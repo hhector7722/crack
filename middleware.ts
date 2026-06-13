@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-const PUBLIC_PATHS = ["/login", "/auth/callback"];
+const PUBLIC_PATHS = ["/login", "/auth/callback", "/auth/confirm"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -10,6 +10,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/icons") ||
+    pathname.startsWith("/auth/") ||
     pathname === "/manifest.json" ||
     pathname === "/sw.js" ||
     pathname.match(/\.(ico|png|svg|js|json)$/)
@@ -30,6 +31,7 @@ export async function middleware(request: NextRequest) {
   if (user && pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/";
+    url.search = "";
     return NextResponse.redirect(url);
   }
 

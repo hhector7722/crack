@@ -28,7 +28,21 @@ cp .env.example .env.local
 4. Authentication → Email provider activado
 5. Authentication → URL Configuration:
    - Site URL: `http://localhost:3000` (dev) o tu dominio Vercel (prod)
-   - Redirect URLs: `http://localhost:3000/auth/callback`, `https://tu-dominio.vercel.app/auth/callback`
+   - Redirect URLs:
+     - `http://localhost:3000/auth/confirm`
+     - `http://localhost:3000/auth/callback`
+     - `https://tu-dominio.vercel.app/auth/confirm`
+     - `https://tu-dominio.vercel.app/auth/callback`
+6. Authentication → Email Templates → **Magic Link** — sustituir el contenido por:
+
+```html
+<h2>Crack — Iniciar sesión</h2>
+<p>Tu código: <strong>{{ .Token }}</strong></p>
+<p>O pulsa este enlace:</p>
+<p><a href="{{ .RedirectTo }}?token_hash={{ .TokenHash }}&type=email">Entrar en Crack</a></p>
+```
+
+El código de 6 dígitos funciona en cualquier navegador. El enlace usa `token_hash` (sin PKCE).
 
 ### 3. Variables de entorno
 
@@ -54,8 +68,45 @@ Abrir [http://localhost:3000](http://localhost:3000)
 ## Deploy en Vercel
 
 1. Importar repositorio
-2. Añadir las mismas variables de entorno (cambiar `NEXT_PUBLIC_SITE_URL` al dominio Vercel)
-3. Deploy
+2. **Environment Variables** (Settings → Environment Variables) — marcar Production, Preview y Development:
+
+| Variable | Ejemplo |
+|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://abcdefgh.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbG...` (anon public) |
+| `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbG...` (service_role) |
+| `OPENAI_API_KEY` | `sk-...` |
+| `OWNER_EMAIL` | `tu@email.com` |
+| `NEXT_PUBLIC_SITE_URL` | `https://crack.vercel.app` |
+
+3. **Redeploy** tras añadir variables (obligatorio — `NEXT_PUBLIC_*` se embeben en build)
+4. Verificar: `https://TU-DOMINIO/api/health` debe devolver `"supabase": "ok"`
+
+### Supabase → Authentication → URL Configuration
+
+- **Site URL:** `https://TU-DOMINIO.vercel.app`
+- **Redirect URLs:**
+  - `https://TU-DOMINIO.vercel.app/auth/confirm`
+  - `https://TU-DOMINIO.vercel.app/auth/callback`
+  - `http://localhost:3000/auth/confirm`
+  - `http://localhost:3000/auth/callback`
+
+## Límite de emails (rate limit)
+
+El plan gratuito de Supabase limita magic links (~3–4 emails/hora). Si ves *email rate limit exceeded*:
+
+1. Espera 30–60 minutos
+2. No pulses el botón varias veces seguidas (hay cooldown de 60s en la app)
+3. Opcional: configura **SMTP propio** en Supabase → Authentication → SMTP Settings (Resend, SendGrid, etc.)
+
+## Troubleshooting
+
+| Error | Causa | Solución |
+|-------|-------|----------|
+| `email rate limit exceeded` | Demasiados intentos | Esperar o SMTP propio |
+| `fetch failed` (producción) | Env vars mal en Vercel o proyecto pausado | Revisar `/api/health`, redeploy |
+| `PKCE code verifier not found` | Enlace abierto en otro browser | Usar código de 6 dígitos en login |
+| `ENOTFOUND xxx.supabase.co` | URL Supabase incorrecta | Copiar URL real del dashboard |
 
 ## Instalar en iPhone
 
