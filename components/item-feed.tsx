@@ -116,7 +116,7 @@ export function ItemFeed({ filter, refreshKey = 0 }: ItemFeedProps) {
       <div className="py-20 text-center">
         <p className="text-zinc-500">No hay items todavía</p>
         <p className="mt-1 text-sm text-zinc-600">
-          Pulsa + para crear uno
+          Usa las pestañas de abajo para crear
         </p>
       </div>
     );

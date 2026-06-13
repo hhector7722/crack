@@ -24,12 +24,20 @@ interface VoiceRecorderProps {
 type Step = "idle" | "recording" | "processing" | "preview";
 
 function getSupportedMimeType(): string {
-  const types = [
-    "audio/webm;codecs=opus",
-    "audio/webm",
-    "audio/mp4",
-    "audio/aac",
-  ];
+  const isIOS =
+    typeof navigator !== "undefined" &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  const types = isIOS
+    ? ["audio/mp4", "audio/aac", "audio/webm", "audio/webm;codecs=opus"]
+    : [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4",
+        "audio/aac",
+        "audio/ogg;codecs=opus",
+      ];
+
   for (const type of types) {
     if (MediaRecorder.isTypeSupported(type)) return type;
   }
@@ -127,9 +135,11 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
 
   async function processRecording(blob: Blob) {
     try {
-      const ext = blob.type.includes("mp4") ? "m4a" : "webm";
+      const mime = blob.type || "audio/webm";
+      const ext = mime.includes("mp4") || mime.includes("aac") ? "m4a" : "webm";
       const formData = new FormData();
-      formData.append("file", blob, `recording.${ext}`);
+      const uploadBlob = new File([blob], `recording.${ext}`, { type: mime });
+      formData.append("file", uploadBlob);
 
       const transcribeRes = await fetch("/api/transcribe", {
         method: "POST",

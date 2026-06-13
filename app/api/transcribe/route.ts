@@ -3,16 +3,17 @@ import { createClient } from "@/lib/supabase/server";
 import { getOpenAIClient } from "@/lib/openai";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
-const ALLOWED_TYPES = [
-  "audio/webm",
-  "audio/mp4",
-  "audio/m4a",
-  "audio/mpeg",
-  "audio/wav",
-  "audio/x-m4a",
-  "video/mp4",
-  "video/webm",
-];
+
+function isAllowedAudioType(type: string): boolean {
+  if (!type) return true;
+  const base = type.split(";")[0].trim().toLowerCase();
+  return (
+    base.startsWith("audio/") ||
+    base === "video/webm" ||
+    base === "video/mp4" ||
+    base === "application/octet-stream"
+  );
+}
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (file.type && !ALLOWED_TYPES.includes(file.type)) {
+  if (file.type && !isAllowedAudioType(file.type)) {
     return NextResponse.json(
       { error: `Tipo no soportado: ${file.type}` },
       { status: 400 }
