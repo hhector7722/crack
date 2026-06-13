@@ -24,7 +24,7 @@ export default function AppLayout({
   return (
     <RefreshContext.Provider value={refreshKey}>
       <div className="mx-auto min-h-dvh max-w-[430px] bg-zinc-950 text-zinc-100">
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/95 px-4 py-3 backdrop-blur-lg">
+        <header className="sticky top-0 z-30 flex shrink-0 items-center justify-between border-b border-zinc-800 bg-zinc-950/95 px-4 py-3 backdrop-blur-lg">
           <h1 className="text-lg font-bold tracking-tight">Crack</h1>
           <form action={signOut}>
             <button
