@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { BottomSheet } from "@/components/bottom-sheet";
 import { VoiceRecorder } from "@/components/voice-recorder";
 import { NoteCapture, type NoteCaptureHandle } from "@/components/note-capture";
@@ -21,10 +21,6 @@ export function CaptureSheet({
 }: CaptureSheetProps) {
   const [error, setError] = useState<string | null>(null);
   const noteRef = useRef<NoteCaptureHandle>(null);
-
-  useEffect(() => {
-    if (!open) setError(null);
-  }, [open]);
 
   async function handleClose(nextOpen: boolean) {
     if (!nextOpen && mode === "note") {
