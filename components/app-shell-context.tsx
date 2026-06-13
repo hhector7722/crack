@@ -8,6 +8,7 @@ interface AppShellContextValue {
   openCamera: () => void;
   openGallery: () => void;
   openCapture: (mode: CaptureMode) => void;
+  openCaptureMenu: () => void;
 }
 
 const AppShellContext = createContext<AppShellContextValue | null>(null);

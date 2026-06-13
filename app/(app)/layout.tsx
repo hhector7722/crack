@@ -1,10 +1,16 @@
 "use client";
 
-import { createContext, useContext, useRef, useState, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useRef,
+  useState,
+  useCallback,
+  useEffect,
+} from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { TabBar } from "@/components/tab-bar";
-import { FabButton } from "@/components/fab-button";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
@@ -30,6 +36,30 @@ export default function AppLayout({
   const [sheetKey, setSheetKey] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    const prevBodyPosition = body.style.position;
+    const prevBodyWidth = body.style.width;
+    const prevBodyHeight = body.style.height;
+
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.width = "100%";
+    body.style.height = "100%";
+
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+      body.style.position = prevBodyPosition;
+      body.style.width = prevBodyWidth;
+      body.style.height = prevBodyHeight;
+    };
+  }, []);
 
   const bumpRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
@@ -82,9 +112,11 @@ export default function AppLayout({
 
   return (
     <RefreshContext.Provider value={refreshKey}>
-      <AppShellProvider value={{ openCamera, openGallery, openCapture }}>
-        <div className="safe-top mx-auto flex h-dvh max-w-[430px] flex-col overflow-hidden bg-zinc-950 text-zinc-100">
-          <header className="z-30 flex shrink-0 items-center justify-between border-b border-zinc-800 bg-zinc-950/95 px-4 py-3 backdrop-blur-lg">
+      <AppShellProvider
+        value={{ openCamera, openGallery, openCapture, openCaptureMenu }}
+      >
+        <div className="app-shell">
+          <header className="app-header">
             <h1 className="text-lg font-bold tracking-tight">Crack</h1>
             <form action={signOut}>
               <button
@@ -109,14 +141,7 @@ export default function AppLayout({
             </p>
           )}
 
-          <main
-            className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pt-4"
-            style={{
-              paddingBottom: "calc(7rem + env(safe-area-inset-bottom))",
-            }}
-          >
-            {children}
-          </main>
+          <main className="app-main">{children}</main>
 
           <input
             ref={cameraInputRef}
@@ -134,7 +159,6 @@ export default function AppLayout({
             onChange={(e) => handleImageSelected(e, "gallery")}
           />
 
-          <FabButton onClick={openCaptureMenu} />
           <TabBar />
 
           <CaptureSheet

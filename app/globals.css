@@ -26,6 +26,42 @@ body {
   padding-top: env(safe-area-inset-top, 0px);
 }
 
+.app-shell {
+  position: fixed;
+  inset: 0;
+  left: 50%;
+  z-index: 0;
+  display: flex;
+  width: 100%;
+  max-width: 430px;
+  flex-direction: column;
+  overflow: hidden;
+  background: #09090b;
+  transform: translateX(-50%);
+}
+
+.app-header {
+  z-index: 30;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgb(39 39 42);
+  background: rgb(9 9 11 / 0.95);
+  padding: 0.75rem 1rem;
+  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
+  backdrop-filter: blur(16px);
+}
+
+.app-main {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 1rem 1rem calc(6.5rem + env(safe-area-inset-bottom, 0px));
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
