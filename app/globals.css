@@ -59,7 +59,7 @@ body {
   overflow-y: auto;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 1rem 1rem calc(6.5rem + env(safe-area-inset-bottom, 0px));
+  padding: 1rem 1rem calc(9rem + env(safe-area-inset-bottom, 0px));
 }
 
 .line-clamp-2 {
