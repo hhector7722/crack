@@ -29,3 +29,38 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Contenido flotante: sin cards, marcos ni relleno salvo excepción explícita */
+@layer components {
+  .content-row {
+    @apply w-full py-4 text-left transition-opacity active:opacity-70;
+  }
+
+  .content-list {
+    @apply divide-y divide-zinc-800/50;
+  }
+
+  .input-float {
+    @apply h-12 w-full rounded-none border-0 border-b border-zinc-800 bg-transparent px-0 text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-500 focus:outline-none;
+  }
+
+  .input-otp {
+    @apply h-14 w-full rounded-none border-0 border-b border-zinc-800 bg-transparent px-0 text-center text-xl tracking-widest text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-500 focus:outline-none;
+  }
+
+  .select-float {
+    @apply h-12 w-full appearance-none rounded-none border-0 border-b border-zinc-800 bg-transparent px-0 text-zinc-100 focus:border-zinc-500 focus:outline-none;
+  }
+
+  .textarea-float {
+    @apply w-full resize-none rounded-none border-0 border-b border-zinc-800 bg-transparent px-0 py-3 text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-500 focus:outline-none;
+  }
+
+  .action-ghost {
+    @apply flex min-h-12 w-full shrink-0 items-center justify-center gap-2 text-sm font-semibold text-zinc-300 transition-colors active:text-zinc-100;
+  }
+
+  .action-accent {
+    @apply flex min-h-12 w-full shrink-0 items-center justify-center gap-2 text-sm font-semibold text-red-400 transition-colors active:text-red-300;
+  }
+}

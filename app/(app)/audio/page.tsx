@@ -10,11 +10,11 @@ export default function AudioPage() {
   const { openCapture } = useAppShell();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       <button
         type="button"
         onClick={() => openCapture("voice")}
-        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-red-600 text-sm font-semibold text-white transition-colors active:bg-red-500"
+        className="action-accent"
       >
         <Mic className="h-5 w-5" />
         Grabar voz

@@ -31,17 +31,15 @@ export function CaptureMenu({ onSelect }: CaptureMenuProps) {
   ];
 
   return (
-    <div className="space-y-3 py-2">
+    <div className="content-list py-2">
       {options.map(({ mode, icon: Icon, label, desc }) => (
         <button
           key={mode}
           type="button"
           onClick={() => onSelect(mode)}
-          className="flex min-h-[72px] w-full items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-900 px-4 text-left transition-colors hover:bg-zinc-800"
+          className="content-row flex min-h-[72px] items-center gap-4"
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-zinc-800">
-            <Icon className="h-6 w-6 text-zinc-200" />
-          </div>
+          <Icon className="h-6 w-6 shrink-0 text-zinc-400" />
           <div>
             <p className="font-semibold text-zinc-100">{label}</p>
             <p className="text-sm text-zinc-500">{desc}</p>

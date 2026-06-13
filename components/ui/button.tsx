@@ -16,11 +16,11 @@ export function Button({
         variant === "primary" &&
           "bg-zinc-100 text-zinc-950 hover:bg-white",
         variant === "secondary" &&
-          "border border-zinc-700 bg-zinc-900 text-zinc-100 hover:bg-zinc-800",
+          "text-zinc-300 active:text-zinc-100",
         variant === "ghost" &&
-          "text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100",
+          "text-zinc-300 active:text-zinc-100",
         variant === "danger" &&
-          "bg-red-600 text-white hover:bg-red-500",
+          "text-red-400 active:text-red-300",
         className
       )}
       {...props}

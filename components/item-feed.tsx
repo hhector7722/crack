@@ -97,12 +97,12 @@ export function ItemFeed({ filter, refreshKey = 0 }: ItemFeedProps) {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-center">
+      <div className="py-8 text-center">
         <p className="text-sm text-red-300">{error}</p>
         <button
           type="button"
           onClick={() => void loadItems()}
-          className="mt-3 inline-flex items-center gap-2 text-sm text-red-200 underline"
+          className="mt-3 inline-flex items-center gap-2 text-sm text-zinc-400 underline"
         >
           <RefreshCw className="h-4 w-4" />
           Reintentar
@@ -124,7 +124,7 @@ export function ItemFeed({ filter, refreshKey = 0 }: ItemFeedProps) {
 
   return (
     <>
-      <div className="space-y-3">
+      <div className="content-list">
         {items.map((item) => (
           <SwipeToDelete key={item.id} onDelete={() => handleDelete(item)}>
             <ItemCard item={item} onClick={() => setSelectedItem(item)} />

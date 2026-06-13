@@ -33,11 +33,7 @@ export function ItemCard({ item, onClick }: ItemCardProps) {
     item.metadata.summary ?? item.content?.slice(0, 120) ?? " ";
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-left transition-colors active:bg-zinc-800"
-    >
+    <button type="button" onClick={onClick} className="content-row">
       <div className="mb-2 flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <TypeIcon type={item.type} />

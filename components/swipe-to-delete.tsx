@@ -48,12 +48,12 @@ export function SwipeToDelete({
   }
 
   return (
-    <div className={cn("relative overflow-hidden rounded-xl", className)}>
+    <div className={cn("relative overflow-hidden", className)}>
       <div className="absolute inset-y-0 right-0 flex w-24 items-center justify-center bg-red-600">
         <Trash2 className="h-5 w-5 text-white" />
       </div>
       <div
-        className="relative bg-zinc-900 transition-transform"
+        className="relative bg-zinc-950 transition-transform"
         style={{
           transform: `translateX(${offsetX}px)`,
           transition: swiping ? "none" : "transform 0.2s ease",

@@ -1,0 +1,34 @@
+---
+description: Crack UI — contenido flotante sin cards por defecto
+globs: **/*.{tsx,css}
+alwaysApply: true
+---
+
+# UI flotante (Crack)
+
+Por defecto, el contenido **no lleva card** (sin `border`, sin `bg-zinc-900`, sin `rounded-xl` como contenedor).
+
+## Regla
+
+- Listas, feeds, filas y acciones de página: flotan sobre el fondo (`bg-zinc-950`).
+- Separación entre items: `divide-y divide-zinc-800/50` o `.content-list`.
+- Filas interactivas: `.content-row` (solo padding + opacidad al pulsar).
+- Acciones secundarias: `.action-ghost` o `.action-accent`.
+- Inputs en formularios: `.input-float` / `.textarea-float` / `.select-float` (solo borde inferior).
+
+## Excepciones permitidas
+
+- Botones primarios sólidos (`Button variant="primary"`) cuando son CTA claros.
+- Badges de clasificación (`.classificationColor`).
+- Bottom sheets / drawers (contenedor modal estructural).
+- Alertas de error inline: solo texto color, sin caja con borde/relleno.
+
+## Prohibido en contenido
+
+```tsx
+// ❌ Card en items de feed o acciones de lista
+className="rounded-xl border border-zinc-800 bg-zinc-900"
+
+// ✅ Contenido flotante
+className="content-row"
+```

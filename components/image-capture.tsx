@@ -67,7 +67,7 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
       />
 
       {preview ? (
-        <div className="overflow-hidden rounded-xl border border-zinc-800">
+        <div className="overflow-hidden rounded-xl">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={preview}
@@ -79,7 +79,7 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex min-h-[160px] w-full flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-zinc-700 bg-zinc-900 text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-300"
+          className="action-ghost min-h-[160px] flex-col gap-3 border-b border-dashed border-zinc-800 text-zinc-400"
         >
           <Camera className="h-10 w-10" />
           <span className="text-sm font-medium">Abrir cámara o galería</span>

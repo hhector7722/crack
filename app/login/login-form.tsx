@@ -172,7 +172,7 @@ export function LoginForm() {
               required
               autoComplete="email"
               placeholder="tu@email.com"
-              className="h-12 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+              className="input-float"
             />
           </div>
 
@@ -215,7 +215,7 @@ export function LoginForm() {
                 required
                 maxLength={OTP_LENGTH}
                 placeholder="23796463"
-                className="h-14 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 text-center text-xl tracking-widest text-zinc-100 placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
+                className="input-otp"
               />
             </div>
 
@@ -230,15 +230,11 @@ export function LoginForm() {
         )}
 
         {error && (
-          <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-            {error}
-          </p>
+          <p className="mt-4 text-sm text-red-300">{error}</p>
         )}
 
         {message && (
-          <p className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
-            {message}
-          </p>
+          <p className="mt-4 text-sm text-emerald-300">{message}</p>
         )}
       </div>
     </div>

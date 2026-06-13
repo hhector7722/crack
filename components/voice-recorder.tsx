@@ -292,7 +292,7 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="h-12 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 text-zinc-100 focus:border-zinc-600 focus:outline-none"
+          className="input-float"
         />
       </div>
 
@@ -302,7 +302,7 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
           value={tags}
           onChange={(e) => setTags(e.target.value)}
           placeholder="separados por coma"
-          className="h-12 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 text-zinc-100 focus:border-zinc-600 focus:outline-none"
+          className="input-float"
         />
       </div>
 

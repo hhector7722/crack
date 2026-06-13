@@ -167,7 +167,7 @@ export function ItemDetail({
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="h-12 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 text-zinc-100 focus:border-zinc-600 focus:outline-none"
+                  className="input-float"
                 />
               </div>
 
@@ -204,7 +204,7 @@ export function ItemDetail({
                             e.target.value as ClassificationType
                           )
                         }
-                        className="h-12 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 text-zinc-100"
+                        className="select-float"
                       >
                         <option value="note">Nota</option>
                         <option value="reminder">Recordatorio</option>
@@ -221,7 +221,7 @@ export function ItemDetail({
                         onChange={(e) =>
                           setPriority(e.target.value as Priority)
                         }
-                        className="h-12 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 text-zinc-100"
+                        className="select-float"
                       >
                         <option value="high">Alta</option>
                         <option value="medium">Media</option>
@@ -237,7 +237,7 @@ export function ItemDetail({
                     <input
                       value={tags}
                       onChange={(e) => setTags(e.target.value)}
-                      className="h-12 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-4 text-zinc-100 focus:border-zinc-600 focus:outline-none"
+                      className="input-float"
                     />
                   </div>
 
@@ -269,7 +269,7 @@ export function ItemDetail({
                       <Loader2 className="h-6 w-6 animate-spin text-zinc-500" />
                     </div>
                   ) : mediaUrl ? (
-                    <div className="overflow-hidden rounded-xl border border-zinc-800">
+                    <div className="overflow-hidden rounded-xl">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={mediaUrl}
