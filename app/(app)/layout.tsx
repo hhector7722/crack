@@ -4,6 +4,7 @@ import { createContext, useContext, useRef, useState, useCallback } from "react"
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { TabBar } from "@/components/tab-bar";
+import { FabButton } from "@/components/fab-button";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
@@ -25,7 +26,8 @@ export default function AppLayout({
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [sheetMode, setSheetMode] = useState<CaptureMode>("note");
+  const [sheetMode, setSheetMode] = useState<CaptureMode>("menu");
+  const [sheetKey, setSheetKey] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -43,6 +45,13 @@ export default function AppLayout({
 
   const openCapture = useCallback((mode: CaptureMode) => {
     setSheetMode(mode);
+    setSheetKey((k) => k + 1);
+    setSheetOpen(true);
+  }, []);
+
+  const openCaptureMenu = useCallback(() => {
+    setSheetMode("menu");
+    setSheetKey((k) => k + 1);
     setSheetOpen(true);
   }, []);
 
@@ -74,8 +83,8 @@ export default function AppLayout({
   return (
     <RefreshContext.Provider value={refreshKey}>
       <AppShellProvider value={{ openCamera, openGallery, openCapture }}>
-        <div className="mx-auto min-h-dvh max-w-[430px] bg-zinc-950 text-zinc-100">
-          <header className="sticky top-0 z-30 flex shrink-0 items-center justify-between border-b border-zinc-800 bg-zinc-950/95 px-4 py-3 backdrop-blur-lg">
+        <div className="safe-top mx-auto flex h-dvh max-w-[430px] flex-col overflow-hidden bg-zinc-950 text-zinc-100">
+          <header className="z-30 flex shrink-0 items-center justify-between border-b border-zinc-800 bg-zinc-950/95 px-4 py-3 backdrop-blur-lg">
             <h1 className="text-lg font-bold tracking-tight">Crack</h1>
             <form action={signOut}>
               <button
@@ -89,19 +98,21 @@ export default function AppLayout({
           </header>
 
           {uploadError && (
-            <p className="mx-4 mt-3 px-4 text-sm text-red-300">{uploadError}</p>
+            <p className="mx-4 mt-3 shrink-0 px-4 text-sm text-red-300">
+              {uploadError}
+            </p>
           )}
 
           {uploading && (
-            <p className="mx-4 mt-3 text-center text-sm text-zinc-400">
+            <p className="mx-4 mt-3 shrink-0 text-center text-sm text-zinc-400">
               Subiendo imagen...
             </p>
           )}
 
           <main
-            className="px-4 pt-4"
+            className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 pt-4"
             style={{
-              paddingBottom: "calc(5.5rem + env(safe-area-inset-bottom))",
+              paddingBottom: "calc(7rem + env(safe-area-inset-bottom))",
             }}
           >
             {children}
@@ -123,9 +134,11 @@ export default function AppLayout({
             onChange={(e) => handleImageSelected(e, "gallery")}
           />
 
+          <FabButton onClick={openCaptureMenu} />
           <TabBar />
 
           <CaptureSheet
+            key={sheetKey}
             open={sheetOpen}
             mode={sheetMode}
             onOpenChange={setSheetOpen}

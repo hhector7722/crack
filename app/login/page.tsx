@@ -11,7 +11,7 @@ export default function LoginPage() {
 
 function LoginFallback() {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-zinc-950">
+    <div className="flex min-h-dvh items-center justify-center bg-zinc-950 safe-top">
       <p className="text-zinc-500">Cargando...</p>
     </div>
   );

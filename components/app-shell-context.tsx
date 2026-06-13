@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-export type CaptureMode = "note" | "voice";
+export type CaptureMode = "menu" | "note" | "voice";
 
 interface AppShellContextValue {
   openCamera: () => void;

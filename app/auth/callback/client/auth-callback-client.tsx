@@ -42,7 +42,7 @@ export function AuthCallbackClient() {
 
   if (error) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center bg-zinc-950 px-6 text-center">
+      <div className="flex min-h-dvh flex-col items-center justify-center bg-zinc-950 px-6 text-center safe-top">
         <p className="mb-4 text-sm text-red-300">{error}</p>
         <p className="mb-6 text-sm text-zinc-400">
           Usa el código de 6 dígitos del email en la pantalla de login.
@@ -58,7 +58,7 @@ export function AuthCallbackClient() {
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-zinc-950">
+    <div className="flex min-h-dvh items-center justify-center bg-zinc-950 safe-top">
       <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
     </div>
   );

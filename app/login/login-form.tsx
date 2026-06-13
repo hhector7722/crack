@@ -145,7 +145,7 @@ export function LoginForm() {
   const disabled = loading || cooldown > 0 || !!configError;
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-zinc-950 px-6">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-zinc-950 px-6 safe-top">
       <div className="w-full max-w-[430px]">
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-zinc-100">

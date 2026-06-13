@@ -2,10 +2,10 @@
 
 import { Mic, FileText, Camera } from "lucide-react";
 
-export type CaptureMode = "menu" | "voice" | "note" | "image";
+export type CaptureMenuMode = "voice" | "note" | "image";
 
 interface CaptureMenuProps {
-  onSelect: (mode: CaptureMode) => void;
+  onSelect: (mode: CaptureMenuMode) => void;
 }
 
 export function CaptureMenu({ onSelect }: CaptureMenuProps) {
