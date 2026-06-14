@@ -16,7 +16,7 @@ export function TabBar() {
   const isAudio = pathname.startsWith("/audio");
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-40 w-full max-w-[430px] -translate-x-1/2 bg-zinc-950/95 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-lg">
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] bg-zinc-950/95 backdrop-blur-lg">
       <div className="flex flex-col items-center">
         <button
           type="button"
@@ -28,7 +28,7 @@ export function TabBar() {
         </button>
 
         <div className="w-full border-t border-zinc-800">
-          <div className="flex items-end justify-between px-1">
+          <div className="flex items-end justify-between px-1 pt-1">
             <TabLink
               href="/notes"
               label="Notas"
@@ -45,9 +45,9 @@ export function TabBar() {
             <button
               type="button"
               onClick={openCamera}
-              className="flex min-w-[56px] flex-1 flex-col items-center justify-end gap-0.5 rounded-lg py-1 text-xs text-zinc-500 transition-colors active:text-zinc-100"
+              className="flex min-w-[56px] flex-1 flex-col-reverse items-center gap-0.5 rounded-lg pt-1 text-xs leading-none text-zinc-500 transition-colors active:text-zinc-100"
             >
-              <Camera className="h-5 w-5" strokeWidth={2} />
+              <Camera className="h-5 w-5 shrink-0" strokeWidth={2} />
               <span className="font-medium">Cámara</span>
             </button>
             <TabLink href="/audio" label="Audio" icon={Mic} active={isAudio} />
@@ -73,11 +73,11 @@ function TabLink({
     <Link
       href={href}
       className={cn(
-        "flex min-w-[56px] flex-1 flex-col items-center justify-end gap-0.5 rounded-lg py-1 text-xs transition-colors",
+        "flex min-w-[56px] flex-1 flex-col-reverse items-center gap-0.5 rounded-lg pt-1 text-xs leading-none transition-colors",
         active ? "text-zinc-100" : "text-zinc-500"
       )}
     >
-      <Icon className="h-5 w-5" strokeWidth={active ? 2.5 : 2} />
+      <Icon className="h-5 w-5 shrink-0" strokeWidth={active ? 2.5 : 2} />
       <span className="font-medium">{label}</span>
     </Link>
   );

@@ -159,8 +159,6 @@ export default function AppLayout({
             onChange={(e) => handleImageSelected(e, "gallery")}
           />
 
-          <TabBar />
-
           <CaptureSheet
             key={sheetKey}
             open={sheetOpen}
@@ -169,6 +167,8 @@ export default function AppLayout({
             onSaved={bumpRefresh}
           />
         </div>
+
+        <TabBar />
       </AppShellProvider>
     </RefreshContext.Provider>
   );

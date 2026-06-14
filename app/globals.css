@@ -34,6 +34,7 @@ body {
   display: flex;
   width: 100%;
   max-width: 430px;
+  height: 100dvh;
   flex-direction: column;
   overflow: hidden;
   background: #09090b;
@@ -59,7 +60,7 @@ body {
   overflow-y: auto;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 1rem 1rem calc(7.5rem + env(safe-area-inset-bottom, 0px));
+  padding: 1rem 1rem 6rem;
 }
 
 .line-clamp-2 {
