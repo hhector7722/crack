@@ -33,7 +33,7 @@ export function getOpenAIClient() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
 
-export async function classifyTranscript(
+export async function classifyWithOpenAI(
   transcript: string
 ): Promise<ClassificationResult> {
   const openai = getOpenAIClient();
@@ -75,4 +75,14 @@ export async function classifyTranscript(
   }
 
   return classificationSchema.parse(parsed);
+}
+
+export async function transcribeWithOpenAI(file: File): Promise<string> {
+  const openai = getOpenAIClient();
+  const transcription = await openai.audio.transcriptions.create({
+    model: "whisper-1",
+    language: "es",
+    file,
+  });
+  return transcription.text;
 }

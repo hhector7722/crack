@@ -1,9 +1,9 @@
 "use client";
 
-import { ItemFeed } from "@/components/item-feed";
+import { HomeDashboard } from "@/components/home-dashboard";
 import { useRefreshKey } from "./layout";
 
 export default function HomePage() {
   const refreshKey = useRefreshKey();
-  return <ItemFeed refreshKey={refreshKey} />;
+  return <HomeDashboard refreshKey={refreshKey} />;
 }

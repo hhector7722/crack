@@ -7,7 +7,7 @@ PWA asistente personal de bolsillo. Captura notas, imágenes y audios con transc
 - Next.js 16 (App Router)
 - TypeScript + Tailwind CSS
 - Supabase (Postgres, Auth, Storage, RLS)
-- OpenAI (Whisper + GPT-4o-mini)
+- OpenAI (Whisper + GPT-4o-mini) con fallback silencioso a Gemini
 - Vercel
 
 ## Setup local
@@ -51,6 +51,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=AI...
 OWNER_EMAIL=tu@email.com
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
@@ -76,6 +77,7 @@ Abrir [http://localhost:3000](http://localhost:3000)
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbG...` (anon public) |
 | `SUPABASE_SERVICE_ROLE_KEY` | `eyJhbG...` (service_role) |
 | `OPENAI_API_KEY` | `sk-...` |
+| `GEMINI_API_KEY` | `AI...` (fallback automático si OpenAI sin créditos) |
 | `OWNER_EMAIL` | `tu@email.com` |
 | `NEXT_PUBLIC_SITE_URL` | `https://crack.vercel.app` |
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getOpenAIClient } from "@/lib/openai";
+import { transcribeAudio } from "@/lib/ai";
 
 const MAX_FILE_SIZE = 25 * 1024 * 1024;
 
@@ -52,14 +52,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const openai = getOpenAIClient();
-    const transcription = await openai.audio.transcriptions.create({
-      model: "whisper-1",
-      language: "es",
-      file,
-    });
-
-    return NextResponse.json({ transcript: transcription.text });
+    const transcript = await transcribeAudio(file);
+    return NextResponse.json({ transcript });
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Error transcribiendo audio";

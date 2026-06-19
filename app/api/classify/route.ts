@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { classifyTranscript } from "@/lib/openai";
+import { classifyTranscript } from "@/lib/ai";
 import { createClient } from "@/lib/supabase/server";
 
 const bodySchema = z.object({
