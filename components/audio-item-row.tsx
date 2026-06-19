@@ -101,7 +101,7 @@ export function AudioItemRow({
         onClick={onTogglePlay}
         aria-label={playing ? "Pausar" : "Reproducir"}
         className={cn(
-          "flex h-10 w-10 shrink-0 items-center justify-center text-xs font-bold active:opacity-70",
+          "flex h-12 w-12 shrink-0 items-center justify-center text-sm font-bold active:opacity-70",
           light ? "text-zinc-700" : "text-zinc-200"
         )}
       >

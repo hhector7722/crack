@@ -60,8 +60,8 @@ export function LinkNotePreview({ url, itemTitle, light }: LinkNotePreviewProps)
     <div className="flex items-center gap-3 py-3">
       <div
         className={cn(
-          "flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg",
-          light ? "bg-zinc-100" : "bg-zinc-800"
+          "flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md",
+          light ? "bg-zinc-100 shadow-sm shadow-zinc-400/50" : "bg-zinc-800 shadow-sm shadow-black/40"
         )}
       >
         {loading ? (

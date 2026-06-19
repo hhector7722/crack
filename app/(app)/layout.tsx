@@ -150,9 +150,9 @@ export default function AppLayout({
             onOpenChange={setSheetOpen}
             onSaved={bumpRefresh}
           />
-        </div>
 
-        <TabBar />
+          <TabBar />
+        </div>
       </AppShellProvider>
     </RefreshContext.Provider>
   );
