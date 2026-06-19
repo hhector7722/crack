@@ -55,8 +55,10 @@ export async function POST(request: Request) {
     const transcript = await transcribeAudio(file);
     return NextResponse.json({ transcript });
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Error transcribiendo audio";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[transcribe]", err);
+    return NextResponse.json(
+      { error: "Error transcribiendo audio" },
+      { status: 500 }
+    );
   }
 }

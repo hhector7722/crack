@@ -1,7 +1,11 @@
 import { z } from "zod";
 import type { ClassificationResult } from "./types";
 
-const GEMINI_MODEL = "gemini-2.0-flash";
+const DEFAULT_GEMINI_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-3.5-flash",
+  "gemini-2.5-flash-lite",
+] as const;
 
 const classificationSchema = z.object({
   title: z.string(),
@@ -30,6 +34,12 @@ Reglas:
 - tags en minúsculas, sin duplicados
 - reminder_date solo si se menciona fecha/hora concreta, si no null`;
 
+function getGeminiModels(): string[] {
+  const configured = process.env.GEMINI_MODEL?.trim();
+  if (configured) return [configured];
+  return [...DEFAULT_GEMINI_MODELS];
+}
+
 function getGeminiApiKey(): string {
   const key = process.env.GEMINI_API_KEY;
   if (!key) {
@@ -38,12 +48,23 @@ function getGeminiApiKey(): string {
   return key;
 }
 
-async function geminiGenerate(
+function isModelUnavailable(status: number, body: string): boolean {
+  if (status === 404) return true;
+  const lower = body.toLowerCase();
+  return (
+    lower.includes("no longer available") ||
+    lower.includes("not found") ||
+    lower.includes("not_found")
+  );
+}
+
+async function geminiGenerateWithModel(
+  model: string,
   parts: Array<{ text?: string; inline_data?: { mime_type: string; data: string } }>,
   options?: { json?: boolean }
 ): Promise<string> {
   const apiKey = getGeminiApiKey();
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const body: Record<string, unknown> = {
     contents: [{ parts }],
@@ -59,9 +80,18 @@ async function geminiGenerate(
     body: JSON.stringify(body),
   });
 
+  const errText = res.ok ? "" : await res.text();
+
   if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`Gemini error ${res.status}: ${errText}`);
+    const err = new Error(`Gemini ${model} ${res.status}`) as Error & {
+      status?: number;
+      body?: string;
+      modelUnavailable?: boolean;
+    };
+    err.status = res.status;
+    err.body = errText;
+    err.modelUnavailable = isModelUnavailable(res.status, errText);
+    throw err;
   }
 
   const data = (await res.json()) as {
@@ -74,6 +104,35 @@ async function geminiGenerate(
   }
 
   return text;
+}
+
+async function geminiGenerate(
+  parts: Array<{ text?: string; inline_data?: { mime_type: string; data: string } }>,
+  options?: { json?: boolean }
+): Promise<string> {
+  const models = getGeminiModels();
+  let lastError: unknown;
+
+  for (const model of models) {
+    try {
+      return await geminiGenerateWithModel(model, parts, options);
+    } catch (err) {
+      lastError = err;
+      const modelUnavailable =
+        err instanceof Error &&
+        "modelUnavailable" in err &&
+        (err as { modelUnavailable?: boolean }).modelUnavailable;
+
+      if (modelUnavailable && models.indexOf(model) < models.length - 1) {
+        console.warn(`[gemini] modelo ${model} no disponible, probando siguiente`);
+        continue;
+      }
+      break;
+    }
+  }
+
+  console.error("[gemini] error:", lastError);
+  throw new Error("Error en servicio de IA");
 }
 
 export async function classifyWithGemini(

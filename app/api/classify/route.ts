@@ -36,8 +36,10 @@ export async function POST(request: Request) {
     const result = await classifyTranscript(parsed.data.transcript);
     return NextResponse.json(result);
   } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Error clasificando transcripción";
-    return NextResponse.json({ error: message }, { status: 502 });
+    console.error("[classify]", err);
+    return NextResponse.json(
+      { error: "Error clasificando transcripción" },
+      { status: 502 }
+    );
   }
 }
