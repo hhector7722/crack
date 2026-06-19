@@ -21,7 +21,7 @@ export function CaptureSheet({
   onOpenChange,
   onSaved,
 }: CaptureSheetProps) {
-  const { openGallery } = useAppShell();
+  const { openCamera } = useAppShell();
   const [viewMode, setViewMode] = useState<CaptureMode>(mode);
   const [error, setError] = useState<string | null>(null);
   const noteRef = useRef<NoteCaptureHandle>(null);
@@ -45,7 +45,7 @@ export function CaptureSheet({
   function handleMenuSelect(selected: "voice" | "note" | "image") {
     if (selected === "image") {
       onOpenChange(false);
-      openGallery();
+      openCamera();
       return;
     }
     setViewMode(selected);

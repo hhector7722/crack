@@ -65,3 +65,15 @@ export function formatDuration(seconds: number): string {
   const secs = seconds % 60;
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
+
+const URL_RE = /https?:\/\/[^\s<>"{}|\\^`[\]]+/i;
+
+export function extractFirstUrl(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const match = text.match(URL_RE);
+  return match?.[0] ?? null;
+}
+
+export function getNoteUrl(item: { title: string | null; content: string | null }): string | null {
+  return extractFirstUrl(item.content) ?? extractFirstUrl(item.title);
+}

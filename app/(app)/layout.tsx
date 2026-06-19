@@ -9,12 +9,10 @@ import {
   useEffect,
 } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut } from "lucide-react";
 import { TabBar } from "@/components/tab-bar";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
-import { signOut } from "@/app/login/actions";
 
 const RefreshContext = createContext(0);
 
@@ -29,7 +27,6 @@ export default function AppLayout({
 }) {
   const router = useRouter();
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<CaptureMode>("menu");
@@ -70,7 +67,7 @@ export default function AppLayout({
 
   const openGallery = useCallback(() => {
     setUploadError(null);
-    galleryInputRef.current?.click();
+    cameraInputRef.current?.click();
   }, []);
 
   const openCapture = useCallback((mode: CaptureMode) => {
@@ -118,15 +115,6 @@ export default function AppLayout({
         <div className="app-shell">
           <header className="app-header">
             <h1 className="text-lg font-bold tracking-tight">Crack</h1>
-            <form action={signOut}>
-              <button
-                type="submit"
-                className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300"
-                aria-label="Cerrar sesión"
-              >
-                <LogOut className="h-5 w-5" />
-              </button>
-            </form>
           </header>
 
           {uploadError && (
@@ -150,13 +138,6 @@ export default function AppLayout({
             capture="environment"
             className="hidden"
             onChange={(e) => handleImageSelected(e, "camera")}
-          />
-          <input
-            ref={galleryInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleImageSelected(e, "gallery")}
           />
 
           <CaptureSheet
