@@ -7,6 +7,7 @@ import { fetchItems, deleteItem } from "@/lib/items";
 import { deleteFile } from "@/lib/storage";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
 import { ItemDetail } from "@/components/item-detail";
+import { LinkNotePreview } from "@/components/link-note-preview";
 import { displayValue, getNoteUrl, cn } from "@/lib/utils";
 import type { Item } from "@/lib/types";
 
@@ -33,11 +34,13 @@ function NoteRow({
     item.metadata.summary ?? item.content?.slice(0, 120) ?? " ";
   const title = displayValue(item.title) === " " ? "Sin título" : item.title;
 
+  if (url) {
+    return (
+      <LinkNotePreview url={url} itemTitle={item.title} light={light} />
+    );
+  }
+
   function handleClick() {
-    if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
-      return;
-    }
     onClick();
   }
 
