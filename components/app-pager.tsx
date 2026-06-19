@@ -65,6 +65,13 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
   return (
     <>
       <SwipePager index={pagerIndex} onIndexChange={handleIndexChange}>
+        <div className="pb-2">
+          <NoteList
+            refreshKey={combinedRefresh}
+            onSelect={setSelectedItem}
+          />
+        </div>
+
         <div className="space-y-5 pb-2">
           <SectionCard>
             <NoteList
@@ -74,9 +81,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
               onSelect={setSelectedItem}
             />
           </SectionCard>
-        </div>
 
-        <div className="space-y-5 pb-2">
           <SectionCard>
             <GalleryFeed
               refreshKey={combinedRefresh}
@@ -86,9 +91,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
               onSelect={setSelectedItem}
             />
           </SectionCard>
-        </div>
 
-        <div className="space-y-5 pb-2">
           <SectionCard>
             <AudioFeed
               refreshKey={combinedRefresh}
@@ -97,6 +100,13 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
               onSelect={setSelectedItem}
             />
           </SectionCard>
+        </div>
+
+        <div className="pb-2">
+          <AudioFeed
+            refreshKey={combinedRefresh}
+            onSelect={setSelectedItem}
+          />
         </div>
       </SwipePager>
 

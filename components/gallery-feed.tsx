@@ -151,7 +151,10 @@ export function GalleryFeed({
               onClick={() => handleSelect(item)}
               className={cn(
                 "aspect-square w-full overflow-hidden rounded-md active:opacity-80",
-                compact ? "bg-zinc-100" : "bg-zinc-800"
+                compact ? "bg-zinc-100" : "bg-zinc-800",
+                compact
+                  ? "shadow-sm shadow-zinc-400/50"
+                  : "shadow-sm shadow-black/40"
               )}
             >
               {url ? (

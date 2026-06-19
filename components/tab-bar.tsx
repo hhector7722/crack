@@ -25,8 +25,8 @@ export function TabBar() {
   }
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-[430px] bg-zinc-950/95 backdrop-blur-lg">
-      <div className="flex flex-col items-center">
+    <nav className="fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-[430px] flex-col bg-zinc-950/95 backdrop-blur-lg">
+      <div className="flex flex-col items-center pb-1 pt-2">
         <button
           type="button"
           onClick={openCaptureMenu}
@@ -37,7 +37,7 @@ export function TabBar() {
         </button>
 
         <div
-          className="mb-2 mt-2 flex items-center gap-1.5"
+          className="mt-2 flex items-center gap-1.5"
           role="tablist"
           aria-label="Páginas"
         >
@@ -56,43 +56,41 @@ export function TabBar() {
             />
           ))}
         </div>
+      </div>
 
-        <div className="w-full">
-          <div className="flex items-end justify-between px-1 pt-1 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
-            <TabButton
-              label="Notas"
-              icon={FileText}
-              active={isNotes}
-              onClick={() => goToPage(0, "/notes")}
-            />
-            <TabButton
-              label="Galería"
-              icon={Images}
-              active={isGallery && !isHome}
-              onClick={() => goToPage(1, "/media")}
-            />
-            <TabButton
-              label="Inicio"
-              icon={Home}
-              active={isHome}
-              onClick={() => goToPage(1, "/")}
-            />
-            <button
-              type="button"
-              onClick={openCamera}
-              className="flex min-w-[56px] flex-1 flex-col-reverse items-center gap-0.5 rounded-lg pt-1 text-xs leading-none text-zinc-500 transition-colors active:text-zinc-100"
-            >
-              <Camera className="h-5 w-5 shrink-0" strokeWidth={2} />
-              <span className="font-medium">Cámara</span>
-            </button>
-            <TabButton
-              label="Audio"
-              icon={Mic}
-              active={isAudio}
-              onClick={() => goToPage(2, "/audio")}
-            />
-          </div>
-        </div>
+      <div className="flex items-end justify-between px-1 pt-1 pb-[env(safe-area-inset-bottom,0px)]">
+        <TabButton
+          label="Notas"
+          icon={FileText}
+          active={isNotes}
+          onClick={() => goToPage(0, "/notes")}
+        />
+        <TabButton
+          label="Galería"
+          icon={Images}
+          active={isGallery && !isHome}
+          onClick={() => goToPage(1, "/media")}
+        />
+        <TabButton
+          label="Inicio"
+          icon={Home}
+          active={isHome}
+          onClick={() => goToPage(1, "/")}
+        />
+        <button
+          type="button"
+          onClick={openCamera}
+          className="flex min-w-[56px] flex-1 flex-col-reverse items-center gap-0.5 rounded-lg pt-1 pb-1 text-xs leading-none text-zinc-500 transition-colors active:text-zinc-100"
+        >
+          <Camera className="h-5 w-5 shrink-0" strokeWidth={2} />
+          <span className="font-medium">Cámara</span>
+        </button>
+        <TabButton
+          label="Audio"
+          icon={Mic}
+          active={isAudio}
+          onClick={() => goToPage(2, "/audio")}
+        />
       </div>
     </nav>
   );
@@ -114,7 +112,7 @@ function TabButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex min-w-[56px] flex-1 flex-col-reverse items-center gap-0.5 rounded-lg pt-1 text-xs leading-none transition-colors",
+        "flex min-w-[56px] flex-1 flex-col-reverse items-center gap-0.5 rounded-lg pt-1 pb-1 text-xs leading-none transition-colors",
         active ? "text-zinc-100" : "text-zinc-500"
       )}
     >

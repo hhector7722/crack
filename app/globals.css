@@ -60,7 +60,7 @@ body {
 }
 
 .app-pager-panel {
-  padding: 1rem 1rem 6rem;
+  padding: 1rem 1rem 7.5rem;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 }
