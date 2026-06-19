@@ -96,13 +96,28 @@ export function AudioFeed({ refreshKey = 0, compact, light, onSelect }: AudioFee
     audioRef.current = audio;
     setPlayingId(item.id);
 
-    audio.addEventListener("timeupdate", () => {
-      if (audio.duration) {
+    let rafId = 0;
+
+    function tick() {
+      if (audio.duration && !audio.paused) {
         setProgress(audio.currentTime / audio.duration);
+        rafId = requestAnimationFrame(tick);
       }
+    }
+
+    audio.addEventListener("play", () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(tick);
     });
-    audio.addEventListener("ended", () => stopPlayback());
-    audio.addEventListener("error", () => stopPlayback());
+    audio.addEventListener("pause", () => cancelAnimationFrame(rafId));
+    audio.addEventListener("ended", () => {
+      cancelAnimationFrame(rafId);
+      stopPlayback();
+    });
+    audio.addEventListener("error", () => {
+      cancelAnimationFrame(rafId);
+      stopPlayback();
+    });
 
     void audio.play();
   }

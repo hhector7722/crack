@@ -16,6 +16,26 @@ function seedBars(id: string, count: number): number[] {
   });
 }
 
+function BarLayer({
+  bars,
+  color,
+}: {
+  bars: number[];
+  color: string;
+}) {
+  return (
+    <>
+      {bars.map((h, i) => (
+        <div
+          key={i}
+          className={cn("min-w-0 flex-1 rounded-full", color)}
+          style={{ height: `${Math.round(h * 100)}%` }}
+        />
+      ))}
+    </>
+  );
+}
+
 export function AudioWaveform({
   bars,
   progress,
@@ -29,32 +49,23 @@ export function AudioWaveform({
 }) {
   const unlit = light ? "bg-zinc-200" : "bg-zinc-700";
   const lit = "bg-rose-500";
+  const fill = active ? Math.min(1, Math.max(0, progress)) : 0;
 
   return (
-    <div className="flex h-8 w-full items-end gap-px">
-      {bars.map((h, i) => {
-        const barStart = i / bars.length;
-        const barEnd = (i + 1) / bars.length;
-        let fillRatio = 0;
-        if (active && progress > barStart) {
-          fillRatio = Math.min(1, (progress - barStart) / (barEnd - barStart));
-        }
-
-        return (
-          <div
-            key={i}
-            className={cn("relative min-w-0 flex-1 overflow-hidden rounded-full", unlit)}
-            style={{ height: `${Math.round(h * 100)}%` }}
-          >
-            {fillRatio > 0 && (
-              <div
-                className={cn("absolute inset-y-0 left-0", lit)}
-                style={{ width: `${fillRatio * 100}%` }}
-              />
-            )}
-          </div>
-        );
-      })}
+    <div className="relative h-8 w-full">
+      <div className="flex h-full w-full items-end gap-px">
+        <BarLayer bars={bars} color={unlit} />
+      </div>
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          clipPath: `inset(0 ${(1 - fill) * 100}% 0 0)`,
+        }}
+      >
+        <div className="flex h-full w-full items-end gap-px">
+          <BarLayer bars={bars} color={lit} />
+        </div>
+      </div>
     </div>
   );
 }

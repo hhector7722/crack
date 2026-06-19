@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Link2, Loader2 } from "lucide-react";
+import { ExternalLink, Link2, Loader2 } from "lucide-react";
 import { resolveLinkTitle, titleFromUrl } from "@/lib/link-preview";
 import { cn } from "@/lib/utils";
 
@@ -100,13 +100,11 @@ export function LinkNotePreview({ url, itemTitle, light }: LinkNotePreviewProps)
         onClick={openLink}
         aria-label="Abrir enlace"
         className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-transparent shadow-sm active:opacity-70",
-          light
-            ? "border-zinc-300 text-zinc-600 shadow-zinc-300/40"
-            : "border-zinc-600 text-zinc-300 shadow-black/30"
+          "flex h-9 w-9 shrink-0 items-center justify-center active:opacity-60",
+          light ? "text-zinc-600" : "text-zinc-300"
         )}
       >
-        <ArrowUpRight className="h-4 w-4" strokeWidth={2.25} />
+        <ExternalLink className="h-5 w-5" strokeWidth={2} />
       </button>
     </div>
   );
