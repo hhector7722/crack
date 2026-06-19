@@ -27,20 +27,32 @@ export function AudioWaveform({
   active: boolean;
   light?: boolean;
 }) {
+  const unlit = light ? "bg-zinc-200" : "bg-zinc-700";
+  const lit = "bg-rose-500";
+
   return (
     <div className="flex h-8 w-full items-end gap-px">
       {bars.map((h, i) => {
-        const barProgress = i / bars.length;
-        const lit = active && barProgress <= progress;
+        const barStart = i / bars.length;
+        const barEnd = (i + 1) / bars.length;
+        let fillRatio = 0;
+        if (active && progress > barStart) {
+          fillRatio = Math.min(1, (progress - barStart) / (barEnd - barStart));
+        }
+
         return (
           <div
             key={i}
-            className={cn(
-              "min-w-0 flex-1 rounded-full transition-colors duration-75",
-              lit ? "bg-rose-500" : light ? "bg-zinc-200" : "bg-zinc-700"
-            )}
+            className={cn("relative min-w-0 flex-1 overflow-hidden rounded-full", unlit)}
             style={{ height: `${Math.round(h * 100)}%` }}
-          />
+          >
+            {fillRatio > 0 && (
+              <div
+                className={cn("absolute inset-y-0 left-0", lit)}
+                style={{ width: `${fillRatio * 100}%` }}
+              />
+            )}
+          </div>
         );
       })}
     </div>
@@ -78,10 +90,8 @@ export function AudioItemRow({
         onClick={onTogglePlay}
         aria-label={playing ? "Pausar" : "Reproducir"}
         className={cn(
-          "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold active:scale-95",
-          light
-            ? "bg-zinc-100 text-zinc-700"
-            : "bg-zinc-800 text-zinc-200"
+          "flex h-10 w-10 shrink-0 items-center justify-center text-xs font-bold active:opacity-70",
+          light ? "text-zinc-700" : "text-zinc-200"
         )}
       >
         {playing ? "❚❚" : "▶"}
