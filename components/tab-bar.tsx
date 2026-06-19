@@ -31,7 +31,7 @@ export function TabBar() {
   }
 
   return (
-    <nav className="z-40 w-full shrink-0 bg-zinc-950/95 pb-[env(safe-area-inset-bottom,0px)] backdrop-blur-lg">
+    <nav className="app-tabbar">
       <div className="flex flex-col items-center pb-1 pt-2">
         <button
           type="button"

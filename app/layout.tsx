@@ -50,13 +50,13 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} dark h-full overflow-hidden antialiased`}
     >
       <head>
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon.png" />
       </head>
-      <body className="min-h-full bg-zinc-950 font-sans text-zinc-100">
+      <body className="h-full overflow-hidden bg-zinc-950 font-sans text-zinc-100">
         {children}
       </body>
     </html>
