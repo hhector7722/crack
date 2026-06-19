@@ -13,7 +13,7 @@ export function TabBar() {
     useAppShell();
 
   const isNotes = pathname.startsWith("/notes");
-  const isGallery = pathname.startsWith("/media") || pathname === "/";
+  const isGallery = pathname.startsWith("/media");
   const isHome = pathname === "/";
   const isAudio = pathname.startsWith("/audio");
 
@@ -21,6 +21,12 @@ export function TabBar() {
     setPagerIndex(index);
     if (pathname !== path) {
       router.replace(path, { scroll: false });
+    }
+  }
+
+  function goToGallery() {
+    if (pathname !== "/media") {
+      router.replace("/media", { scroll: false });
     }
   }
 
@@ -36,26 +42,28 @@ export function TabBar() {
           <Plus className="h-6 w-6" strokeWidth={2.5} />
         </button>
 
-        <div
-          className="mt-2 flex items-center gap-1.5"
-          role="tablist"
-          aria-label="Páginas"
-        >
-          {PAGER_PATHS.map((path, i) => (
-            <button
-              key={path}
-              type="button"
-              role="tab"
-              aria-selected={pagerIndex === i}
-              aria-label={`Página ${i + 1}`}
-              onClick={() => goToPage(i, path)}
-              className={cn(
-                "h-1.5 rounded-full bg-white transition-all duration-300",
-                pagerIndex === i ? "w-4 opacity-100" : "w-1.5 opacity-35"
-              )}
-            />
-          ))}
-        </div>
+        {!isGallery && (
+          <div
+            className="mt-2 flex items-center gap-1.5"
+            role="tablist"
+            aria-label="Páginas"
+          >
+            {PAGER_PATHS.map((path, i) => (
+              <button
+                key={path}
+                type="button"
+                role="tab"
+                aria-selected={pagerIndex === i}
+                aria-label={`Página ${i + 1}`}
+                onClick={() => goToPage(i, path)}
+                className={cn(
+                  "h-1.5 rounded-full bg-white transition-all duration-300",
+                  pagerIndex === i ? "w-4 opacity-100" : "w-1.5 opacity-35"
+                )}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="flex items-end justify-between px-1 pt-1 pb-1">
@@ -68,8 +76,8 @@ export function TabBar() {
         <TabButton
           label="Galería"
           icon={Images}
-          active={isGallery && !isHome}
-          onClick={() => goToPage(1, "/media")}
+          active={isGallery}
+          onClick={goToGallery}
         />
         <TabButton
           label="Inicio"

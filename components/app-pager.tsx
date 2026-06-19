@@ -24,7 +24,6 @@ function SectionCard({ children }: { children: React.ReactNode }) {
 function pathnameToIndex(pathname: string): number {
   if (pathname.startsWith("/notes")) return 0;
   if (pathname.startsWith("/audio")) return 2;
-  if (pathname.startsWith("/media")) return 1;
   return 1;
 }
 
@@ -36,15 +35,16 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { pagerIndex, setPagerIndex } = usePager();
+  const isGalleryPage = pathname.startsWith("/media");
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [localRefresh, setLocalRefresh] = useState(0);
   const combinedRefresh = refreshKey + localRefresh;
 
   useEffect(() => {
-    const idx = pathnameToIndex(pathname);
-    setPagerIndex(idx);
-  }, [pathname, setPagerIndex]);
+    if (isGalleryPage) return;
+    setPagerIndex(pathnameToIndex(pathname));
+  }, [pathname, isGalleryPage, setPagerIndex]);
 
   const handleIndexChange = useCallback(
     (index: number) => {
@@ -60,6 +60,35 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
   function handleUpdated(updated: Item) {
     setSelectedItem(updated);
     setLocalRefresh((k) => k + 1);
+  }
+
+  const itemDetail = selectedItem ? (
+    <ItemDetail
+      key={selectedItem.id}
+      item={selectedItem}
+      open={!!selectedItem}
+      onOpenChange={(open) => !open && setSelectedItem(null)}
+      onUpdated={handleUpdated}
+      onDeleted={() => {
+        setSelectedItem(null);
+        setLocalRefresh((k) => k + 1);
+      }}
+    />
+  ) : null;
+
+  if (isGalleryPage) {
+    return (
+      <>
+        <div className="app-pager-panel h-full overflow-y-auto">
+          <GalleryFeed
+            refreshKey={combinedRefresh}
+            columns={5}
+            onSelect={setSelectedItem}
+          />
+        </div>
+        {itemDetail}
+      </>
+    );
   }
 
   return (
@@ -110,19 +139,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
         </div>
       </SwipePager>
 
-      {selectedItem && (
-        <ItemDetail
-          key={selectedItem.id}
-          item={selectedItem}
-          open={!!selectedItem}
-          onOpenChange={(open) => !open && setSelectedItem(null)}
-          onUpdated={handleUpdated}
-          onDeleted={() => {
-            setSelectedItem(null);
-            setLocalRefresh((k) => k + 1);
-          }}
-        />
-      )}
+      {itemDetail}
     </>
   );
 }

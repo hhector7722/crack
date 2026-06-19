@@ -26,6 +26,7 @@ export function AudioFeed({ refreshKey = 0, compact, light, onSelect }: AudioFee
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const rafRef = useRef(0);
 
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -66,11 +67,39 @@ export function AudioFeed({ refreshKey = 0, compact, light, onSelect }: AudioFee
 
   useEffect(() => {
     return () => {
+      stopProgressLoop();
       audioRef.current?.pause();
     };
   }, []);
 
+  function stopProgressLoop() {
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = 0;
+  }
+
+  function updateProgress(audio: HTMLAudioElement) {
+    const duration = audio.duration;
+    if (Number.isFinite(duration) && duration > 0) {
+      setProgress(Math.min(1, audio.currentTime / duration));
+    }
+  }
+
+  function startProgressLoop(audio: HTMLAudioElement) {
+    stopProgressLoop();
+
+    const tick = () => {
+      if (audioRef.current !== audio || audio.paused || audio.ended) {
+        return;
+      }
+      updateProgress(audio);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+  }
+
   function stopPlayback() {
+    stopProgressLoop();
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -95,31 +124,17 @@ export function AudioFeed({ refreshKey = 0, compact, light, onSelect }: AudioFee
     const audio = new Audio(url);
     audioRef.current = audio;
     setPlayingId(item.id);
+    setProgress(0);
 
-    let rafId = 0;
+    audio.addEventListener("loadedmetadata", () => updateProgress(audio));
+    audio.addEventListener("durationchange", () => updateProgress(audio));
+    audio.addEventListener("timeupdate", () => updateProgress(audio));
+    audio.addEventListener("play", () => startProgressLoop(audio));
+    audio.addEventListener("pause", stopProgressLoop);
+    audio.addEventListener("ended", () => stopPlayback());
+    audio.addEventListener("error", () => stopPlayback());
 
-    function tick() {
-      if (audio.duration && !audio.paused) {
-        setProgress(audio.currentTime / audio.duration);
-        rafId = requestAnimationFrame(tick);
-      }
-    }
-
-    audio.addEventListener("play", () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(tick);
-    });
-    audio.addEventListener("pause", () => cancelAnimationFrame(rafId));
-    audio.addEventListener("ended", () => {
-      cancelAnimationFrame(rafId);
-      stopPlayback();
-    });
-    audio.addEventListener("error", () => {
-      cancelAnimationFrame(rafId);
-      stopPlayback();
-    });
-
-    void audio.play();
+    void audio.play().catch(() => stopPlayback());
   }
 
   async function handleDelete(item: Item) {

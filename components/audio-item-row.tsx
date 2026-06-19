@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { Item } from "@/lib/types";
 
@@ -50,19 +50,33 @@ export function AudioWaveform({
   const unlit = light ? "bg-zinc-200" : "bg-zinc-700";
   const lit = "bg-rose-500";
   const fill = active ? Math.min(1, Math.max(0, progress)) : 0;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [trackWidth, setTrackWidth] = useState(0);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const ro = new ResizeObserver(([entry]) => {
+      setTrackWidth(entry.contentRect.width);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   return (
-    <div className="relative h-8 w-full">
+    <div ref={containerRef} className="relative h-8 w-full">
       <div className="flex h-full w-full items-end gap-px">
         <BarLayer bars={bars} color={unlit} />
       </div>
       <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          clipPath: `inset(0 ${(1 - fill) * 100}% 0 0)`,
-        }}
+        className="pointer-events-none absolute inset-y-0 left-0 overflow-hidden"
+        style={{ width: `${fill * 100}%` }}
       >
-        <div className="flex h-full w-full items-end gap-px">
+        <div
+          className="flex h-full items-end gap-px"
+          style={{ width: trackWidth > 0 ? trackWidth : "100%" }}
+        >
           <BarLayer bars={bars} color={lit} />
         </div>
       </div>
