@@ -11,6 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 import { TabBar } from "@/components/tab-bar";
 import { CaptureSheet } from "@/components/capture-sheet";
+import { AppPager } from "@/components/app-pager";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
 
@@ -21,7 +22,7 @@ export function useRefreshKey() {
 }
 
 export default function AppLayout({
-  children,
+  children: _children,
 }: {
   children: React.ReactNode;
 }) {
@@ -129,7 +130,9 @@ export default function AppLayout({
             </p>
           )}
 
-          <main className="app-main">{children}</main>
+          <main className="app-main">
+            <AppPager refreshKey={refreshKey} />
+          </main>
 
           <input
             ref={cameraInputRef}

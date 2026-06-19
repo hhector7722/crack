@@ -56,10 +56,13 @@ body {
 .app-main {
   min-height: 0;
   flex: 1;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+}
+
+.app-pager-panel {
   padding: 1rem 1rem 6rem;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
 }
 
 .line-clamp-2 {
