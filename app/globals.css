@@ -11,7 +11,8 @@
   --tm-tabbar-height: 5rem;
   --tm-tabbar-height-md: 4rem;
   --tm-tabbar-core: var(--tm-tabbar-height);
-  --tm-tabbar-shell: calc(var(--tm-tabbar-core) + env(safe-area-inset-bottom, 0px));
+  /* Solo 5rem: pb-safe ya vive dentro del h-20 (border-box). Sumar safe otra vez duplica la zona inferior. */
+  --tm-tabbar-shell: var(--tm-tabbar-height);
   --tm-chrome-bottom: 0px;
   --tab-bar-height: var(--tm-tabbar-shell);
   --tm-content-bottom: var(--tm-tabbar-shell);
@@ -36,7 +37,7 @@
 
 @media (min-width: 768px) {
   :root {
-    --tm-tabbar-shell: calc(var(--tm-tabbar-height-md) + env(safe-area-inset-bottom, 0px));
+    --tm-tabbar-shell: var(--tm-tabbar-height-md);
     --tm-tabbar-core: var(--tm-tabbar-height-md);
   }
 }

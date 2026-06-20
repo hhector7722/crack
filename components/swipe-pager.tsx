@@ -322,8 +322,8 @@ export function SwipePager({
     <div
       ref={containerRef}
       className={cn(
-        "swipe-pager-root tm-tab-swipe-root h-full w-full overflow-hidden",
-        dragging && "swipe-pager-root--dragging",
+        "swipe-pager-root tm-tab-swipe-root relative min-h-0 min-w-0 flex-1 touch-pan-y overflow-hidden",
+        dragging && "tm-tab-swipe-root--dragging swipe-pager-root--dragging",
         className
       )}
       onPointerDown={onPointerDown}

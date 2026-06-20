@@ -66,8 +66,11 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
 
   return (
     <>
-      <div className="h-full">
-        <SwipePager index={pagerIndex} onIndexChange={handleIndexChange}>
+        <SwipePager
+          className="min-h-0 min-w-0 flex-1"
+          index={pagerIndex}
+          onIndexChange={handleIndexChange}
+        >
           <PagerPanel onRefresh={handleRefresh}>
             <div className="pb-2">
               <AudioFeed
@@ -130,7 +133,6 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             <ProfileView />
           </PagerPanel>
         </SwipePager>
-      </div>
 
       {itemDetail}
     </>
