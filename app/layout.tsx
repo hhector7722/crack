@@ -57,7 +57,7 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon.png" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){function lift(v,h){if(!v)return 0;if(v.height<h*0.82)return Math.max(0,Math.round(h-v.offsetTop-v.height));return 0}function s(){var v=window.visualViewport,h=window.innerHeight,t=(v&&v.offsetTop)||0,hh=(v&&v.height)||h,r=document.documentElement;r.style.setProperty('--app-height',(hh+t)+'px');r.style.setProperty('--app-offset-top',t+'px');r.style.setProperty('--app-chrome-bottom-lift',lift(v,h)+'px')}s();window.addEventListener('resize',s);window.addEventListener('orientationchange',s);window.visualViewport&&(window.visualViewport.addEventListener('resize',s),window.visualViewport.addEventListener('scroll',s))})();`,
+            __html: `(function(){function lift(v,h){if(!v)return 0;if(v.height<h*0.82)return Math.max(0,Math.round(h-v.offsetTop-v.height));return 0}function s(){var v=window.visualViewport,h=window.innerHeight,t=(v&&v.offsetTop)||0,vh=(v&&v.height)||h,r=document.documentElement;r.style.setProperty('--app-vv-height',vh+'px');r.style.setProperty('--app-height',(vh+t)+'px');r.style.setProperty('--app-offset-top',t+'px');r.style.setProperty('--app-chrome-bottom-lift',lift(v,h)+'px')}s();window.addEventListener('resize',s);window.addEventListener('orientationchange',s);window.visualViewport&&(window.visualViewport.addEventListener('resize',s),window.visualViewport.addEventListener('scroll',s))})();`,
           }}
         />
       </head>

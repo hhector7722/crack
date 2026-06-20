@@ -4,6 +4,7 @@
   --background: #09090b;
   --foreground: #fafafa;
   --app-height: 100dvh;
+  --app-vv-height: 100dvh;
   --app-offset-top: 0px;
   --app-chrome-height: clamp(3.25rem, 10.5svh, 4rem);
   --app-chrome-top: calc(var(--app-chrome-height) + env(safe-area-inset-top, 0px));
@@ -100,14 +101,14 @@ body {
 .app-main {
   box-sizing: border-box;
   display: flex;
-  flex: 1 1 auto;
   flex-direction: column;
   width: 100%;
-  height: var(--app-height, 100dvh);
-  max-height: var(--app-height, 100dvh);
-  min-height: var(--app-height, 100dvh);
+  /* Altura útil entre cabecera fija y TabBar (patrón tm-app-main--internal-scroll). */
+  height: calc(var(--app-vv-height, 100dvh) - var(--app-tabbar-shell));
+  max-height: calc(var(--app-vv-height, 100dvh) - var(--app-tabbar-shell));
+  min-height: calc(var(--app-vv-height, 100dvh) - var(--app-tabbar-shell));
   padding-top: var(--app-chrome-top);
-  padding-bottom: var(--app-tabbar-shell);
+  padding-bottom: 0;
   overflow: hidden;
 }
 
@@ -140,9 +141,9 @@ html[data-modal-open='true'] .marbella-fixed-bottombar {
 }
 
 .app-pager-panel {
-  height: 100%;
+  min-height: 100%;
   padding: var(--app-gutter);
-  padding-bottom: var(--app-gutter);
+  scroll-padding-bottom: var(--app-gutter);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 }
