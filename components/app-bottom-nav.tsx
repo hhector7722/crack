@@ -1,10 +1,8 @@
 'use client';
 
-import { useRef } from 'react';
 import { Home, FileText, Images, Mic, User, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppShell } from '@/components/app-shell-context';
-import { useVisualViewportBottomPin } from '@/lib/ui/use-visual-viewport-bottom-pin';
 
 type CrackNavItem = {
   name: string;
@@ -22,14 +20,10 @@ const CRACK_NAV_ITEMS: CrackNavItem[] = [
 
 export function AppBottomNav() {
   const { pagerIndex, navigateToPage } = useAppShell();
-  const navRef = useRef<HTMLElement>(null);
-
-  useVisualViewportBottomPin(navRef);
 
   return (
     <nav
-      ref={navRef}
-      className="app-chrome-bar marbella-fixed-bottombar fixed bottom-0 z-[95] justify-around px-2 md:px-8 print:hidden"
+      className="app-chrome-bar marbella-fixed-bottombar fixed bottom-0 z-[95] justify-around px-2 pb-safe md:px-8 print:hidden"
       aria-label="Navegación principal"
     >
       {CRACK_NAV_ITEMS.map((item) => {

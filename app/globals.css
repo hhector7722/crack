@@ -10,7 +10,10 @@
   --app-tabbar-height: 5rem;
   --app-tabbar-height-md: 4rem;
   --app-tabbar-core: var(--app-tabbar-height);
-  --app-chrome-bottom: calc(var(--app-tabbar-core) + env(safe-area-inset-bottom, 0px));
+  /* pb-safe vive dentro del h-20; no sumar safe-area otra vez (duplica hueco inferior). */
+  --app-tabbar-shell: var(--app-tabbar-core);
+  --app-chrome-bottom: var(--app-tabbar-shell);
+  --app-chrome-bottom-lift: 0px;
   --app-gutter: clamp(0.75rem, 3.5vw, 1rem);
   --crack-ios-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --crack-page-push-ms: 360ms;
@@ -84,10 +87,9 @@ body {
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  height: var(--app-chrome-bottom);
-  min-height: var(--app-chrome-bottom);
-  max-height: var(--app-chrome-bottom);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: var(--app-tabbar-core);
+  min-height: var(--app-tabbar-core);
+  max-height: var(--app-tabbar-core);
   padding-left: max(var(--app-gutter), env(safe-area-inset-left, 0px));
   padding-right: max(var(--app-gutter), env(safe-area-inset-right, 0px));
   border-top: 1px solid rgb(39 39 42 / 0.8);
@@ -105,7 +107,7 @@ body {
   max-height: var(--app-height, 100dvh);
   min-height: var(--app-height, 100dvh);
   padding-top: var(--app-chrome-top);
-  padding-bottom: var(--app-chrome-bottom);
+  padding-bottom: var(--app-tabbar-shell);
   overflow: hidden;
 }
 
@@ -119,6 +121,8 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
+  transform: translate3d(0, calc(-1 * var(--app-chrome-bottom-lift, 0px)), 0);
+  -webkit-transform: translate3d(0, calc(-1 * var(--app-chrome-bottom-lift, 0px)), 0);
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
@@ -138,7 +142,7 @@ html[data-modal-open='true'] .marbella-fixed-bottombar {
 .app-pager-panel {
   height: 100%;
   padding: var(--app-gutter);
-  padding-bottom: calc(var(--app-gutter) + var(--app-chrome-bottom));
+  padding-bottom: var(--app-gutter);
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 }

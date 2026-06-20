@@ -1,33 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
-
-function applyViewportMetrics() {
-  const vv = window.visualViewport;
-  const height = vv?.height ?? window.innerHeight;
-  const offsetTop = vv?.offsetTop ?? 0;
-  const root = document.documentElement;
-  root.style.setProperty("--app-height", `${height + offsetTop}px`);
-  root.style.setProperty("--app-offset-top", `${offsetTop}px`);
-}
+import { applyVisualViewportChrome } from "@/lib/ui/viewport-chrome";
 
 export function ViewportHeight() {
   useEffect(() => {
-    applyViewportMetrics();
+    const sync = () => applyVisualViewportChrome();
 
-    window.addEventListener("resize", applyViewportMetrics);
-    window.addEventListener("orientationchange", applyViewportMetrics);
-    window.visualViewport?.addEventListener("resize", applyViewportMetrics);
-    window.visualViewport?.addEventListener("scroll", applyViewportMetrics);
+    sync();
+    window.addEventListener("resize", sync);
+    window.addEventListener("orientationchange", sync);
+    window.visualViewport?.addEventListener("resize", sync);
+    window.visualViewport?.addEventListener("scroll", sync);
 
     return () => {
-      window.removeEventListener("resize", applyViewportMetrics);
-      window.removeEventListener("orientationchange", applyViewportMetrics);
-      window.visualViewport?.removeEventListener("resize", applyViewportMetrics);
-      window.visualViewport?.removeEventListener(
-        "scroll",
-        applyViewportMetrics
-      );
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("orientationchange", sync);
+      window.visualViewport?.removeEventListener("resize", sync);
+      window.visualViewport?.removeEventListener("scroll", sync);
     };
   }, []);
 
