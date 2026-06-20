@@ -8,12 +8,56 @@ import { deleteFile, getSignedUrl } from "@/lib/storage";
 import { AudioItemRow } from "@/components/audio-item-row";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
 import { ItemDetail } from "@/components/item-detail";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useItemShare } from "@/hooks/use-item-share";
 import type { Item } from "@/lib/types";
 
 interface AudioFeedProps {
   refreshKey?: number;
   compact?: boolean;
   onSelect?: (item: Item) => void;
+}
+
+function AudioRow({
+  item,
+  mediaUrl,
+  playing,
+  progress,
+  onTogglePlay,
+  onOpen,
+  onShare,
+}: {
+  item: Item;
+  mediaUrl: string | null;
+  playing: boolean;
+  progress: number;
+  onTogglePlay: () => void;
+  onOpen?: () => void;
+  onShare: (item: Item, mediaUrl?: string | null) => void;
+}) {
+  const longPress = useLongPress(() => onShare(item, mediaUrl));
+
+  return (
+    <div {...longPress}>
+      <AudioItemRow
+        item={item}
+        playing={playing}
+        progress={progress}
+        onTogglePlay={() => {
+          if (longPress.consumeLongPress()) return;
+          onTogglePlay();
+        }}
+        onOpen={
+          onOpen
+            ? () => {
+                if (longPress.consumeLongPress()) return;
+                onOpen();
+              }
+            : undefined
+        }
+      />
+    </div>
+  );
 }
 
 export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps) {
@@ -26,6 +70,7 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const rafRef = useRef(0);
+  const { shareItem, sheet } = useItemShare();
 
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -210,13 +255,16 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
     <>
       <div className={listClass}>
         {items.map((item) => {
+          const mediaUrl = item.file_url ? mediaUrls[item.file_url] ?? null : null;
           const row = (
-            <AudioItemRow
+            <AudioRow
               item={item}
+              mediaUrl={mediaUrl}
               playing={playingId === item.id}
               progress={playingId === item.id ? progress : 0}
               onTogglePlay={() => toggleAudioPlay(item)}
               onOpen={onSelect ? () => handleOpen(item) : undefined}
+              onShare={shareItem}
             />
           );
 
@@ -245,6 +293,8 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
           }}
         />
       )}
+
+      {sheet}
     </>
   );
 }

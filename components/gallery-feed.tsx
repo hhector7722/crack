@@ -7,6 +7,8 @@ import { fetchItems, deleteItem } from "@/lib/items";
 import { deleteFile, getSignedUrl } from "@/lib/storage";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
 import { ItemDetail } from "@/components/item-detail";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useItemShare } from "@/hooks/use-item-share";
 import type { Item } from "@/lib/types";
 
 interface GalleryFeedProps {
@@ -15,6 +17,41 @@ interface GalleryFeedProps {
   limit?: number;
   compact?: boolean;
   onSelect?: (item: Item) => void;
+}
+
+function GalleryThumb({
+  item,
+  url,
+  onSelect,
+  onShare,
+}: {
+  item: Item;
+  url: string | null;
+  onSelect: () => void;
+  onShare: (item: Item, mediaUrl?: string | null) => void;
+}) {
+  const longPress = useLongPress(() => onShare(item, url));
+
+  return (
+    <button
+      type="button"
+      {...longPress}
+      onClick={() => {
+        if (longPress.consumeLongPress()) return;
+        onSelect();
+      }}
+      className="aspect-square w-full overflow-hidden rounded-md bg-white shadow-sm shadow-black/40 active:opacity-80"
+    >
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={url} alt="" className="h-full w-full object-contain" />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center">
+          <Loader2 className="h-4 w-4 animate-spin text-zinc-600" />
+        </div>
+      )}
+    </button>
+  );
 }
 
 export function GalleryFeed({
@@ -29,6 +66,7 @@ export function GalleryFeed({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const { shareItem, sheet } = useItemShare();
 
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -145,24 +183,12 @@ export function GalleryFeed({
         {visible.map((item) => {
           const url = item.file_url ? urls[item.file_url] : null;
           const thumb = (
-            <button
-              type="button"
-              onClick={() => handleSelect(item)}
-              className="aspect-square w-full overflow-hidden rounded-md bg-zinc-800 shadow-sm shadow-black/40 active:opacity-80"
-            >
-              {url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={url}
-                  alt=""
-                  className="h-full w-full object-contain"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <Loader2 className="h-4 w-4 animate-spin text-zinc-600" />
-                </div>
-              )}
-            </button>
+            <GalleryThumb
+              item={item}
+              url={url}
+              onShare={shareItem}
+              onSelect={() => handleSelect(item)}
+            />
           );
 
           if (compact) {
@@ -190,6 +216,8 @@ export function GalleryFeed({
           }}
         />
       )}
+
+      {sheet}
     </>
   );
 }

@@ -8,6 +8,8 @@ import { deleteFile } from "@/lib/storage";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
 import { ItemDetail } from "@/components/item-detail";
 import { LinkNotePreview } from "@/components/link-note-preview";
+import { useLongPress } from "@/hooks/use-long-press";
+import { useItemShare } from "@/hooks/use-item-share";
 import { displayValue, getNoteUrl } from "@/lib/utils";
 import type { Item } from "@/lib/types";
 
@@ -21,29 +23,42 @@ function NoteRow({
   item,
   compact,
   onClick,
+  onShare,
 }: {
   item: Item;
   compact?: boolean;
   onClick: () => void;
+  onShare: (item: Item) => void;
 }) {
   const url = getNoteUrl(item);
   const summary =
     item.metadata.summary ?? item.content?.slice(0, 120) ?? " ";
   const title = displayValue(item.title) === " " ? "Sin título" : item.title;
+  const longPress = useLongPress(() => onShare(item));
 
-  if (url) {
-    return <LinkNotePreview url={url} itemTitle={item.title} />;
+  function handleActivate(action: () => void) {
+    if (longPress.consumeLongPress()) return;
+    action();
   }
 
-  function handleClick() {
-    onClick();
+  if (url) {
+    return (
+      <div
+        className={compact ? undefined : "content-row"}
+        {...longPress}
+        onClick={() => handleActivate(onClick)}
+      >
+        <LinkNotePreview url={url} itemTitle={item.title} />
+      </div>
+    );
   }
 
   if (compact) {
     return (
       <button
         type="button"
-        onClick={handleClick}
+        {...longPress}
+        onClick={() => handleActivate(onClick)}
         className="flex w-full py-3 text-left last:border-b-0 active:opacity-70"
       >
         <p className="line-clamp-2 text-sm text-zinc-300">{summary}</p>
@@ -52,7 +67,12 @@ function NoteRow({
   }
 
   return (
-    <button type="button" onClick={handleClick} className="content-row">
+    <button
+      type="button"
+      {...longPress}
+      onClick={() => handleActivate(onClick)}
+      className="content-row"
+    >
       <h3 className="truncate font-semibold text-zinc-100">{title}</h3>
       <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{summary}</p>
     </button>
@@ -64,6 +84,7 @@ export function NoteList({ refreshKey = 0, compact, onSelect }: NoteListProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const { shareItem, sheet } = useItemShare();
 
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -161,11 +182,16 @@ export function NoteList({ refreshKey = 0, compact, onSelect }: NoteListProps) {
               key={item.id}
               item={item}
               compact
+              onShare={shareItem}
               onClick={() => handleClick(item)}
             />
           ) : (
             <SwipeToDelete key={item.id} onDelete={() => handleDelete(item)}>
-              <NoteRow item={item} onClick={() => handleClick(item)} />
+              <NoteRow
+                item={item}
+                onShare={shareItem}
+                onClick={() => handleClick(item)}
+              />
             </SwipeToDelete>
           )
         )}
@@ -184,6 +210,8 @@ export function NoteList({ refreshKey = 0, compact, onSelect }: NoteListProps) {
           }}
         />
       )}
+
+      {sheet}
     </>
   );
 }

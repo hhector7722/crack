@@ -16,10 +16,17 @@ import { ViewportHeight } from "@/components/viewport-height";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
 
-const RefreshContext = createContext(0);
+const RefreshContext = createContext({
+  refreshKey: 0,
+  bumpRefresh: () => {},
+});
 
 export function useRefreshKey() {
-  return useContext(RefreshContext);
+  return useContext(RefreshContext).refreshKey;
+}
+
+export function useBumpRefresh() {
+  return useContext(RefreshContext).bumpRefresh;
 }
 
 export default function AppLayout({
@@ -101,7 +108,7 @@ export default function AppLayout({
   }
 
   return (
-    <RefreshContext.Provider value={refreshKey}>
+    <RefreshContext.Provider value={{ refreshKey, bumpRefresh }}>
       <AppShellProvider
         value={{ openCamera, openGallery, openCapture, openCaptureMenu }}
       >

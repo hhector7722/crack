@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Home, FileText, Images, Camera, Mic, Plus } from "lucide-react";
+import { Home, FileText, Images, Mic, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppShell } from "@/components/app-shell-context";
 import { PAGER_PATHS } from "@/components/app-pager";
@@ -9,13 +9,14 @@ import { PAGER_PATHS } from "@/components/app-pager";
 export function TabBar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { openCamera, openCaptureMenu, pagerIndex, setPagerIndex } =
-    useAppShell();
+  const { openCaptureMenu, pagerIndex, setPagerIndex } = useAppShell();
 
   const isNotes = pathname.startsWith("/notes");
   const isGallery = pathname.startsWith("/media");
   const isHome = pathname === "/";
   const isAudio = pathname.startsWith("/audio");
+  const isProfile = pathname.startsWith("/profile");
+  const hidePagerDots = isGallery || isProfile;
 
   function goToPage(index: number, path: string) {
     setPagerIndex(index);
@@ -27,6 +28,12 @@ export function TabBar() {
   function goToGallery() {
     if (pathname !== "/media") {
       router.replace("/media", { scroll: false });
+    }
+  }
+
+  function goToProfile() {
+    if (pathname !== "/profile") {
+      router.replace("/profile", { scroll: false });
     }
   }
 
@@ -43,7 +50,7 @@ export function TabBar() {
             <Plus className="h-6 w-6" strokeWidth={2.5} />
           </button>
 
-          {!isGallery && (
+          {!hidePagerDots && (
             <div
               className="mt-2 flex items-center gap-1.5"
               role="tablist"
@@ -69,10 +76,10 @@ export function TabBar() {
 
         <div className="flex items-end justify-between px-1 pt-1 pb-1">
           <TabButton
-            label="Notas"
-            icon={FileText}
-            active={isNotes}
-            onClick={() => goToPage(0, "/notes")}
+            label="Audio"
+            icon={Mic}
+            active={isAudio}
+            onClick={() => goToPage(2, "/audio")}
           />
           <TabButton
             label="Galería"
@@ -86,19 +93,17 @@ export function TabBar() {
             active={isHome}
             onClick={() => goToPage(1, "/")}
           />
-          <button
-            type="button"
-            onClick={openCamera}
-            className="flex min-w-[56px] flex-1 flex-col-reverse items-center gap-0.5 rounded-lg pt-1 pb-1 text-xs leading-none text-zinc-500 transition-colors active:text-zinc-100"
-          >
-            <Camera className="h-5 w-5 shrink-0" strokeWidth={2} />
-            <span className="font-medium">Cámara</span>
-          </button>
           <TabButton
-            label="Audio"
-            icon={Mic}
-            active={isAudio}
-            onClick={() => goToPage(2, "/audio")}
+            label="Notas"
+            icon={FileText}
+            active={isNotes}
+            onClick={() => goToPage(0, "/notes")}
+          />
+          <TabButton
+            label="Perfil"
+            icon={User}
+            active={isProfile}
+            onClick={goToProfile}
           />
         </div>
       </div>
