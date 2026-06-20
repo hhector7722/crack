@@ -182,24 +182,31 @@ export function ProfileView() {
 
             <details className="pt-2 text-sm text-zinc-400">
               <summary className="cursor-pointer font-medium text-zinc-300">
-                Atajo iPhone (recomendado: portapapeles)
+                Atajo iPhone (GET — sin POST ni cabeceras)
               </summary>
               <p className="mt-3 text-xs leading-relaxed text-emerald-300/90">
-                Si no puedes activar «Mostrar en hoja de compartir», usa este
-                método: Compartir → Copiar enlace → ejecutar atajo.
+                Compartir → Copiar enlace → ejecutar atajo. Evita el error
+                «No se ha especificado ninguna URL».
               </p>
               <ol className="mt-3 list-decimal space-y-2 pl-5 text-xs leading-relaxed">
-                <li>Obtener contenido del portapapeles</li>
-                <li>Obtener URL de [portapapeles]</li>
+                <li>Obtener portapapeles</li>
+                <li>Obtener direcciones URL de Portapapeles</li>
+                <li>Codificar con URL → entrada: Direcciones URL</li>
                 <li>
-                  Obtener contenido de URL → POST a{" "}
-                  <span className="text-zinc-300">{apiUrl}</span>
+                  Texto:{" "}
+                  <span className="text-zinc-300">
+                    {apiUrl}?token=
+                    {plainToken ?? "TU_TOKEN"}&amp;url=
+                  </span>
                 </li>
-                <li>Authorization: Bearer [token]. JSON: url = variable URL</li>
+                <li>Combinar texto → Texto + Texto codificado</li>
+                <li>
+                  Obtener contenido de URL → variable Texto combinado (GET)
+                </li>
                 <li>ⓘ → Añadir a pantalla de inicio</li>
               </ol>
               <p className="mt-3 text-xs text-zinc-500">
-                Hoja Compartir directa: docs/ios-shortcuts.md (método B)
+                Guía completa: docs/ios-shortcuts.md
               </p>
             </details>
           </div>

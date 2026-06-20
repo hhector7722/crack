@@ -1,96 +1,125 @@
-# Compartir enlaces a Crack desde iPhone (Atajos)
+# Atajo iOS — Guardar enlaces en Crack
 
-Gratis, sin App Store.
+Dominio: `https://crackdecracks.vercel.app`  
+Token: `ArJec1N0IytJlhviMNWjyWmuxkeHqcPDIobgdOcBhlg`
 
-## 1. Migración Supabase
-
-En el SQL Editor de Supabase ejecuta:
-
-`supabase/migrations/002_share_tokens.sql`
-
-## 2. Variable en Vercel
-
-| Variable | Valor |
-|----------|--------|
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → API → `service_role` |
-| `NEXT_PUBLIC_SITE_URL` | `https://tu-dominio.vercel.app` |
-
-Redespliega la app.
-
-## 3. Token en Crack
-
-Perfil → **Generar token** → copia token y URL de `/api/share-link`.
+> Si compartes este archivo o lo subes a un repo público, **revoca y regenera** el token en Perfil.
 
 ---
 
-## Método A — Portapapeles (recomendado si falla la hoja Compartir)
+## Uso diario
 
-No necesitas «Recibir» ni «Mostrar en hoja de compartir». Funciona siempre.
-
-### Uso diario
-
-1. En YouTube/Safari/Instagram → **Compartir** → **Copiar enlace**
-2. Ejecuta el atajo **Guardar en Crack** (icono en pantalla de inicio o widget)
-3. Listo → abre Crack → Notas
-
-### Crear el atajo (3 acciones)
-
-1. **Atajos** → **+** → nombre: **Guardar en Crack**
-2. **Añadir acción** → busca **Portapapeles** → **Obtener contenido del portapapeles**
-3. **Añadir acción** → busca **URL** → **Obtener URL de** → elige **Contenido del portapapeles** (variable del paso anterior)
-4. **Añadir acción** → **Obtener contenido de URL**:
-   - URL: `https://TU-DOMINIO.vercel.app/api/share-link`
-   - Método: **POST**
-   - Cabeceras:
-     - `Authorization` → `Bearer TU_TOKEN`
-     - `Content-Type` → `application/json`
-   - Cuerpo: **JSON** → `{ "url": "[URL del paso 2]" }`  
-     (toca `url` y selecciona la variable **URL**, no escribas texto fijo)
-5. (Opcional) **Mostrar notificación** → «Guardado en Crack»
-6. Toca **ⓘ** abajo → **Añadir a pantalla de inicio** (para lanzarlo con un toque)
+1. En Safari, YouTube, etc. → **Compartir** → **Copiar enlace**
+2. Ejecutar el atajo **Guardar en Crack**
+3. Abrir Crack → el enlace aparece en Notas
 
 ---
 
-## Método B — Directo desde Compartir (hoja de compartir)
+## Crear el atajo (método GET)
 
-Solo si tu iPhone deja activar el interruptor.
+No uses POST ni JSON. Son 6 acciones en la app **Atajos**.
 
-### Activar entrada compartida
+### Paso a paso
 
-1. Editor del atajo → barra inferior → icono **ⓘ** (tercero: deshacer, rehacer, **ⓘ**, compartir, play)  
-   **No** uses el menú del nombre «Nuevo atajo» arriba.
-2. En **Detalles** → activa **Mostrar en hoja de compartir**
-3. **Hecho** → arriba aparece franja gris: *Recibir Cualquier entrada…*
-4. Toca **Cualquier** → marca **URLs** y **Safari** → **OK**
+#### 1. Obtener portapapeles
 
-Si el interruptor **no se queda en verde** o no puedes marcar URLs → usa **Método A**.
-
-### Acciones (igual que A pero con Entrada del atajo)
-
-1. **Obtener URL de Entrada del atajo**
-2. **Obtener contenido de URL** (POST, mismo JSON y token)
-
-### Activar en Compartir
-
-Compartir → abajo **Editar acciones** → **+** junto a tu atajo.
+Busca **Obtener portapapeles** y añádela.
 
 ---
 
-## Probar
+#### 2. Obtener direcciones URL de
 
-- **Método A:** Copiar enlace → pulsar atajo en inicio → Notas en Crack  
-- **Método B:** Compartir → Guardar en Crack → Notas en Crack
+Busca **Obtener direcciones URL de la entrada** (o «Obtener direcciones URL de»).
+
+- Toca el hueco de entrada → **Seleccionar variable** → **Portapapeles**
+
+---
+
+#### 3. Codificar con URL
+
+Busca **Codificar con URL**.
+
+- Entrada: **Direcciones URL** (variable del paso 2)
+
+---
+
+#### 4. Texto
+
+Busca **Texto** y pega **exactamente** esta línea (ya incluye tu token):
+
+```
+https://crackdecracks.vercel.app/api/share-link?token=ArJec1N0IytJlhviMNWjyWmuxkeHqcPDIobgdOcBhlg&url=
+```
+
+No añadas espacios ni saltos de línea al final.
+
+---
+
+#### 5. Combinar texto
+
+Busca **Combinar texto** (o «Unir texto»).
+
+- Primer bloque: **Texto** (paso 4)
+- Segundo bloque: **Texto codificado** (paso 3)
+
+Orden: primero el Texto fijo, luego el enlace codificado.
+
+---
+
+#### 6. Obtener contenido de URL
+
+Busca **Obtener contenido de URL**.
+
+- Toca el **hueco vacío** junto a «Obtener contenido de» (no el campo de abajo suelto)
+- **Seleccionar variable** → **Texto combinado** (paso 5)
+- Método: **GET** (viene por defecto; no cambies a POST)
+
+Si ves el error *«No se ha especificado ninguna URL»*, es porque este hueco sigue vacío. Debe mostrar la variable **Texto combinado**, no una URL escrita aparte.
+
+---
+
+#### 7. Icono en pantalla de inicio (opcional)
+
+Toca **ⓘ** arriba a la derecha → **Añadir a pantalla de inicio** → nombre: **Guardar en Crack**.
+
+---
+
+## Cómo queda la URL al ejecutar
+
+```
+https://crackdecracks.vercel.app/api/share-link?token=ArJec1N0IytJlhviMNWjyWmuxkeHqcPDIobgdOcBhlg&url=https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3D...
+```
+
+Crack recibe la petición GET, valida el token y guarda el enlace.
+
+---
+
+## Probar sin copiar enlace
+
+Abre Safari, copia manualmente `https://youtube.com/watch?v=dQw4w9WgXcQ`, ejecuta el atajo. Deberías ver `{"ok":true,"id":"..."}` o similar en la respuesta.
+
+---
+
+## Errores frecuentes
+
+| Mensaje | Qué hacer |
+|---------|-----------|
+| No se ha especificado ninguna URL | Paso 6: el hueco principal debe ser la variable **Texto combinado** |
+| Token inválido | Regenera token en Perfil y actualiza el paso 4 |
+| No se encontró ninguna URL válida | Copia un enlace real antes de ejecutar el atajo |
+| 503 | Falta `SUPABASE_SERVICE_ROLE_KEY` en Vercel |
+| 404 / HTML en vez de JSON | Despliega la última versión en Vercel (endpoint GET aún no publicado) |
+
+---
 
 ## Android
 
-PWA instalada → Crack puede salir en Compartir (`share_target` → `/share`).
+PWA instalada → Compartir → **Crack** (usa `/share`, no necesita atajo).
 
-## Problemas
+---
 
-| Problema | Solución |
-|----------|----------|
-| No aparece «Recibir» al buscar | Normal. Usa **Método A** |
-| ⓘ no activa hoja compartir | Usa **Método A** |
-| No deja marcar URLs | Usa **Método A** |
-| Token inválido | Regenerar token en Perfil |
-| 503 | Falta `SUPABASE_SERVICE_ROLE_KEY` en Vercel |
+## Requisitos en servidor
+
+- Migración `supabase/migrations/002_share_tokens.sql` aplicada
+- Variable `SUPABASE_SERVICE_ROLE_KEY` en Vercel
+- Token generado en Perfil (el de arriba debe coincidir con el activo en tu cuenta)
