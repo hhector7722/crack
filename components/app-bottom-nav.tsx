@@ -29,7 +29,7 @@ export function AppBottomNav() {
   return (
     <nav
       ref={navRef}
-      className="app-chrome-bar marbella-fixed-bottombar fixed bottom-0 z-[95] justify-around print:hidden"
+      className="app-chrome-bar marbella-fixed-bottombar fixed bottom-0 z-[95] justify-around px-2 md:px-8 print:hidden"
       aria-label="Navegación principal"
     >
       {CRACK_NAV_ITEMS.map((item) => {

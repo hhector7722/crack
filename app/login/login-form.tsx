@@ -149,7 +149,7 @@ export function LoginForm() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-zinc-950 px-6 safe-top">
-      <div className="w-full max-w-[430px]">
+      <div className="w-full max-w-md">
         <div className="mb-10 text-center">
           <h1 className="text-3xl font-bold tracking-tight text-zinc-100">
             Crack

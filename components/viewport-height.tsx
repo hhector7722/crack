@@ -5,11 +5,9 @@ import { useEffect } from "react";
 function applyViewportMetrics() {
   const vv = window.visualViewport;
   const height = vv?.height ?? window.innerHeight;
-  const width = vv?.width ?? window.innerWidth;
   const offsetTop = vv?.offsetTop ?? 0;
   const root = document.documentElement;
-  root.style.setProperty("--app-height", `${height}px`);
-  root.style.setProperty("--app-width", `${width}px`);
+  root.style.setProperty("--app-height", `${height + offsetTop}px`);
   root.style.setProperty("--app-offset-top", `${offsetTop}px`);
 }
 

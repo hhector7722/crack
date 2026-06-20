@@ -57,7 +57,7 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon.png" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){function s(){var v=window.visualViewport,h=(v&&v.height)||window.innerHeight,w=(v&&v.width)||window.innerWidth,t=(v&&v.offsetTop)||0,r=document.documentElement;r.style.setProperty('--app-height',h+'px');r.style.setProperty('--app-width',w+'px');r.style.setProperty('--app-offset-top',t+'px')}s();window.addEventListener('resize',s);window.addEventListener('orientationchange',s);window.visualViewport&&(window.visualViewport.addEventListener('resize',s),window.visualViewport.addEventListener('scroll',s))})();`,
+            __html: `(function(){function s(){var v=window.visualViewport,h=(v&&v.height)||window.innerHeight,t=(v&&v.offsetTop)||0,r=document.documentElement;r.style.setProperty('--app-height',(h+t)+'px');r.style.setProperty('--app-offset-top',t+'px')}s();window.addEventListener('resize',s);window.addEventListener('orientationchange',s);window.visualViewport&&(window.visualViewport.addEventListener('resize',s),window.visualViewport.addEventListener('scroll',s))})();`,
           }}
         />
       </head>
