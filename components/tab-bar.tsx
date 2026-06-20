@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Home, FileText, Images, Mic, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppShell } from "@/components/app-shell-context";
 import { PAGE_PUSH_MS, IOS_EASE_OUT } from "@/lib/ui/motion";
+import { useVisualViewportBottomPin } from "@/lib/ui/use-visual-viewport-bottom-pin";
 import {
   PAGER_DOT_INDICES,
   PAGER_PATHS,
@@ -12,9 +15,21 @@ import {
 
 export function TabBar() {
   const { openCaptureMenu, pagerIndex, navigateToPage } = useAppShell();
+  const navRef = useRef<HTMLElement>(null);
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <nav className="app-tabbar" aria-label="Navegación principal">
+  useVisualViewportBottomPin(navRef, mounted);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const bar = (
+    <nav
+      ref={navRef}
+      className="app-tabbar app-fixed-bottombar"
+      aria-label="Navegación principal"
+    >
       <div className="mx-auto flex w-full max-w-[430px] flex-col">
         <div className="flex flex-col items-center pt-2">
           <button
@@ -91,6 +106,9 @@ export function TabBar() {
       </div>
     </nav>
   );
+
+  if (!mounted) return null;
+  return createPortal(bar, document.body);
 }
 
 function TabButton({

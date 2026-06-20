@@ -24,10 +24,10 @@ export function BottomSheet({
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-[60] bg-black/60" />
+        <Drawer.Overlay className="fixed inset-0 z-[999] bg-black/60" />
         <Drawer.Content
           className={cn(
-            "fixed inset-x-0 bottom-0 z-[60] mx-auto flex max-h-[90dvh] max-w-[430px] flex-col rounded-t-2xl border border-zinc-800 bg-zinc-950 outline-none",
+            "fixed inset-x-0 bottom-0 z-[999] mx-auto flex max-h-[90dvh] max-w-[430px] flex-col rounded-t-2xl border border-zinc-800 bg-zinc-950 outline-none",
             className
           )}
         >

@@ -126,8 +126,8 @@ export function ItemDetail({
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-[70] bg-black/60" />
-        <Drawer.Content className="fixed inset-x-0 bottom-0 z-[70] mx-auto flex max-h-[92dvh] max-w-[430px] flex-col rounded-t-2xl border border-zinc-800 bg-zinc-950 outline-none">
+        <Drawer.Overlay className="fixed inset-0 z-[999] bg-black/60" />
+        <Drawer.Content className="fixed inset-x-0 bottom-0 z-[999] mx-auto flex max-h-[92dvh] max-w-[430px] flex-col rounded-t-2xl border border-zinc-800 bg-zinc-950 outline-none">
           <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-zinc-700" />
           <div className="flex-1 overflow-y-auto px-5 pb-8 pt-4">
             <div className="mb-4 flex items-center justify-between">

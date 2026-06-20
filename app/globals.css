@@ -77,19 +77,37 @@ body {
   padding-bottom: var(--tabbar-height);
 }
 
-.app-tabbar {
+.app-fixed-bottombar {
   position: fixed;
-  bottom: 0;
   left: 0;
   right: 0;
-  z-index: 50;
+  bottom: 0;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.app-tabbar {
+  z-index: 95;
   width: 100%;
   max-width: 430px;
   margin-inline: auto;
   background: rgb(9 9 11 / 0.95);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  transition:
+    filter 200ms ease,
+    opacity 200ms ease;
+}
+
+html[data-modal-open] .app-fixed-bottombar {
+  filter: blur(6px);
+  opacity: 0.35;
+  pointer-events: none;
 }
 
 .app-pager-panel {
