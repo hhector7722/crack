@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { Home, FileText, Images, Mic, User, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppShell } from '@/components/app-shell-context';
@@ -23,7 +24,13 @@ export function AppBottomNav() {
 
   return (
     <nav
-      className="app-chrome-bar marbella-fixed-bottombar fixed bottom-0 z-[95] justify-around px-2 pb-safe md:px-8 print:hidden"
+      className={cn(
+        'fixed bottom-0 left-0 right-0 z-[95] flex',
+        'min-h-[calc(5rem+env(safe-area-inset-bottom))] md:min-h-[calc(4rem+env(safe-area-inset-bottom))]',
+        'items-center justify-around border-t border-zinc-800/80',
+        'bg-zinc-950/90 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.15)]',
+        'backdrop-blur-md md:px-8 print:hidden'
+      )}
       aria-label="Navegación principal"
     >
       {CRACK_NAV_ITEMS.map((item) => {

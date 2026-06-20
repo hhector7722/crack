@@ -13,7 +13,6 @@ import { Plus } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { AppBottomNavPortal } from "@/components/app-bottom-nav-portal";
 import { AppPager } from "@/components/app-pager";
-import { ViewportHeight } from "@/components/viewport-height";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
 
@@ -112,7 +111,6 @@ export default function AppLayout({
       <AppShellProvider
         value={{ openCamera, openGallery, openCapture, openCaptureMenu }}
       >
-        <ViewportHeight />
         <div className="app-shell">
           <header className="app-header relative">
             <h1 className="text-lg font-bold tracking-tight">Crack</h1>
