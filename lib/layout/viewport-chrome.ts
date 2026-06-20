@@ -78,9 +78,12 @@ export function readTabBarTop(): number {
     return nav.getBoundingClientRect().top;
   }
 
-  const shellRaw = getComputedStyle(document.documentElement).getPropertyValue("--tm-tabbar-shell");
+  const shellRaw = getComputedStyle(document.documentElement).getPropertyValue(
+    "--tm-bottom-chrome-block"
+  );
   const shellPx = parseFloat(shellRaw);
-  const tabBarShell = Number.isFinite(shellPx) && shellPx > 0 ? shellPx : readTabBarCorePx();
+  const tabBarShell =
+    Number.isFinite(shellPx) && shellPx > 0 ? shellPx : readTabBarCorePx();
 
   return readVisibleViewportBottom() - tabBarShell;
 }

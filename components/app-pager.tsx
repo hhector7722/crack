@@ -65,8 +65,9 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
 
   return (
     <>
+      <div className="tm-app-pager flex min-h-0 flex-1 flex-col">
         <SwipePager
-          className="w-full"
+          className="h-full min-h-0 w-full flex-1"
           index={pagerIndex}
           onIndexChange={handleIndexChange}
         >
@@ -130,6 +131,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             <ProfileView />
           </PagerPanel>
         </SwipePager>
+      </div>
 
       {itemDetail}
     </>

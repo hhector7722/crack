@@ -16,9 +16,12 @@
   --tm-tabbar-shell: calc(
     var(--tm-tabbar-core) + var(--tm-chrome-dots) + var(--tm-chrome-fab)
   );
+  --tm-bottom-chrome-block: calc(
+    var(--tm-tabbar-shell) + env(safe-area-inset-bottom, 0px)
+  );
   --tm-chrome-bottom: 0px;
-  --tab-bar-height: var(--tm-tabbar-shell);
-  --tm-content-bottom: var(--tm-tabbar-shell);
+  --tab-bar-height: var(--tm-bottom-chrome-block);
+  --tm-content-bottom: var(--tm-bottom-chrome-block);
   --tm-app-header-inner: 3rem;
   --tm-app-header-pt: max(0.75rem, env(safe-area-inset-top, 0px));
   --tm-app-header-pb: 0.5rem;
@@ -105,14 +108,14 @@ html[data-modal-open] .tm-app-main {
 }
 
 .scroll-end-touch {
-  min-height: var(--tm-tabbar-shell);
+  min-height: var(--tm-bottom-chrome-block);
   width: 100%;
   flex-shrink: 0;
   pointer-events: none;
 }
 
 .scroll-pb-end {
-  scroll-padding-bottom: var(--tm-tabbar-shell);
+  scroll-padding-bottom: var(--tm-bottom-chrome-block);
 }
 
 .tm-app-shell {
@@ -160,9 +163,9 @@ html[data-modal-open] .tm-app-header-fixed {
 
 .tm-app-main--internal-scroll {
   box-sizing: border-box;
-  height: calc(var(--tm-app-height) - var(--tm-tabbar-shell));
-  min-height: calc(var(--tm-app-height) - var(--tm-tabbar-shell));
-  max-height: calc(var(--tm-app-height) - var(--tm-tabbar-shell));
+  height: calc(var(--tm-app-height) - var(--tm-bottom-chrome-block));
+  min-height: calc(var(--tm-app-height) - var(--tm-bottom-chrome-block));
+  max-height: calc(var(--tm-app-height) - var(--tm-bottom-chrome-block));
 }
 
 .tm-app-main--internal-scroll .tm-tab-swipe-root {
@@ -171,6 +174,11 @@ html[data-modal-open] .tm-app-header-fixed {
   flex-direction: column;
   min-height: 0;
   height: 100%;
+}
+
+.tm-app-main--internal-scroll > .tm-app-pager {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .tm-tab-scroll-layout {
