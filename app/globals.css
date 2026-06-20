@@ -195,10 +195,10 @@ html[data-modal-open] .tm-app-header-fixed {
 .tm-app-tabbar {
   box-sizing: border-box;
   bottom: 0;
-  transform: translate3d(0, calc(-1 * var(--tm-chrome-bottom, 0px)), 0);
+  /* Sin lift en PWA: el teclado se compensa solo con foco en input (viewport-chrome.ts). */
+  transform: none;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  will-change: transform;
 }
 
 html[data-modal-open] .tm-app-tabbar {

@@ -322,7 +322,7 @@ export function SwipePager({
     <div
       ref={containerRef}
       className={cn(
-        "swipe-pager-root tm-tab-swipe-root relative min-h-[calc(var(--tm-app-height)-var(--tm-app-header-block)-var(--tm-tabbar-shell))] min-w-0 w-full touch-pan-y overflow-x-hidden overflow-y-visible",
+        "swipe-pager-root tm-tab-swipe-root relative min-h-0 min-w-0 w-full touch-pan-y overflow-x-hidden overflow-y-visible",
         dragging && "tm-tab-swipe-root--dragging swipe-pager-root--dragging",
         className
       )}
@@ -334,7 +334,7 @@ export function SwipePager({
     >
       <div
         ref={trackRef}
-        className="swipe-pager-track flex min-h-full will-change-transform"
+        className="swipe-pager-track flex will-change-transform"
         style={{ width: width > 0 ? width * count : `${count * 100}%` }}
       >
         {children.map((child, i) => {
@@ -353,7 +353,7 @@ export function SwipePager({
             <div
               key={i}
               className={cn(
-                "swipe-pager-panel min-h-full shrink-0 overflow-x-hidden overflow-y-visible",
+                "swipe-pager-panel shrink-0 overflow-x-hidden overflow-y-visible self-start",
                 isOutgoing && "swipe-pager-panel--outgoing",
                 isIncoming && "swipe-pager-panel--incoming"
               )}
