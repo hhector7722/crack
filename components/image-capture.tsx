@@ -13,7 +13,8 @@ interface ImageCaptureProps {
 }
 
 export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -58,10 +59,17 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
   return (
     <div className="space-y-4 py-2">
       <input
-        ref={inputRef}
+        ref={cameraInputRef}
         type="file"
         accept="image/*"
         capture="environment"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+      <input
+        ref={galleryInputRef}
+        type="file"
+        accept="image/*"
         onChange={handleFileChange}
         className="hidden"
       />
@@ -76,14 +84,24 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
           />
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="action-ghost min-h-[160px] flex-col gap-3 border-b border-dashed border-zinc-800 text-zinc-400"
-        >
-          <Camera className="h-10 w-10" />
-          <span className="text-sm font-medium">Abrir cámara o galería</span>
-        </button>
+        <div className="grid gap-2">
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            className="action-ghost min-h-14 flex items-center justify-center gap-3"
+          >
+            <Camera className="h-5 w-5" />
+            <span className="text-sm font-medium">Cámara</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => galleryInputRef.current?.click()}
+            className="action-ghost min-h-14 flex items-center justify-center gap-3"
+          >
+            <Upload className="h-5 w-5" />
+            <span className="text-sm font-medium">Galería</span>
+          </button>
+        </div>
       )}
 
       {file && (
@@ -93,7 +111,8 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
             onClick={() => {
               setFile(null);
               setPreview(null);
-              if (inputRef.current) inputRef.current.value = "";
+              if (cameraInputRef.current) cameraInputRef.current.value = "";
+              if (galleryInputRef.current) galleryInputRef.current.value = "";
             }}
             className="flex-1"
           >

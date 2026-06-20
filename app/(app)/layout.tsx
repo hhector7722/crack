@@ -36,6 +36,7 @@ export default function AppLayout({
 }) {
   const router = useRouter();
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<CaptureMode>("menu");
@@ -67,7 +68,7 @@ export default function AppLayout({
 
   const openGallery = useCallback(() => {
     setUploadError(null);
-    cameraInputRef.current?.click();
+    galleryInputRef.current?.click();
   }, []);
 
   const openCapture = useCallback((mode: CaptureMode) => {
@@ -84,7 +85,7 @@ export default function AppLayout({
 
   async function handleImageSelected(
     e: React.ChangeEvent<HTMLInputElement>,
-    source: "camera" | "gallery"
+    _source: "camera" | "gallery"
   ) {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -95,9 +96,7 @@ export default function AppLayout({
     try {
       await uploadImageFromFile(file);
       bumpRefresh();
-      if (source === "camera") {
-        router.push("/media");
-      }
+      router.push("/media");
     } catch (err) {
       setUploadError(
         err instanceof Error ? err.message : "Error subiendo imagen"
@@ -141,6 +140,14 @@ export default function AppLayout({
             capture="environment"
             className="hidden"
             onChange={(e) => handleImageSelected(e, "camera")}
+          />
+
+          <input
+            ref={galleryInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => handleImageSelected(e, "gallery")}
           />
 
           <CaptureSheet
