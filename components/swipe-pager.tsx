@@ -58,7 +58,7 @@ function canStartSwipe(target: EventTarget | null) {
   if (target.closest("[data-block-tab-swipe]")) return false;
   if (
     target.closest(
-      "input, textarea, select, button, a, [role='slider'], [data-vaul-drawer]"
+      "input, textarea, select, button, a, [role='slider'], [data-crack-modal], [data-block-tab-swipe]"
     )
   ) {
     return false;

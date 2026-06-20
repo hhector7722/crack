@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Camera, Images } from "lucide-react";
-import { BottomSheet } from "@/components/bottom-sheet";
+import { AppModal } from "@/components/app-modal";
 import { CaptureMenu } from "@/components/capture-menu";
 import { VoiceRecorder } from "@/components/voice-recorder";
 import { NoteCapture, type NoteCaptureHandle } from "@/components/note-capture";
@@ -75,55 +74,49 @@ export function CaptureSheet({
   const showBack = mode === "menu" && viewMode !== "menu";
 
   return (
-    <BottomSheet open={open} onOpenChange={handleClose} title={titles[viewMode]}>
-      {error && <p className="mb-3 text-sm text-red-300">{error}</p>}
+    <AppModal open={open} onOpenChange={handleClose} title={titles[viewMode]}>
+      {error ? <p className="mb-3 text-sm text-red-300">{error}</p> : null}
 
-      {viewMode === "menu" && <CaptureMenu onSelect={handleMenuSelect} />}
+      {viewMode === "menu" ? <CaptureMenu onSelect={handleMenuSelect} /> : null}
 
-      {viewMode === "image" && (
-        <div className="content-list py-2">
+      {viewMode === "image" ? (
+        <div className="content-list">
           <button
             type="button"
             onClick={() => pickImage("camera")}
-            className="content-row flex min-h-[72px] items-center gap-4"
+            className="content-row min-h-12 text-left"
           >
-            <Camera className="h-6 w-6 shrink-0 text-zinc-400" />
-            <div className="text-left">
-              <p className="font-semibold text-zinc-100">Cámara</p>
-              <p className="text-sm text-zinc-500">Hacer una foto nueva</p>
-            </div>
+            <span className="block font-semibold text-zinc-100">Cámara</span>
+            <span className="block text-sm text-zinc-500">Hacer una foto nueva</span>
           </button>
           <button
             type="button"
             onClick={() => pickImage("gallery")}
-            className="content-row flex min-h-[72px] items-center gap-4"
+            className="content-row min-h-12 text-left"
           >
-            <Images className="h-6 w-6 shrink-0 text-zinc-400" />
-            <div className="text-left">
-              <p className="font-semibold text-zinc-100">Galería</p>
-              <p className="text-sm text-zinc-500">Elegir del dispositivo</p>
-            </div>
+            <span className="block font-semibold text-zinc-100">Galería</span>
+            <span className="block text-sm text-zinc-500">Elegir del dispositivo</span>
           </button>
         </div>
-      )}
+      ) : null}
 
-      {viewMode === "voice" && (
+      {viewMode === "voice" ? (
         <VoiceRecorder onSaved={handleSaved} onError={setError} />
-      )}
+      ) : null}
 
-      {viewMode === "note" && (
+      {viewMode === "note" ? (
         <NoteCapture ref={noteRef} onSaved={handleSaved} onError={setError} />
-      )}
+      ) : null}
 
-      {showBack && (
+      {showBack ? (
         <button
           type="button"
           onClick={() => setViewMode("menu")}
-          className="mt-4 w-full py-2 text-sm text-zinc-500"
+          className="action-ghost mt-2 min-h-12 text-zinc-500"
         >
-          ← Volver
+          Volver
         </button>
-      )}
-    </BottomSheet>
+      ) : null}
+    </AppModal>
   );
 }

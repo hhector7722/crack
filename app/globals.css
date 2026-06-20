@@ -145,9 +145,11 @@ html[data-modal-open] .tm-app-main {
 }
 
 html[data-modal-open="true"] .tm-app-header-fixed,
-html[data-modal-open] .tm-app-header-fixed {
-  filter: blur(6px);
-  opacity: 0.35;
+html[data-modal-open] .tm-app-header-fixed,
+html[data-modal-open] .tm-bottom-chrome,
+html[data-modal-open] .tm-app-main {
+  filter: blur(4px);
+  opacity: 0.92;
   pointer-events: none;
 }
 
@@ -217,12 +219,6 @@ html[data-modal-open] .tm-app-header-fixed {
   box-sizing: border-box;
 }
 
-html[data-modal-open] .tm-bottom-chrome {
-  filter: blur(6px);
-  opacity: 0.35;
-  pointer-events: none;
-}
-
 .tm-tab-swipe-root--dragging {
   touch-action: none;
 }
@@ -270,21 +266,47 @@ html:has(.tm-app-shell) body {
   z-index: 1;
 }
 
-[data-vaul-drawer] {
-  animation-duration: var(--crack-modal-enter-ms);
-  transition-duration: var(--crack-modal-enter-ms);
+.crack-modal-root {
+  animation: crack-modal-root-in var(--crack-modal-enter-ms) var(--crack-ios-ease-out);
 }
 
-[data-vaul-drawer][data-state="closed"] {
-  animation-duration: var(--crack-modal-exit-ms);
+.crack-modal-overlay {
+  animation: crack-modal-overlay-in var(--crack-modal-enter-ms) var(--crack-ios-ease-out);
 }
 
-[data-vaul-overlay][data-vaul-snap-points="false"] {
-  animation-duration: var(--crack-modal-enter-ms);
+.crack-modal-card {
+  animation: crack-modal-card-in var(--crack-modal-enter-ms) var(--crack-ios-ease-out);
 }
 
-[data-vaul-overlay][data-state="closed"] {
-  animation-duration: var(--crack-modal-exit-ms);
+@keyframes crack-modal-root-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes crack-modal-overlay-in {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+  }
+}
+
+@keyframes crack-modal-card-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .line-clamp-2 {

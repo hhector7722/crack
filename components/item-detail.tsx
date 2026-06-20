@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Drawer } from "vaul";
-import { Pin, PinOff, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { AppModal } from "@/components/app-modal";
 import { createClient } from "@/lib/supabase/client";
 import { updateItem, deleteItem, togglePin } from "@/lib/items";
 import { getSignedUrl, deleteFile } from "@/lib/storage";
-import { useModalOpen } from "@/lib/ui/use-modal-open";
 import {
   classificationColor,
   classificationLabel,
@@ -46,8 +44,6 @@ export function ItemDetail({
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loadingMedia, setLoadingMedia] = useState(false);
-
-  useModalOpen(open);
 
   useEffect(() => {
     if (!open || !item.file_url) return;
@@ -124,177 +120,145 @@ export function ItemDetail({
   }
 
   return (
-    <Drawer.Root open={open} onOpenChange={onOpenChange}>
-      <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-[999] bg-black/60" />
-        <Drawer.Content className="fixed inset-x-0 bottom-0 z-[999] mx-auto flex max-h-[92dvh] w-full max-w-lg flex-col rounded-t-2xl border border-zinc-800 bg-zinc-950 outline-none">
-          <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-zinc-700" />
-          <div className="flex-1 overflow-y-auto px-5 pb-8 pt-4">
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-xs text-zinc-500">
-                {formatRelative(item.created_at)}
-              </span>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleTogglePin}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-800"
-                >
-                  {item.pinned ? (
-                    <PinOff className="h-5 w-5" />
-                  ) : (
-                    <Pin className="h-5 w-5" />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  className="flex h-10 w-10 items-center justify-center rounded-lg text-red-400 hover:bg-red-500/10"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              </div>
+    <AppModal open={open} onOpenChange={onOpenChange} size="wide">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <span className="text-xs text-zinc-500">
+          {formatRelative(item.created_at)}
+        </span>
+        <div className="flex shrink-0 gap-1">
+          <button
+            type="button"
+            onClick={handleTogglePin}
+            className="action-ghost min-h-10 px-3 text-sm"
+          >
+            {item.pinned ? "Desfijar" : "Fijar"}
+          </button>
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="action-accent min-h-10 px-3 text-sm"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+
+      {classificationType ? (
+        <Badge className={cn("mb-3", classificationColor(classificationType))}>
+          {classificationLabel(classificationType)}
+        </Badge>
+      ) : null}
+
+      <div className="space-y-4">
+        <div>
+          <label className="mb-1 block text-sm text-zinc-400">Título</label>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="input-float"
+          />
+        </div>
+
+        {item.type === "audio" ? (
+          <>
+            {loadingMedia ? (
+              <p className="py-2 text-sm text-zinc-500">Cargando audio...</p>
+            ) : mediaUrl ? (
+              <audio controls src={mediaUrl} className="w-full" />
+            ) : null}
+
+            <div>
+              <label className="mb-1 block text-sm text-zinc-400">
+                Transcripción
+              </label>
+              <Textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={6}
+              />
             </div>
 
-            {classificationType && (
-              <Badge
-                className={cn("mb-3", classificationColor(classificationType))}
-              >
-                {classificationLabel(classificationType)}
-              </Badge>
-            )}
-
-            <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-sm text-zinc-400">Título</label>
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="input-float"
-                />
+                <label className="mb-1 block text-sm text-zinc-400">Tipo IA</label>
+                <select
+                  value={classificationType ?? "note"}
+                  onChange={(e) =>
+                    setClassificationType(e.target.value as ClassificationType)
+                  }
+                  className="select-float"
+                >
+                  <option value="note">Nota</option>
+                  <option value="reminder">Recordatorio</option>
+                  <option value="important">Importante</option>
+                  <option value="info">Info</option>
+                </select>
               </div>
-
-              {item.type === "audio" && (
-                <>
-                  {loadingMedia ? (
-                    <div className="flex justify-center py-4">
-                      <Loader2 className="h-5 w-5 animate-spin text-zinc-500" />
-                    </div>
-                  ) : mediaUrl ? (
-                    <audio controls src={mediaUrl} className="w-full" />
-                  ) : null}
-
-                  <div>
-                    <label className="mb-1 block text-sm text-zinc-400">
-                      Transcripción
-                    </label>
-                    <Textarea
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      rows={6}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="mb-1 block text-sm text-zinc-400">
-                        Tipo IA
-                      </label>
-                      <select
-                        value={classificationType ?? "note"}
-                        onChange={(e) =>
-                          setClassificationType(
-                            e.target.value as ClassificationType
-                          )
-                        }
-                        className="select-float"
-                      >
-                        <option value="note">Nota</option>
-                        <option value="reminder">Recordatorio</option>
-                        <option value="important">Importante</option>
-                        <option value="info">Info</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-zinc-400">
-                        Prioridad
-                      </label>
-                      <select
-                        value={priority ?? "medium"}
-                        onChange={(e) =>
-                          setPriority(e.target.value as Priority)
-                        }
-                        className="select-float"
-                      >
-                        <option value="high">Alta</option>
-                        <option value="medium">Media</option>
-                        <option value="low">Baja</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="mb-1 block text-sm text-zinc-400">
-                      Tags
-                    </label>
-                    <input
-                      value={tags}
-                      onChange={(e) => setTags(e.target.value)}
-                      className="input-float"
-                    />
-                  </div>
-
-                  {item.metadata.duration_seconds ? (
-                    <p className="text-sm text-zinc-500">
-                      Duración: {displayValue(item.metadata.duration_seconds)}s
-                    </p>
-                  ) : null}
-                </>
-              )}
-
-              {item.type === "note" && (
-                <div>
-                  <label className="mb-1 block text-sm text-zinc-400">
-                    Contenido
-                  </label>
-                  <Textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    rows={8}
-                  />
-                </div>
-              )}
-
-              {item.type === "image" && (
-                <>
-                  {loadingMedia ? (
-                    <div className="flex justify-center py-8">
-                      <Loader2 className="h-6 w-6 animate-spin text-zinc-500" />
-                    </div>
-                  ) : mediaUrl ? (
-                    <div className="overflow-hidden rounded-xl">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={mediaUrl}
-                        alt={title}
-                        className="w-full object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <p className="text-sm text-red-400">
-                      No se pudo cargar la imagen
-                    </p>
-                  )}
-                </>
-              )}
-
-              <Button onClick={handleSave} disabled={saving} className="w-full">
-                {saving ? "Guardando..." : "Guardar cambios"}
-              </Button>
+              <div>
+                <label className="mb-1 block text-sm text-zinc-400">
+                  Prioridad
+                </label>
+                <select
+                  value={priority ?? "medium"}
+                  onChange={(e) => setPriority(e.target.value as Priority)}
+                  className="select-float"
+                >
+                  <option value="high">Alta</option>
+                  <option value="medium">Media</option>
+                  <option value="low">Baja</option>
+                </select>
+              </div>
             </div>
+
+            <div>
+              <label className="mb-1 block text-sm text-zinc-400">Tags</label>
+              <input
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                className="input-float"
+              />
+            </div>
+
+            {item.metadata.duration_seconds ? (
+              <p className="text-sm text-zinc-500">
+                Duración: {displayValue(item.metadata.duration_seconds)}s
+              </p>
+            ) : null}
+          </>
+        ) : null}
+
+        {item.type === "note" ? (
+          <div>
+            <label className="mb-1 block text-sm text-zinc-400">Contenido</label>
+            <Textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={8}
+            />
           </div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+        ) : null}
+
+        {item.type === "image" ? (
+          <>
+            {loadingMedia ? (
+              <p className="py-4 text-sm text-zinc-500">Cargando imagen...</p>
+            ) : mediaUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={mediaUrl}
+                alt={title}
+                className="max-h-[min(50dvh,calc(var(--tm-vv-height,100dvh)*0.5))] w-full object-contain"
+              />
+            ) : (
+              <p className="text-sm text-red-400">No se pudo cargar la imagen</p>
+            )}
+          </>
+        ) : null}
+
+        <Button onClick={handleSave} disabled={saving} className="w-full">
+          {saving ? "Guardando..." : "Guardar cambios"}
+        </Button>
+      </div>
+    </AppModal>
   );
 }

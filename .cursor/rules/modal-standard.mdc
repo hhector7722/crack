@@ -1,0 +1,38 @@
+---
+description: Norma obligatoria para modales y overlays en Crack
+globs: components/**/*.{tsx,ts}
+alwaysApply: false
+---
+
+# Modal estándar (Crack)
+
+Todo modal, sheet o diálogo **debe** usar `AppModal` de `@/components/app-modal`.
+
+## Contenedor
+
+- Card única: `rounded-2xl bg-zinc-800 shadow-sm shadow-black/40` (mismo relleno que cards de inicio).
+- Fondo: overlay con `backdrop-blur` ligero sobre el contenido de la app.
+- Tamaño: `w-max` / `w-full` según `size`; **nunca** más ancho ni más alto que el viewport visible.
+- Scroll interno solo en `.crack-modal-body` si el contenido excede la altura máxima.
+
+## Contenido interior (por defecto)
+
+- Items, botones, filas, campos: **sin card individual**, sin borde, sin relleno de caja propia.
+- Usar `.content-list`, `.content-row`, `.action-ghost`, `.input-float`, etc.
+- **No añadir iconos** salvo que el usuario lo pida explícitamente.
+- Excepciones: badges de clasificación, CTA primario (`Button variant="primary"`).
+
+## Prohibido
+
+```tsx
+// ❌ Drawer/bottom-sheet propio, vaul directo, overlay ad-hoc
+<Drawer.Root>...</Drawer.Root>
+
+// ❌ Card por cada fila dentro del modal
+<div className="rounded-xl border bg-zinc-900 p-3">...</div>
+
+// ✅ Shell único
+<AppModal open={open} onOpenChange={setOpen} title="Título">
+  <div className="content-list">...</div>
+</AppModal>
+```

@@ -1,7 +1,6 @@
 "use client";
 
-import { Share2 } from "lucide-react";
-import { BottomSheet } from "@/components/bottom-sheet";
+import { AppModal } from "@/components/app-modal";
 import { sharePayload, type SharePayload } from "@/lib/share";
 
 interface ShareSheetProps {
@@ -18,15 +17,14 @@ export function ShareSheet({ open, onOpenChange, payload }: ShareSheetProps) {
   }
 
   return (
-    <BottomSheet open={open} onOpenChange={onOpenChange} title="Compartir">
+    <AppModal open={open} onOpenChange={onOpenChange} title="Compartir">
       <button
         type="button"
         onClick={() => void handleShare()}
-        className="action-ghost min-h-14"
+        className="action-ghost min-h-12"
       >
-        <Share2 className="h-5 w-5" />
         Compartir
       </button>
-    </BottomSheet>
+    </AppModal>
   );
 }
