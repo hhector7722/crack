@@ -4,7 +4,6 @@
   --background: #09090b;
   --foreground: #fafafa;
   --app-height: 100dvh;
-  --tabbar-height: 5rem;
   --crack-ios-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --crack-page-push-ms: 360ms;
   --crack-modal-enter-ms: 260ms;
@@ -74,10 +73,9 @@ body {
 .app-main {
   min-height: 0;
   overflow: hidden;
-  padding-bottom: var(--tabbar-height);
 }
 
-.app-fixed-bottombar {
+.marbella-fixed-bottombar {
   position: fixed;
   left: 0;
   right: 0;
@@ -88,7 +86,7 @@ body {
   backface-visibility: hidden;
 }
 
-html[data-modal-open='true'] .app-fixed-bottombar {
+html[data-modal-open='true'] .marbella-fixed-bottombar {
   filter: blur(6px);
   opacity: 0.35;
   pointer-events: none;

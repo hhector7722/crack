@@ -9,6 +9,7 @@ import {
   useEffect,
 } from "react";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { AppBottomNavPortal } from "@/components/app-bottom-nav-portal";
 import { AppPager } from "@/components/app-pager";
@@ -113,8 +114,16 @@ export default function AppLayout({
       >
         <ViewportHeight />
         <div className="app-shell">
-          <header className="app-header">
+          <header className="app-header relative">
             <h1 className="text-lg font-bold tracking-tight">Crack</h1>
+            <button
+              type="button"
+              onClick={openCaptureMenu}
+              aria-label="Crear"
+              className="absolute right-4 flex h-12 min-h-12 w-12 min-w-12 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 shadow-lg shadow-black/40 transition-transform active:scale-95"
+            >
+              <Plus className="h-6 w-6" strokeWidth={2.5} />
+            </button>
           </header>
 
           {uploadError && (
@@ -129,7 +138,7 @@ export default function AppLayout({
             </p>
           )}
 
-          <main className="app-main">
+          <main className="app-main pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-[calc(4rem+env(safe-area-inset-bottom))]">
             <AppPager refreshKey={refreshKey} />
           </main>
 

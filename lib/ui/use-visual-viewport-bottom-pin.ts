@@ -2,13 +2,11 @@
 
 import { useEffect, type RefObject } from 'react';
 
-/** Ancla una barra fixed bottom al borde visual en iOS Safari/PWA. */
+/** Mantiene una barra `position:fixed; bottom:0` anclada al borde visual en iOS Safari/PWA. */
 export function useVisualViewportBottomPin(
-  ref: RefObject<HTMLElement | null>,
-  enabled: boolean
+  ref: RefObject<HTMLElement | null>
 ) {
   useEffect(() => {
-    if (!enabled) return;
     const node = ref.current;
     if (!node) return;
 
@@ -35,5 +33,5 @@ export function useVisualViewportBottomPin(
       window.removeEventListener('scroll', pin);
       node.style.bottom = '';
     };
-  }, [ref, enabled]);
+  }, [ref]);
 }
