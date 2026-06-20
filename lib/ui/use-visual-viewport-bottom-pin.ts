@@ -1,42 +1,39 @@
-"use client";
+'use client';
 
-import { useEffect, type RefObject } from "react";
+import { useEffect, type RefObject } from 'react';
 
-function applyBottomPin(node: HTMLElement) {
-  const vv = window.visualViewport;
-  if (!vv) {
-    node.style.bottom = "0px";
-    return;
-  }
-  const gap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-  node.style.bottom = `${gap}px`;
-}
-
-/** Mantiene la barra inferior pegada al borde visible en iOS (Safari / PWA). */
+/** Ancla una barra fixed bottom al borde visual en iOS Safari/PWA. */
 export function useVisualViewportBottomPin(
   ref: RefObject<HTMLElement | null>,
-  active = true
+  enabled: boolean
 ) {
   useEffect(() => {
-    if (!active) return;
+    if (!enabled) return;
     const node = ref.current;
     if (!node) return;
 
-    const update = () => {
-      if (ref.current) applyBottomPin(ref.current);
+    const pin = () => {
+      const vv = window.visualViewport;
+      if (!vv) {
+        node.style.bottom = '0px';
+        return;
+      }
+      const gap = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      node.style.bottom = `${gap}px`;
     };
 
-    update();
-    window.addEventListener("resize", update);
-    window.addEventListener("scroll", update);
-    window.visualViewport?.addEventListener("resize", update);
-    window.visualViewport?.addEventListener("scroll", update);
+    pin();
+    window.visualViewport?.addEventListener('resize', pin);
+    window.visualViewport?.addEventListener('scroll', pin);
+    window.addEventListener('resize', pin);
+    window.addEventListener('scroll', pin, { passive: true });
 
     return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update);
-      window.visualViewport?.removeEventListener("resize", update);
-      window.visualViewport?.removeEventListener("scroll", update);
+      window.visualViewport?.removeEventListener('resize', pin);
+      window.visualViewport?.removeEventListener('scroll', pin);
+      window.removeEventListener('resize', pin);
+      window.removeEventListener('scroll', pin);
+      node.style.bottom = '';
     };
-  }, [ref, active]);
+  }, [ref, enabled]);
 }

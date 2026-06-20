@@ -6,7 +6,7 @@ import { useEffect } from "react";
 export function useModalOpen(open: boolean) {
   useEffect(() => {
     if (!open) return;
-    document.documentElement.setAttribute("data-modal-open", "");
+    document.documentElement.setAttribute("data-modal-open", "true");
     return () => {
       document.documentElement.removeAttribute("data-modal-open");
     };
