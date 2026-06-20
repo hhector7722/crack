@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { CaptureSheet } from "@/components/capture-sheet";
+import { TabBar } from "@/components/tab-bar";
 import { AppPager } from "@/components/app-pager";
 import { ViewportHeight } from "@/components/viewport-height";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
@@ -156,6 +157,8 @@ export default function AppLayout({
             onOpenChange={setSheetOpen}
             onSaved={bumpRefresh}
           />
+
+          <TabBar />
         </div>
       </AppShellProvider>
     </RefreshContext.Provider>

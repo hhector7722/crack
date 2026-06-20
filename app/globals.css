@@ -4,7 +4,9 @@
   --background: #09090b;
   --foreground: #fafafa;
   --app-height: 100dvh;
-  --tabbar-height: calc(7.75rem + env(safe-area-inset-bottom, 0px));
+  --tabbar-dock-height: calc(3.25rem + env(safe-area-inset-bottom, 0px));
+  --tabbar-chrome-height: 4.5rem;
+  --tabbar-height: calc(var(--tabbar-chrome-height) + var(--tabbar-dock-height));
   --crack-ios-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --crack-page-push-ms: 360ms;
   --crack-modal-enter-ms: 260ms;
@@ -74,29 +76,52 @@ body {
 .app-main {
   min-height: 0;
   overflow: hidden;
+  padding-bottom: var(--tabbar-height);
 }
 
-.app-tabbar {
+.app-fixed-bottombar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 95;
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.app-tabbar-anchor {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 430px;
   margin-inline: auto;
-  background: rgb(9 9 11 / 0.95);
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
+  pointer-events: none;
+}
+
+.app-tabbar-chrome {
+  flex-shrink: 0;
+  pointer-events: auto;
+}
+
+.app-tabbar-dock {
+  flex-shrink: 0;
+  width: 100%;
+  background: rgb(9 9 11 / 0.95);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  pointer-events: auto;
   transition:
     filter 200ms ease,
     opacity 200ms ease;
 }
 
-.app-tabbar--in-flow {
-  flex-shrink: 0;
-  margin-top: auto;
-}
-
-html[data-modal-open] .app-tabbar {
+html[data-modal-open] .app-tabbar-dock,
+html[data-modal-open] .app-tabbar-chrome {
   filter: blur(6px);
   opacity: 0.35;
   pointer-events: none;

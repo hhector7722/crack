@@ -68,7 +68,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
     <>
       <div className="h-full">
         <SwipePager index={pagerIndex} onIndexChange={handleIndexChange}>
-          <PagerPanel pageIndex={0} onRefresh={handleRefresh}>
+          <PagerPanel onRefresh={handleRefresh}>
             <div className="pb-2">
               <AudioFeed
                 refreshKey={combinedRefresh}
@@ -77,7 +77,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             </div>
           </PagerPanel>
 
-          <PagerPanel pageIndex={1} onRefresh={handleRefresh}>
+          <PagerPanel onRefresh={handleRefresh}>
             <GalleryFeed
               refreshKey={combinedRefresh}
               columns={5}
@@ -85,7 +85,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             />
           </PagerPanel>
 
-          <PagerPanel pageIndex={2} onRefresh={handleRefresh}>
+          <PagerPanel onRefresh={handleRefresh}>
             <div className="space-y-5 pb-2">
               <SectionCard>
                 <NoteList
@@ -117,7 +117,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             </div>
           </PagerPanel>
 
-          <PagerPanel pageIndex={3} onRefresh={handleRefresh}>
+          <PagerPanel onRefresh={handleRefresh}>
             <div className="pb-2">
               <NoteList
                 refreshKey={combinedRefresh}
@@ -126,7 +126,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             </div>
           </PagerPanel>
 
-          <PagerPanel pageIndex={4} onRefresh={handleRefresh}>
+          <PagerPanel onRefresh={handleRefresh}>
             <ProfileView />
           </PagerPanel>
         </SwipePager>
