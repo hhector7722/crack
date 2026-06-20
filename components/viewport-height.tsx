@@ -2,25 +2,34 @@
 
 import { useEffect } from "react";
 
-function applyViewportHeight() {
-  const height = window.visualViewport?.height ?? window.innerHeight;
-  document.documentElement.style.setProperty("--app-height", `${height}px`);
+function applyViewportMetrics() {
+  const vv = window.visualViewport;
+  const height = vv?.height ?? window.innerHeight;
+  const width = vv?.width ?? window.innerWidth;
+  const offsetTop = vv?.offsetTop ?? 0;
+  const root = document.documentElement;
+  root.style.setProperty("--app-height", `${height}px`);
+  root.style.setProperty("--app-width", `${width}px`);
+  root.style.setProperty("--app-offset-top", `${offsetTop}px`);
 }
 
 export function ViewportHeight() {
   useEffect(() => {
-    applyViewportHeight();
+    applyViewportMetrics();
 
-    window.addEventListener("resize", applyViewportHeight);
-    window.addEventListener("orientationchange", applyViewportHeight);
-    window.visualViewport?.addEventListener("resize", applyViewportHeight);
-    window.visualViewport?.addEventListener("scroll", applyViewportHeight);
+    window.addEventListener("resize", applyViewportMetrics);
+    window.addEventListener("orientationchange", applyViewportMetrics);
+    window.visualViewport?.addEventListener("resize", applyViewportMetrics);
+    window.visualViewport?.addEventListener("scroll", applyViewportMetrics);
 
     return () => {
-      window.removeEventListener("resize", applyViewportHeight);
-      window.removeEventListener("orientationchange", applyViewportHeight);
-      window.visualViewport?.removeEventListener("resize", applyViewportHeight);
-      window.visualViewport?.removeEventListener("scroll", applyViewportHeight);
+      window.removeEventListener("resize", applyViewportMetrics);
+      window.removeEventListener("orientationchange", applyViewportMetrics);
+      window.visualViewport?.removeEventListener("resize", applyViewportMetrics);
+      window.visualViewport?.removeEventListener(
+        "scroll",
+        applyViewportMetrics
+      );
     };
   }, []);
 

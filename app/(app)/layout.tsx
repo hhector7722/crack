@@ -120,7 +120,7 @@ export default function AppLayout({
               type="button"
               onClick={openCaptureMenu}
               aria-label="Crear"
-              className="absolute right-4 flex h-12 min-h-12 w-12 min-w-12 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 shadow-lg shadow-black/40 transition-transform active:scale-95"
+              className="absolute right-[var(--app-gutter)] flex h-10 min-h-10 w-10 min-w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 shadow-lg shadow-black/40 transition-transform active:scale-95 sm:h-12 sm:min-h-12 sm:w-12 sm:min-w-12"
             >
               <Plus className="h-6 w-6" strokeWidth={2.5} />
             </button>
