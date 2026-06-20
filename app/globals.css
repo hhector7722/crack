@@ -4,6 +4,7 @@
   --background: #09090b;
   --foreground: #fafafa;
   --app-height: 100dvh;
+  --tabbar-height: calc(7.75rem + env(safe-area-inset-bottom, 0px));
 }
 
 @theme inline {
@@ -17,6 +18,7 @@ html,
 body {
   margin: 0;
   height: var(--app-height);
+  min-height: var(--app-height);
   overflow: hidden;
 }
 
@@ -35,16 +37,19 @@ body {
 .app-shell {
   position: fixed;
   top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
   z-index: 0;
-  display: flex;
+  display: grid;
   width: 100%;
   max-width: 430px;
   height: var(--app-height);
-  flex-direction: column;
+  min-height: var(--app-height);
+  max-height: var(--app-height);
+  margin-inline: auto;
+  grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
-  margin: 0 auto;
   background: #09090b;
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
@@ -64,19 +69,27 @@ body {
 
 .app-main {
   min-height: 0;
-  flex: 1;
   overflow: hidden;
+  padding-bottom: var(--tabbar-height);
 }
 
 .app-tabbar {
-  flex-shrink: 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
   width: 100%;
+  max-width: 430px;
+  margin-inline: auto;
   background: rgb(9 9 11 / 0.95);
   padding-bottom: env(safe-area-inset-bottom, 0px);
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .app-pager-panel {
+  height: 100%;
   padding: 1rem 1rem 1.5rem;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;

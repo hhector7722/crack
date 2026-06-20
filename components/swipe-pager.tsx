@@ -16,11 +16,18 @@ interface SwipePagerProps {
   className?: string;
 }
 
-const SWIPE_THRESHOLD = 0.28;
-const VELOCITY_THRESHOLD = 0.55;
-const MIN_DRAG_PX = 56;
-const TRANSITION_MS = 340;
-const EASING = "cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+const SWIPE_THRESHOLD = 0.22;
+const VELOCITY_THRESHOLD = 0.38;
+const MIN_DRAG_PX = 36;
+const TRANSITION_MS = 320;
+const EASING = "cubic-bezier(0.32, 0.72, 0, 1)";
+
+function rubberBand(offset: number, width: number): number {
+  const abs = Math.abs(offset);
+  const limit = width * 0.75;
+  const sign = offset >= 0 ? 1 : -1;
+  return sign * (limit * (1 - 1 / (abs / limit + 1)));
+}
 
 export function SwipePager({
   index,
@@ -45,13 +52,7 @@ export function SwipePager({
   const locked = useRef<"none" | "horizontal" | "vertical">("none");
   const indexRef = useRef(index);
   const pointerIdRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    indexRef.current = index;
-    if (!dragging && !animating) {
-      applyTransform(0, true);
-    }
-  }, [index]);
+  const animTimerRef = useRef(0);
 
   const applyTransform = useCallback(
     (offsetPx: number, animate: boolean) => {
@@ -65,6 +66,13 @@ export function SwipePager({
     },
     [width]
   );
+
+  useEffect(() => {
+    indexRef.current = index;
+    if (!dragging && !animating) {
+      applyTransform(0, true);
+    }
+  }, [index, dragging, animating, applyTransform]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -83,6 +91,10 @@ export function SwipePager({
     }
   }, [width, dragging, animating, applyTransform]);
 
+  useEffect(() => {
+    return () => window.clearTimeout(animTimerRef.current);
+  }, []);
+
   function clampIndex(i: number) {
     return Math.max(0, Math.min(count - 1, i));
   }
@@ -90,15 +102,13 @@ export function SwipePager({
   function resolveTarget(offset: number, vel: number): number {
     const current = indexRef.current;
 
-    if (Math.abs(offset) < MIN_DRAG_PX) {
-      return current;
+    if (Math.abs(vel) > VELOCITY_THRESHOLD) {
+      if (vel > 0 && offset >= 0) return clampIndex(current - 1);
+      if (vel < 0 && offset <= 0) return clampIndex(current + 1);
     }
 
-    if (vel > VELOCITY_THRESHOLD && offset > 0) {
-      return clampIndex(current - 1);
-    }
-    if (vel < -VELOCITY_THRESHOLD && offset < 0) {
-      return clampIndex(current + 1);
+    if (Math.abs(offset) < MIN_DRAG_PX) {
+      return current;
     }
 
     const progress = width > 0 ? -offset / width : 0;
@@ -120,7 +130,11 @@ export function SwipePager({
   }
 
   function onPointerDown(e: React.PointerEvent) {
-    if (animating || width === 0 || e.button !== 0) return;
+    if (width === 0 || e.button !== 0) return;
+
+    window.clearTimeout(animTimerRef.current);
+    setAnimating(false);
+
     locked.current = "none";
     dragOffset.current = 0;
     startX.current = e.clientX;
@@ -139,8 +153,8 @@ export function SwipePager({
     const dy = e.clientY - startY.current;
 
     if (locked.current === "none") {
-      if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
-      if (Math.abs(dy) > Math.abs(dx) * 1.15) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dy) > Math.abs(dx) * 1.05) {
         resetGesture();
         return;
       }
@@ -155,16 +169,16 @@ export function SwipePager({
     const now = performance.now();
     const dt = now - lastTime.current;
     if (dt > 0) {
-      velocity.current = (e.clientX - lastX.current) / dt;
+      const instant = (e.clientX - lastX.current) / dt;
+      velocity.current = velocity.current * 0.65 + instant * 0.35;
     }
     lastX.current = e.clientX;
     lastTime.current = now;
 
-    let offset = dx;
     const current = indexRef.current;
-    if ((current === 0 && offset > 0) || (current === count - 1 && offset < 0)) {
-      offset *= 0.22;
-    }
+    const atStart = current === 0 && dx > 0;
+    const atEnd = current === count - 1 && dx < 0;
+    const offset = atStart || atEnd ? rubberBand(dx, width) : dx;
 
     dragOffset.current = offset;
     applyTransform(offset, false);
@@ -183,7 +197,10 @@ export function SwipePager({
         indexRef.current = target;
         onIndexChange(target);
         applyTransform(0, true);
-        window.setTimeout(() => setAnimating(false), TRANSITION_MS + 20);
+        animTimerRef.current = window.setTimeout(
+          () => setAnimating(false),
+          TRANSITION_MS + 24
+        );
       } else {
         applyTransform(0, true);
       }
@@ -210,7 +227,7 @@ export function SwipePager({
         {children.map((child, i) => (
           <div
             key={i}
-            className="h-full shrink-0"
+            className="h-full shrink-0 overflow-hidden"
             style={{ width: width > 0 ? width : `${100 / count}%` }}
           >
             {child}

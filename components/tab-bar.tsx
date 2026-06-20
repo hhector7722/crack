@@ -4,19 +4,16 @@ import { usePathname, useRouter } from "next/navigation";
 import { Home, FileText, Images, Mic, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppShell } from "@/components/app-shell-context";
-import { PAGER_PATHS } from "@/components/app-pager";
+import {
+  ALL_PAGER_PATHS,
+  PAGER_DOT_INDICES,
+  PAGER_PATHS,
+} from "@/components/app-pager";
 
 export function TabBar() {
   const pathname = usePathname();
   const router = useRouter();
   const { openCaptureMenu, pagerIndex, setPagerIndex } = useAppShell();
-
-  const isNotes = pathname.startsWith("/notes");
-  const isGallery = pathname.startsWith("/media");
-  const isHome = pathname === "/";
-  const isAudio = pathname.startsWith("/audio");
-  const isProfile = pathname.startsWith("/profile");
-  const hidePagerDots = isGallery || isProfile;
 
   function goToPage(index: number, path: string) {
     setPagerIndex(index);
@@ -25,20 +22,8 @@ export function TabBar() {
     }
   }
 
-  function goToGallery() {
-    if (pathname !== "/media") {
-      router.replace("/media", { scroll: false });
-    }
-  }
-
-  function goToProfile() {
-    if (pathname !== "/profile") {
-      router.replace("/profile", { scroll: false });
-    }
-  }
-
   return (
-    <nav className="app-tabbar">
+    <nav className="app-tabbar" aria-label="Navegación principal">
       <div className="mx-auto flex w-full max-w-[430px] flex-col">
         <div className="flex flex-col items-center pt-2">
           <button
@@ -50,60 +35,62 @@ export function TabBar() {
             <Plus className="h-6 w-6" strokeWidth={2.5} />
           </button>
 
-          {!hidePagerDots && (
-            <div
-              className="mt-2 flex items-center gap-1.5"
-              role="tablist"
-              aria-label="Páginas"
-            >
-              {PAGER_PATHS.map((path, i) => (
+          <div
+            className="mt-2 flex items-center gap-1.5"
+            role="tablist"
+            aria-label="Páginas centrales"
+          >
+            {PAGER_PATHS.map((path, dotIndex) => {
+              const pageIndex = PAGER_DOT_INDICES[dotIndex];
+              const active = pagerIndex === pageIndex;
+              return (
                 <button
                   key={path}
                   type="button"
                   role="tab"
-                  aria-selected={pagerIndex === i}
-                  aria-label={`Página ${i + 1}`}
-                  onClick={() => goToPage(i, path)}
+                  aria-selected={active}
+                  aria-label={`Página ${dotIndex + 1}`}
+                  onClick={() => goToPage(pageIndex, path)}
                   className={cn(
                     "h-1.5 rounded-full bg-white transition-all duration-300",
-                    pagerIndex === i ? "w-4 opacity-100" : "w-1.5 opacity-35"
+                    active ? "w-4 opacity-100" : "w-1.5 opacity-35"
                   )}
                 />
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
         </div>
 
         <div className="flex items-end justify-between px-1 pt-1 pb-1">
           <TabButton
             label="Audio"
             icon={Mic}
-            active={isAudio}
-            onClick={() => goToPage(2, "/audio")}
+            active={pathname.startsWith("/audio")}
+            onClick={() => goToPage(0, ALL_PAGER_PATHS[0])}
           />
           <TabButton
             label="Galería"
             icon={Images}
-            active={isGallery}
-            onClick={goToGallery}
+            active={pathname.startsWith("/media")}
+            onClick={() => goToPage(1, ALL_PAGER_PATHS[1])}
           />
           <TabButton
             label="Inicio"
             icon={Home}
-            active={isHome}
-            onClick={() => goToPage(1, "/")}
+            active={pathname === "/"}
+            onClick={() => goToPage(2, ALL_PAGER_PATHS[2])}
           />
           <TabButton
             label="Notas"
             icon={FileText}
-            active={isNotes}
-            onClick={() => goToPage(0, "/notes")}
+            active={pathname.startsWith("/notes")}
+            onClick={() => goToPage(3, ALL_PAGER_PATHS[3])}
           />
           <TabButton
             label="Perfil"
             icon={User}
-            active={isProfile}
-            onClick={goToProfile}
+            active={pathname.startsWith("/profile")}
+            onClick={() => goToPage(4, ALL_PAGER_PATHS[4])}
           />
         </div>
       </div>

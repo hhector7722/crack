@@ -29,7 +29,7 @@ export function AppShellProvider({
   children: React.ReactNode;
   value: Omit<AppShellContextValue, "pagerIndex" | "setPagerIndex" | "pagerPageCount">;
 }) {
-  const [pagerIndex, setPagerIndexState] = useState(1);
+  const [pagerIndex, setPagerIndexState] = useState(2);
 
   const setPagerIndex = useCallback((index: number) => {
     setPagerIndexState(index);
@@ -40,7 +40,7 @@ export function AppShellProvider({
       ...value,
       pagerIndex,
       setPagerIndex,
-      pagerPageCount: 3,
+      pagerPageCount: 5,
     }),
     [value, pagerIndex, setPagerIndex]
   );

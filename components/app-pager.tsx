@@ -13,8 +13,20 @@ import { usePager } from "@/components/app-shell-context";
 import { useBumpRefresh } from "@/app/(app)/layout";
 import type { Item } from "@/lib/types";
 
-const PAGER_PATHS = ["/notes", "/", "/audio"] as const;
-const PAGE_COUNT = 3;
+/** Orden de deslizamiento (izq → der), alineado con la tab bar */
+const ALL_PAGER_PATHS = [
+  "/audio",
+  "/media",
+  "/",
+  "/notes",
+  "/profile",
+] as const;
+
+/** Tres indicadores centrales: galería | inicio | notas */
+const PAGER_PATHS = ["/media", "/", "/notes"] as const;
+const PAGER_DOT_INDICES = [1, 2, 3] as const;
+
+const PAGE_COUNT = ALL_PAGER_PATHS.length;
 
 function SectionCard({ children }: { children: React.ReactNode }) {
   return (
@@ -25,9 +37,11 @@ function SectionCard({ children }: { children: React.ReactNode }) {
 }
 
 function pathnameToIndex(pathname: string): number {
-  if (pathname.startsWith("/notes")) return 0;
-  if (pathname.startsWith("/audio")) return 2;
-  return 1;
+  if (pathname.startsWith("/audio")) return 0;
+  if (pathname.startsWith("/media")) return 1;
+  if (pathname.startsWith("/notes")) return 3;
+  if (pathname.startsWith("/profile")) return 4;
+  return 2;
 }
 
 interface AppPagerProps {
@@ -39,17 +53,14 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
   const router = useRouter();
   const bumpRefresh = useBumpRefresh();
   const { pagerIndex, setPagerIndex } = usePager();
-  const isGalleryPage = pathname.startsWith("/media");
-  const isProfilePage = pathname.startsWith("/profile");
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [localRefresh, setLocalRefresh] = useState(0);
   const combinedRefresh = refreshKey + localRefresh;
 
   useEffect(() => {
-    if (isGalleryPage || isProfilePage) return;
     setPagerIndex(pathnameToIndex(pathname));
-  }, [pathname, isGalleryPage, isProfilePage, setPagerIndex]);
+  }, [pathname, setPagerIndex]);
 
   const handleRefresh = useCallback(async () => {
     bumpRefresh();
@@ -60,7 +71,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
   const handleIndexChange = useCallback(
     (index: number) => {
       setPagerIndex(index);
-      const target = PAGER_PATHS[index];
+      const target = ALL_PAGER_PATHS[index];
       if (pathname !== target) {
         router.replace(target, { scroll: false });
       }
@@ -87,42 +98,25 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
     />
   ) : null;
 
-  if (isProfilePage) {
-    return (
-      <>
+  return (
+    <>
+      <div className="h-full">
+        <SwipePager index={pagerIndex} onIndexChange={handleIndexChange}>
         <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
-          <ProfileView />
+          <div className="pb-2">
+            <AudioFeed
+              refreshKey={combinedRefresh}
+              onSelect={setSelectedItem}
+            />
+          </div>
         </PullToRefresh>
-        {itemDetail}
-      </>
-    );
-  }
 
-  if (isGalleryPage) {
-    return (
-      <>
         <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
           <GalleryFeed
             refreshKey={combinedRefresh}
             columns={5}
             onSelect={setSelectedItem}
           />
-        </PullToRefresh>
-        {itemDetail}
-      </>
-    );
-  }
-
-  return (
-    <>
-      <SwipePager index={pagerIndex} onIndexChange={handleIndexChange}>
-        <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
-          <div className="pb-2">
-            <NoteList
-              refreshKey={combinedRefresh}
-              onSelect={setSelectedItem}
-            />
-          </div>
         </PullToRefresh>
 
         <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
@@ -157,17 +151,28 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
 
         <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
           <div className="pb-2">
-            <AudioFeed
+            <NoteList
               refreshKey={combinedRefresh}
               onSelect={setSelectedItem}
             />
           </div>
         </PullToRefresh>
+
+        <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
+          <ProfileView />
+        </PullToRefresh>
       </SwipePager>
+      </div>
 
       {itemDetail}
     </>
   );
 }
 
-export { PAGE_COUNT, PAGER_PATHS, pathnameToIndex };
+export {
+  PAGE_COUNT,
+  PAGER_PATHS,
+  PAGER_DOT_INDICES,
+  ALL_PAGER_PATHS,
+  pathnameToIndex,
+};
