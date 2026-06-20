@@ -8,7 +8,7 @@
   --app-tabbar-height: 5rem;
   --app-tabbar-height-md: 4rem;
   --app-tabbar-core: var(--app-tabbar-height);
-  /* Iconos (~5rem) + safe-area inferior; h-20+pb-safe no cabía en iPhone */
+  /* Fila de iconos (5rem) + pb-safe en la nav; scroll usa el shell completo */
   --app-tabbar-shell: calc(var(--app-tabbar-core) + env(safe-area-inset-bottom, 0px));
   --app-gutter: clamp(0.75rem, 3.5vw, 1rem);
   --crack-ios-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
