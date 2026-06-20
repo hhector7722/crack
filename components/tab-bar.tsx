@@ -6,6 +6,7 @@ import { useAppShell } from "@/components/app-shell-context";
 import {
   PAGER_DOT_INDICES,
   PAGER_PATHS,
+  pagerIndexToDotIndex,
 } from "@/lib/pager-routes";
 
 export function TabBar() {
@@ -31,7 +32,8 @@ export function TabBar() {
           >
             {PAGER_PATHS.map((path, dotIndex) => {
               const pageIndex = PAGER_DOT_INDICES[dotIndex];
-              const active = pagerIndex === pageIndex;
+              const active =
+                pagerIndexToDotIndex(pagerIndex) === pageIndex;
               return (
                 <button
                   key={path}

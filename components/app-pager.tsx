@@ -140,4 +140,5 @@ export {
   PAGER_DOT_INDICES,
   PAGER_PATHS,
   pathnameToIndex,
+  pagerIndexToDotIndex,
 } from "@/lib/pager-routes";

@@ -20,3 +20,10 @@ export function pathnameToIndex(pathname: string): number {
   if (pathname.startsWith("/profile")) return 4;
   return 2;
 }
+
+/** Índice visual de los 3 indicadores (audio→galería, perfil→notas) */
+export function pagerIndexToDotIndex(pagerIndex: number): number {
+  if (pagerIndex <= 0) return 1;
+  if (pagerIndex >= 4) return 3;
+  return pagerIndex;
+}
