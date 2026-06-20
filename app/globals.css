@@ -9,7 +9,6 @@
   --app-chrome-height: clamp(3.25rem, 10.5svh, 4rem);
   --app-chrome-top: calc(var(--app-chrome-height) + env(safe-area-inset-top, 0px));
   --app-chrome-bottom: calc(var(--app-chrome-height) + env(safe-area-inset-bottom, 0px));
-  --app-content-height: calc(var(--app-height) - var(--app-chrome-top) - var(--app-chrome-bottom));
   --app-gutter: clamp(0.75rem, 3.5vw, 1rem);
   --crack-ios-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --crack-page-push-ms: 360ms;
@@ -51,9 +50,9 @@ body {
   z-index: 0;
   display: grid;
   width: min(var(--app-width, 100vw), 430px);
-  height: calc(var(--app-height) - var(--app-chrome-bottom));
-  min-height: calc(var(--app-height) - var(--app-chrome-bottom));
-  max-height: calc(var(--app-height) - var(--app-chrome-bottom));
+  height: var(--app-height);
+  min-height: var(--app-height);
+  max-height: var(--app-height);
   transform: translateX(-50%);
   margin-inline: auto;
   grid-template-rows: var(--app-chrome-top) minmax(0, 1fr);
@@ -92,8 +91,6 @@ body {
 
 .app-main {
   min-height: 0;
-  height: var(--app-content-height);
-  max-height: var(--app-content-height);
   overflow: hidden;
 }
 
@@ -124,6 +121,7 @@ html[data-modal-open='true'] .marbella-fixed-bottombar {
 .app-pager-panel {
   height: 100%;
   padding: var(--app-gutter);
+  padding-bottom: calc(var(--app-gutter) + var(--app-chrome-bottom));
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
 }
