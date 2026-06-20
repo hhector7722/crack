@@ -5,6 +5,10 @@
   --foreground: #fafafa;
   --app-height: 100dvh;
   --tabbar-height: calc(7.75rem + env(safe-area-inset-bottom, 0px));
+  --crack-ios-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+  --crack-page-push-ms: 360ms;
+  --crack-modal-enter-ms: 260ms;
+  --crack-modal-exit-ms: 220ms;
 }
 
 @theme inline {
@@ -93,6 +97,47 @@ body {
   padding: 1rem 1rem 1.5rem;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+}
+
+/* Pager swipe iOS */
+.swipe-pager-root--dragging {
+  cursor: grabbing;
+}
+
+html[data-tab-swipe-dragging],
+html[data-tab-swipe-dragging] body {
+  overscroll-behavior-x: none;
+}
+
+.swipe-pager-panel {
+  transform-origin: center center;
+  backface-visibility: hidden;
+}
+
+.swipe-pager-panel--outgoing {
+  z-index: 0;
+}
+
+.swipe-pager-panel--incoming {
+  z-index: 1;
+}
+
+/* Drawer vaul: duraciones iOS centralizadas */
+[data-vaul-drawer] {
+  animation-duration: var(--crack-modal-enter-ms);
+  transition-duration: var(--crack-modal-enter-ms);
+}
+
+[data-vaul-drawer][data-state="closed"] {
+  animation-duration: var(--crack-modal-exit-ms);
+}
+
+[data-vaul-overlay][data-vaul-snap-points="false"] {
+  animation-duration: var(--crack-modal-enter-ms);
+}
+
+[data-vaul-overlay][data-state="closed"] {
+  animation-duration: var(--crack-modal-exit-ms);
 }
 
 .line-clamp-2 {

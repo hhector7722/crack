@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils";
+import { IOS_EASE_OUT, PAGE_PUSH_MS } from "@/lib/ui/motion";
 
 interface SwipePagerProps {
   index: number;
@@ -19,14 +20,65 @@ interface SwipePagerProps {
 const SWIPE_THRESHOLD = 0.22;
 const VELOCITY_THRESHOLD = 0.38;
 const MIN_DRAG_PX = 36;
-const TRANSITION_MS = 320;
-const EASING = "cubic-bezier(0.32, 0.72, 0, 1)";
 
 function rubberBand(offset: number, width: number): number {
   const abs = Math.abs(offset);
   const limit = width * 0.75;
   const sign = offset >= 0 ? 1 : -1;
   return sign * (limit * (1 - 1 / (abs / limit + 1)));
+}
+
+function setSwipeDragging(active: boolean) {
+  if (typeof document === "undefined") return;
+  if (active) {
+    document.documentElement.setAttribute("data-tab-swipe-dragging", "");
+  } else {
+    document.documentElement.removeAttribute("data-tab-swipe-dragging");
+  }
+}
+
+function setSwipeNavigating(active: boolean) {
+  if (typeof document === "undefined") return;
+  if (active) {
+    document.documentElement.setAttribute("data-tab-swipe-navigating", "");
+  } else {
+    document.documentElement.removeAttribute("data-tab-swipe-navigating");
+  }
+}
+
+function isModalOpen() {
+  return (
+    typeof document !== "undefined" &&
+    document.documentElement.hasAttribute("data-modal-open")
+  );
+}
+
+function canStartSwipe(target: EventTarget | null) {
+  if (!(target instanceof Element)) return true;
+  if (target.closest("[data-block-tab-swipe]")) return false;
+  if (
+    target.closest(
+      "input, textarea, select, button, a, [role='slider'], [data-vaul-drawer]"
+    )
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function panelDepthTransform(
+  panelIndex: number,
+  activeIndex: number,
+  dragOffset: number,
+  width: number,
+  animating: boolean
+): string | undefined {
+  if (width <= 0) return undefined;
+  const progress = dragOffset / width;
+  const distance = Math.abs(panelIndex - activeIndex - progress);
+  if (distance > 1.05 && !animating) return undefined;
+  const scale = 1 - Math.min(distance, 1) * 0.035;
+  return scale < 0.999 ? `scale(${scale})` : undefined;
 }
 
 export function SwipePager({
@@ -42,6 +94,8 @@ export function SwipePager({
   const [width, setWidth] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [animating, setAnimating] = useState(false);
+  const [dragOffsetPx, setDragOffsetPx] = useState(0);
+  const [commitFrom, setCommitFrom] = useState<number | null>(null);
 
   const dragOffset = useRef(0);
   const startX = useRef(0);
@@ -52,27 +106,40 @@ export function SwipePager({
   const locked = useRef<"none" | "horizontal" | "vertical">("none");
   const indexRef = useRef(index);
   const pointerIdRef = useRef<number | null>(null);
-  const animTimerRef = useRef(0);
+  const animatingRef = useRef(false);
+
+  const slideTransition = `transform ${PAGE_PUSH_MS}ms ${IOS_EASE_OUT}`;
+  const depthTransition = `transform ${PAGE_PUSH_MS}ms ${IOS_EASE_OUT}`;
 
   const applyTransform = useCallback(
     (offsetPx: number, animate: boolean) => {
       const track = trackRef.current;
       if (!track || width === 0) return;
       const base = -indexRef.current * width;
-      track.style.transition = animate
-        ? `transform ${TRANSITION_MS}ms ${EASING}`
-        : "none";
+      track.style.transition = animate ? slideTransition : "none";
       track.style.transform = `translate3d(${base + offsetPx}px, 0, 0)`;
     },
-    [width]
+    [slideTransition, width]
   );
+
+  const syncDragOffset = useCallback((next: number) => {
+    dragOffset.current = next;
+    setDragOffsetPx(next);
+  }, []);
+
+  const finishAnimation = useCallback(() => {
+    setAnimating(false);
+    animatingRef.current = false;
+    setCommitFrom(null);
+    setSwipeNavigating(false);
+  }, []);
 
   useEffect(() => {
     indexRef.current = index;
-    if (!dragging && !animating) {
+    if (!dragging && !animatingRef.current) {
       applyTransform(0, true);
     }
-  }, [index, dragging, animating, applyTransform]);
+  }, [index, dragging, applyTransform]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -86,13 +153,21 @@ export function SwipePager({
   }, []);
 
   useEffect(() => {
-    if (!dragging && !animating) {
+    if (!dragging && !animatingRef.current) {
       applyTransform(0, true);
     }
-  }, [width, dragging, animating, applyTransform]);
+  }, [width, dragging, applyTransform]);
 
   useEffect(() => {
-    return () => window.clearTimeout(animTimerRef.current);
+    setSwipeDragging(dragging);
+    return () => setSwipeDragging(false);
+  }, [dragging]);
+
+  useEffect(() => {
+    return () => {
+      setSwipeNavigating(false);
+      setSwipeDragging(false);
+    };
   }, []);
 
   function clampIndex(i: number) {
@@ -125,18 +200,21 @@ export function SwipePager({
   function resetGesture() {
     setDragging(false);
     locked.current = "none";
-    dragOffset.current = 0;
+    syncDragOffset(0);
     pointerIdRef.current = null;
   }
 
   function onPointerDown(e: React.PointerEvent) {
-    if (width === 0 || e.button !== 0) return;
+    if (width === 0 || e.button !== 0 || isModalOpen()) return;
+    if (!canStartSwipe(e.target)) return;
 
-    window.clearTimeout(animTimerRef.current);
     setAnimating(false);
+    animatingRef.current = false;
+    setCommitFrom(null);
+    setSwipeNavigating(false);
 
     locked.current = "none";
-    dragOffset.current = 0;
+    syncDragOffset(0);
     startX.current = e.clientX;
     startY.current = e.clientY;
     lastX.current = e.clientX;
@@ -180,8 +258,39 @@ export function SwipePager({
     const atEnd = current === count - 1 && dx < 0;
     const offset = atStart || atEnd ? rubberBand(dx, width) : dx;
 
-    dragOffset.current = offset;
+    syncDragOffset(offset);
     applyTransform(offset, false);
+  }
+
+  function animateToRest(onDone?: () => void) {
+    const track = trackRef.current;
+    if (!track) {
+      onDone?.();
+      return;
+    }
+
+    setAnimating(true);
+    animatingRef.current = true;
+    applyTransform(0, true);
+
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      track.removeEventListener("transitionend", handleEnd);
+      window.clearTimeout(fallbackTimer);
+      syncDragOffset(0);
+      finishAnimation();
+      onDone?.();
+    };
+
+    const handleEnd = (event: TransitionEvent) => {
+      if (event.target !== track || event.propertyName !== "transform") return;
+      finish();
+    };
+
+    const fallbackTimer = window.setTimeout(finish, PAGE_PUSH_MS + 80);
+    track.addEventListener("transitionend", handleEnd);
   }
 
   function finishGesture(e: React.PointerEvent) {
@@ -189,30 +298,34 @@ export function SwipePager({
 
     if (locked.current === "horizontal") {
       (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      const fromIndex = indexRef.current;
       const target = resolveTarget(dragOffset.current, velocity.current);
-      dragOffset.current = 0;
 
-      if (target !== indexRef.current) {
-        setAnimating(true);
+      if (target !== fromIndex) {
+        setCommitFrom(fromIndex);
+        setSwipeNavigating(true);
         indexRef.current = target;
         onIndexChange(target);
-        applyTransform(0, true);
-        animTimerRef.current = window.setTimeout(
-          () => setAnimating(false),
-          TRANSITION_MS + 24
-        );
+        animateToRest();
       } else {
-        applyTransform(0, true);
+        animateToRest();
       }
     }
 
     resetGesture();
   }
 
+  const visualActiveIndex =
+    dragging || animating ? indexRef.current : index;
+
   return (
     <div
       ref={containerRef}
-      className={cn("h-full w-full overflow-hidden", className)}
+      className={cn(
+        "swipe-pager-root h-full w-full overflow-hidden",
+        dragging && "swipe-pager-root--dragging",
+        className
+      )}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={finishGesture}
@@ -221,18 +334,40 @@ export function SwipePager({
     >
       <div
         ref={trackRef}
-        className="flex h-full will-change-transform"
+        className="swipe-pager-track flex h-full will-change-transform"
         style={{ width: width > 0 ? width * count : `${count * 100}%` }}
       >
-        {children.map((child, i) => (
-          <div
-            key={i}
-            className="h-full shrink-0 overflow-hidden"
-            style={{ width: width > 0 ? width : `${100 / count}%` }}
-          >
-            {child}
-          </div>
-        ))}
+        {children.map((child, i) => {
+          const depth = panelDepthTransform(
+            i,
+            visualActiveIndex,
+            dragOffsetPx,
+            width,
+            animating
+          );
+          const isOutgoing = commitFrom === i && animating;
+          const isIncoming =
+            commitFrom != null && i === indexRef.current && animating;
+
+          return (
+            <div
+              key={i}
+              className={cn(
+                "swipe-pager-panel h-full shrink-0 overflow-hidden",
+                isOutgoing && "swipe-pager-panel--outgoing",
+                isIncoming && "swipe-pager-panel--incoming"
+              )}
+              style={{
+                width: width > 0 ? width : `${100 / count}%`,
+                transform: depth,
+                transition:
+                  dragging || !animating ? "none" : depthTransition,
+              }}
+            >
+              {child}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

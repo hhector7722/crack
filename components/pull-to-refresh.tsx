@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { iosTransition } from "@/lib/ui/motion";
 
 interface PullToRefreshProps {
   onRefresh: () => void | Promise<void>;
@@ -91,8 +92,8 @@ export function PullToRefresh({
       onTouchCancel={onTouchEnd}
     >
       <div
-        className="flex items-center justify-center overflow-hidden transition-[height] duration-200"
-        style={{ height: indicatorHeight }}
+        className="flex items-center justify-center overflow-hidden"
+        style={{ height: indicatorHeight, transition: iosTransition("height", 200) }}
       >
         {(pull > 0 || refreshing) && (
           <Loader2

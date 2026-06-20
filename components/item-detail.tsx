@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 import { updateItem, deleteItem, togglePin } from "@/lib/items";
 import { getSignedUrl, deleteFile } from "@/lib/storage";
+import { useModalOpen } from "@/lib/ui/use-modal-open";
 import {
   classificationColor,
   classificationLabel,
@@ -45,6 +46,8 @@ export function ItemDetail({
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loadingMedia, setLoadingMedia] = useState(false);
+
+  useModalOpen(open);
 
   useEffect(() => {
     if (!open || !item.file_url) return;

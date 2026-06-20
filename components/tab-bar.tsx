@@ -3,6 +3,7 @@
 import { Home, FileText, Images, Mic, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppShell } from "@/components/app-shell-context";
+import { PAGE_PUSH_MS, IOS_EASE_OUT } from "@/lib/ui/motion";
 import {
   PAGER_DOT_INDICES,
   PAGER_PATHS,
@@ -43,9 +44,12 @@ export function TabBar() {
                   aria-label={`Página ${dotIndex + 1}`}
                   onClick={() => navigateToPage(pageIndex)}
                   className={cn(
-                    "h-1.5 shrink-0 rounded-full bg-white transition-all duration-300",
-                    active ? "w-4 opacity-100" : "w-1.5 opacity-50"
+                    "h-1.5 shrink-0 rounded-full bg-white opacity-50",
+                    active ? "w-4 opacity-100" : "w-1.5"
                   )}
+                  style={{
+                    transition: `width ${PAGE_PUSH_MS}ms ${IOS_EASE_OUT}, opacity ${PAGE_PUSH_MS}ms ${IOS_EASE_OUT}`,
+                  }}
                 />
               );
             })}

@@ -2,6 +2,7 @@
 
 import { Drawer } from "vaul";
 import { cn } from "@/lib/utils";
+import { useModalOpen } from "@/lib/ui/use-modal-open";
 
 interface BottomSheetProps {
   open: boolean;
@@ -18,6 +19,8 @@ export function BottomSheet({
   children,
   className,
 }: BottomSheetProps) {
+  useModalOpen(open);
+
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
