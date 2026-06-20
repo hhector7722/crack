@@ -1,26 +1,15 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
 import { Home, FileText, Images, Mic, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppShell } from "@/components/app-shell-context";
 import {
-  ALL_PAGER_PATHS,
   PAGER_DOT_INDICES,
   PAGER_PATHS,
-} from "@/components/app-pager";
+} from "@/lib/pager-routes";
 
 export function TabBar() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { openCaptureMenu, pagerIndex, setPagerIndex } = useAppShell();
-
-  function goToPage(index: number, path: string) {
-    setPagerIndex(index);
-    if (pathname !== path) {
-      router.replace(path, { scroll: false });
-    }
-  }
+  const { openCaptureMenu, pagerIndex, navigateToPage } = useAppShell();
 
   return (
     <nav className="app-tabbar" aria-label="Navegación principal">
@@ -36,7 +25,7 @@ export function TabBar() {
           </button>
 
           <div
-            className="mt-2 flex items-center gap-1.5"
+            className="mt-2 flex h-1.5 min-h-1.5 items-center gap-1.5"
             role="tablist"
             aria-label="Páginas centrales"
           >
@@ -50,10 +39,10 @@ export function TabBar() {
                   role="tab"
                   aria-selected={active}
                   aria-label={`Página ${dotIndex + 1}`}
-                  onClick={() => goToPage(pageIndex, path)}
+                  onClick={() => navigateToPage(pageIndex)}
                   className={cn(
-                    "h-1.5 rounded-full bg-white transition-all duration-300",
-                    active ? "w-4 opacity-100" : "w-1.5 opacity-35"
+                    "h-1.5 shrink-0 rounded-full bg-white transition-all duration-300",
+                    active ? "w-4 opacity-100" : "w-1.5 opacity-50"
                   )}
                 />
               );
@@ -65,32 +54,32 @@ export function TabBar() {
           <TabButton
             label="Audio"
             icon={Mic}
-            active={pathname.startsWith("/audio")}
-            onClick={() => goToPage(0, ALL_PAGER_PATHS[0])}
+            active={pagerIndex === 0}
+            onClick={() => navigateToPage(0)}
           />
           <TabButton
             label="Galería"
             icon={Images}
-            active={pathname.startsWith("/media")}
-            onClick={() => goToPage(1, ALL_PAGER_PATHS[1])}
+            active={pagerIndex === 1}
+            onClick={() => navigateToPage(1)}
           />
           <TabButton
             label="Inicio"
             icon={Home}
-            active={pathname === "/"}
-            onClick={() => goToPage(2, ALL_PAGER_PATHS[2])}
+            active={pagerIndex === 2}
+            onClick={() => navigateToPage(2)}
           />
           <TabButton
             label="Notas"
             icon={FileText}
-            active={pathname.startsWith("/notes")}
-            onClick={() => goToPage(3, ALL_PAGER_PATHS[3])}
+            active={pagerIndex === 3}
+            onClick={() => navigateToPage(3)}
           />
           <TabButton
             label="Perfil"
             icon={User}
-            active={pathname.startsWith("/profile")}
-            onClick={() => goToPage(4, ALL_PAGER_PATHS[4])}
+            active={pagerIndex === 4}
+            onClick={() => navigateToPage(4)}
           />
         </div>
       </div>
@@ -113,6 +102,7 @@ function TabButton({
     <button
       type="button"
       onClick={onClick}
+      aria-current={active ? "page" : undefined}
       className={cn(
         "flex min-w-[56px] flex-1 flex-col-reverse items-center gap-0.5 rounded-lg pt-1 pb-1 text-xs leading-none transition-colors",
         active ? "text-zinc-100" : "text-zinc-500"

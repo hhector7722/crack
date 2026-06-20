@@ -4,9 +4,16 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  ALL_PAGER_PATHS,
+  PAGE_COUNT,
+  pathnameToIndex,
+} from "@/lib/pager-routes";
 
 export type CaptureMode = "menu" | "note" | "voice";
 
@@ -17,6 +24,7 @@ interface AppShellContextValue {
   openCaptureMenu: () => void;
   pagerIndex: number;
   setPagerIndex: (index: number) => void;
+  navigateToPage: (index: number) => void;
   pagerPageCount: number;
 }
 
@@ -27,22 +35,46 @@ export function AppShellProvider({
   value,
 }: {
   children: React.ReactNode;
-  value: Omit<AppShellContextValue, "pagerIndex" | "setPagerIndex" | "pagerPageCount">;
+  value: Omit<
+    AppShellContextValue,
+    "pagerIndex" | "setPagerIndex" | "navigateToPage" | "pagerPageCount"
+  >;
 }) {
-  const [pagerIndex, setPagerIndexState] = useState(2);
+  const pathname = usePathname();
+  const router = useRouter();
+  const [pagerIndex, setPagerIndexState] = useState(() =>
+    pathnameToIndex(pathname)
+  );
+
+  useEffect(() => {
+    setPagerIndexState(pathnameToIndex(pathname));
+  }, [pathname]);
 
   const setPagerIndex = useCallback((index: number) => {
     setPagerIndexState(index);
   }, []);
+
+  const navigateToPage = useCallback(
+    (index: number) => {
+      const clamped = Math.max(0, Math.min(PAGE_COUNT - 1, index));
+      setPagerIndexState(clamped);
+      const target = ALL_PAGER_PATHS[clamped];
+      if (pathname !== target) {
+        router.replace(target, { scroll: false });
+      }
+    },
+    [pathname, router]
+  );
 
   const merged = useMemo(
     () => ({
       ...value,
       pagerIndex,
       setPagerIndex,
-      pagerPageCount: 5,
+      navigateToPage,
+      pagerPageCount: PAGE_COUNT,
     }),
-    [value, pagerIndex, setPagerIndex]
+    [value, pagerIndex, setPagerIndex, navigateToPage]
   );
 
   return (
@@ -59,6 +91,7 @@ export function useAppShell() {
 }
 
 export function usePager() {
-  const { pagerIndex, setPagerIndex, pagerPageCount } = useAppShell();
-  return { pagerIndex, setPagerIndex, pagerPageCount };
+  const { pagerIndex, setPagerIndex, navigateToPage, pagerPageCount } =
+    useAppShell();
+  return { pagerIndex, setPagerIndex, navigateToPage, pagerPageCount };
 }
