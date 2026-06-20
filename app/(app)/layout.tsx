@@ -6,13 +6,13 @@ import {
   useRef,
   useState,
   useCallback,
-  useEffect,
 } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { AppBottomNavPortal } from "@/components/app-bottom-nav-portal";
 import { AppPager } from "@/components/app-pager";
+import { VisualViewportSync } from "@/components/visual-viewport-sync";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
 
@@ -43,21 +43,6 @@ export default function AppLayout({
   const [sheetKey, setSheetKey] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
-
-  useEffect(() => {
-    const html = document.documentElement;
-    const body = document.body;
-    const prevHtmlOverflow = html.style.overflow;
-    const prevBodyOverflow = body.style.overflow;
-
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
-
-    return () => {
-      html.style.overflow = prevHtmlOverflow;
-      body.style.overflow = prevBodyOverflow;
-    };
-  }, []);
 
   const bumpRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
 
@@ -111,32 +96,37 @@ export default function AppLayout({
       <AppShellProvider
         value={{ openCamera, openGallery, openCapture, openCaptureMenu }}
       >
-        <div className="app-shell">
-          <header className="app-header relative">
-            <h1 className="text-lg font-bold tracking-tight">Crack</h1>
-            <button
-              type="button"
-              onClick={openCaptureMenu}
-              aria-label="Crear"
-              className="absolute right-[var(--app-gutter)] flex h-10 min-h-10 w-10 min-w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 shadow-lg shadow-black/40 transition-transform active:scale-95 sm:h-12 sm:min-h-12 sm:w-12 sm:min-w-12"
-            >
-              <Plus className="h-6 w-6" strokeWidth={2.5} />
-            </button>
+        <div className="app-shell relative">
+          <div className="app-shell-bg" aria-hidden="true" />
+          <div
+            id="app-safe-probe"
+            className="pointer-events-none fixed left-0 top-0 -z-50 h-0 w-0 overflow-hidden pb-safe"
+            aria-hidden
+          />
+
+          <header className="app-header app-header-fixed fixed right-0 left-0 z-[100] shrink-0 border-b border-zinc-800/80 bg-zinc-950/90 px-[var(--app-gutter)] pb-0 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
+            <div className="relative flex h-[var(--app-header-inner)] min-h-[var(--app-header-inner)] items-center justify-center">
+              <h1 className="text-lg font-bold tracking-tight">Crack</h1>
+              <button
+                type="button"
+                onClick={openCaptureMenu}
+                aria-label="Crear"
+                className="absolute right-0 flex h-10 min-h-10 w-10 min-w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 shadow-lg shadow-black/40 transition-transform active:scale-95 sm:h-12 sm:min-h-12 sm:w-12 sm:min-w-12"
+              >
+                <Plus className="h-6 w-6" strokeWidth={2.5} />
+              </button>
+            </div>
           </header>
 
-          {uploadError && (
-            <p className="mx-4 mt-3 shrink-0 px-4 text-sm text-red-300">
-              {uploadError}
-            </p>
-          )}
-
-          {uploading && (
-            <p className="mx-4 mt-3 shrink-0 text-center text-sm text-zinc-400">
-              Subiendo imagen...
-            </p>
-          )}
-
-          <main className="app-main">
+          <main className="app-main app-main--internal-scroll relative z-10 w-full pt-[var(--app-header-block)] pb-0">
+            {uploadError ? (
+              <p className="mx-4 shrink-0 px-4 text-sm text-red-300">{uploadError}</p>
+            ) : null}
+            {uploading ? (
+              <p className="mx-4 shrink-0 text-center text-sm text-zinc-400">
+                Subiendo imagen...
+              </p>
+            ) : null}
             <AppPager refreshKey={refreshKey} />
           </main>
 
@@ -167,6 +157,7 @@ export default function AppLayout({
         </div>
 
         <AppBottomNavPortal />
+        <VisualViewportSync />
       </AppShellProvider>
     </RefreshContext.Provider>
   );

@@ -18,45 +18,39 @@ const CRACK_NAV_ITEMS: CrackNavItem[] = [
   { name: 'Perfil', pageIndex: 4, icon: User },
 ];
 
+const TABBAR_NAV_CLASS =
+  'app-tabbar fixed bottom-0 left-0 right-0 z-[95] flex min-h-[calc(var(--app-tabbar-core)+env(safe-area-inset-bottom))] items-center justify-around border-t border-zinc-800/80 bg-[var(--app-tabbar-bg-hex)] px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.15)] backdrop-blur-md md:px-8 print:hidden';
+
 export function AppBottomNav() {
   const { pagerIndex, navigateToPage } = useAppShell();
 
   return (
-    <nav
-      className={cn(
-        'fixed bottom-0 left-0 right-0 z-[95]',
-        'border-t border-zinc-800/80 bg-zinc-950/90 pb-safe',
-        'shadow-[0_-4px_20px_rgba(0,0,0,0.15)] backdrop-blur-md print:hidden'
-      )}
-      aria-label="Navegación principal"
-    >
-      <div className="flex h-20 items-center justify-around px-2 md:h-16 md:px-8">
-        {CRACK_NAV_ITEMS.map((item) => {
-          const active = pagerIndex === item.pageIndex;
-          const Icon = item.icon;
+    <nav className={TABBAR_NAV_CLASS} aria-label="Navegacion principal">
+      {CRACK_NAV_ITEMS.map((item) => {
+        const active = pagerIndex === item.pageIndex;
+        const Icon = item.icon;
 
-          return (
-            <button
-              key={item.name}
-              type="button"
-              className={cn(
-                'flex min-h-12 min-w-12 flex-1 flex-col items-center justify-center transition-all duration-200 active:scale-95',
-                active
-                  ? 'scale-110 text-zinc-100 drop-shadow-md'
-                  : 'text-zinc-500 hover:text-zinc-300'
-              )}
-              aria-current={active ? 'page' : undefined}
-              aria-label={item.name}
-              onClick={() => navigateToPage(item.pageIndex)}
-            >
-              <Icon size={20} className="md:h-5 md:w-5" strokeWidth={2.5} />
-              <span className="mt-0.5 text-[7.5px] font-black uppercase tracking-tighter whitespace-nowrap md:mt-1 md:text-[9px] md:tracking-widest">
-                {item.name}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+        return (
+          <button
+            key={item.name}
+            type="button"
+            className={cn(
+              'flex min-h-12 min-w-12 flex-1 flex-col items-center justify-center transition-all duration-200 active:scale-95',
+              active
+                ? 'scale-110 text-zinc-100 drop-shadow-md'
+                : 'text-zinc-500 hover:text-zinc-300'
+            )}
+            aria-current={active ? 'page' : undefined}
+            aria-label={item.name}
+            onClick={() => navigateToPage(item.pageIndex)}
+          >
+            <Icon size={20} className="md:h-5 md:w-5" strokeWidth={2.5} />
+            <span className="mt-0.5 text-[7.5px] font-black uppercase tracking-tighter whitespace-nowrap md:mt-1 md:text-[9px] md:tracking-widest">
+              {item.name}
+            </span>
+          </button>
+        );
+      })}
     </nav>
   );
 }

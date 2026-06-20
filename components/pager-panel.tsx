@@ -9,8 +9,9 @@ interface PagerPanelProps {
 
 export function PagerPanel({ onRefresh, children }: PagerPanelProps) {
   return (
-    <PullToRefresh onRefresh={onRefresh} className="app-pager-panel">
+    <PullToRefresh onRefresh={onRefresh} className="app-pager-panel scroll-pb-end">
       {children}
+      <div className="scroll-end-touch" aria-hidden />
     </PullToRefresh>
   );
 }

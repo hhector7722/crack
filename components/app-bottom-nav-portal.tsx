@@ -1,19 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { usePathname } from 'next/navigation';
-import { AppBottomNav } from './app-bottom-nav';
+import { BottomChrome } from '@/components/bottom-chrome';
+import { clearDocumentElementPullTransform } from '@/lib/layout/shell-pull-chrome';
 
+/** Portal a body — TabBar fija al borde inferior (patrón trincadores). */
 export function AppBottomNavPortal() {
-  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useLayoutEffect(() => {
+    clearDocumentElementPullTransform();
+    setMounted(true);
+  }, []);
 
   if (!mounted) return null;
-  if (pathname === '/login') return null;
-  if (pathname.startsWith('/auth')) return null;
 
-  return createPortal(<AppBottomNav />, document.body);
+  return createPortal(<BottomChrome />, document.body);
 }
