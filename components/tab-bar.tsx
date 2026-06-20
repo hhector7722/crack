@@ -24,9 +24,35 @@ export function TabBar() {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (!mounted) return;
+    const node = anchorRef.current;
+    if (!node) return;
+
+    const syncHeight = () => {
+      const height = node.getBoundingClientRect().height;
+      document.documentElement.style.setProperty(
+        "--tabbar-height",
+        `${height}px`
+      );
+    };
+
+    syncHeight();
+    const observer = new ResizeObserver(syncHeight);
+    observer.observe(node);
+    window.addEventListener("resize", syncHeight);
+    window.visualViewport?.addEventListener("resize", syncHeight);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", syncHeight);
+      window.visualViewport?.removeEventListener("resize", syncHeight);
+    };
+  }, [mounted]);
+
   const bar = (
     <div ref={anchorRef} className="app-tabbar-anchor app-fixed-bottombar">
-      <div className="app-tabbar-chrome mx-auto flex w-full max-w-[430px] flex-col items-center pt-2">
+      <div className="app-tabbar-chrome mx-auto flex w-full max-w-[430px] flex-col items-center pt-1">
         <button
           type="button"
           onClick={openCaptureMenu}
@@ -37,7 +63,7 @@ export function TabBar() {
         </button>
 
         <div
-          className="mt-2 flex h-1.5 min-h-1.5 items-center gap-1.5"
+          className="mt-1.5 flex h-1.5 min-h-1.5 items-center gap-1.5"
           role="tablist"
           aria-label="Páginas centrales"
         >
@@ -66,7 +92,7 @@ export function TabBar() {
       </div>
 
       <nav className="app-tabbar-dock" aria-label="Navegación principal">
-        <div className="mx-auto flex w-full max-w-[430px] items-end justify-between px-1 pt-1 pb-1">
+        <div className="mx-auto flex w-full max-w-[430px] items-end justify-between px-0.5">
           <TabButton
             label="Audio"
             icon={Mic}
@@ -123,7 +149,7 @@ function TabButton({
       onClick={onClick}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex min-w-[56px] flex-1 flex-col-reverse items-center gap-0.5 rounded-lg pt-1 pb-1 text-xs leading-none transition-colors",
+        "flex min-w-0 flex-1 flex-col-reverse items-center gap-0 py-0.5 text-[11px] leading-none transition-colors",
         active ? "text-zinc-100" : "text-zinc-500"
       )}
     >
