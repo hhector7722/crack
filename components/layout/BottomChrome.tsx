@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { AppBottomNav } from "@/components/app-bottom-nav";
+import { TabBar } from "@/components/layout/TabBar";
 
 export function BottomChrome() {
   const pathname = usePathname();
@@ -10,5 +10,5 @@ export function BottomChrome() {
     return null;
   }
 
-  return <AppBottomNav />;
+  return <TabBar />;
 }

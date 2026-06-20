@@ -10,9 +10,9 @@ import {
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
-import { AppBottomNavPortal } from "@/components/app-bottom-nav-portal";
+import { TabBarWrapper } from "@/components/layout/TabBarWrapper";
+import { VisualViewportSync } from "@/components/layout/VisualViewportSync";
 import { AppPager } from "@/components/app-pager";
-import { VisualViewportSync } from "@/components/visual-viewport-sync";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
 
@@ -96,16 +96,16 @@ export default function AppLayout({
       <AppShellProvider
         value={{ openCamera, openGallery, openCapture, openCaptureMenu }}
       >
-        <div className="app-shell relative">
-          <div className="app-shell-bg" aria-hidden="true" />
+        <div className="tm-app-shell relative">
+          <div className="tm-app-shell-bg" aria-hidden="true" />
           <div
-            id="app-safe-probe"
+            id="tm-safe-probe"
             className="pointer-events-none fixed left-0 top-0 -z-50 h-0 w-0 overflow-hidden pb-safe"
             aria-hidden
           />
 
-          <header className="app-header app-header-fixed fixed right-0 left-0 z-[100] shrink-0 border-b border-zinc-800/80 bg-zinc-950/90 px-[var(--app-gutter)] pb-0 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
-            <div className="relative flex h-[var(--app-header-inner)] min-h-[var(--app-header-inner)] items-center justify-center">
+          <header className="tm-app-header tm-app-header-fixed fixed right-0 left-0 z-[100] shrink-0 border-b border-[var(--tm-border)] bg-[var(--tm-bg)]/80 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
+            <div className="tm-app-header__row relative flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-center">
               <h1 className="text-lg font-bold tracking-tight">Crack</h1>
               <button
                 type="button"
@@ -118,7 +118,7 @@ export default function AppLayout({
             </div>
           </header>
 
-          <main className="app-main app-main--internal-scroll relative z-10 w-full pt-[var(--app-header-block)] pb-0">
+          <main className="tm-app-main tm-app-main--internal-scroll relative z-10 flex w-full flex-col overflow-hidden pb-0 pt-[var(--tm-app-header-block)]">
             {uploadError ? (
               <p className="mx-4 shrink-0 px-4 text-sm text-red-300">{uploadError}</p>
             ) : null}
@@ -156,7 +156,7 @@ export default function AppLayout({
           />
         </div>
 
-        <AppBottomNavPortal />
+        <TabBarWrapper />
         <VisualViewportSync />
       </AppShellProvider>
     </RefreshContext.Provider>

@@ -1,17 +1,16 @@
 "use client";
 
-import { PullToRefresh } from "@/components/pull-to-refresh";
+import { TabScrollLayout } from "@/components/layout/TabScrollLayout";
 
 interface PagerPanelProps {
   onRefresh: () => void | Promise<void>;
   children: React.ReactNode;
 }
 
-export function PagerPanel({ onRefresh, children }: PagerPanelProps) {
+export function PagerPanel({ onRefresh: _onRefresh, children }: PagerPanelProps) {
   return (
-    <PullToRefresh onRefresh={onRefresh} className="app-pager-panel scroll-pb-end">
+    <TabScrollLayout className="px-[var(--app-gutter)] pt-[var(--app-gutter)]">
       {children}
-      <div className="scroll-end-touch" aria-hidden />
-    </PullToRefresh>
+    </TabScrollLayout>
   );
 }

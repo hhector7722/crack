@@ -322,7 +322,7 @@ export function SwipePager({
     <div
       ref={containerRef}
       className={cn(
-        "swipe-pager-root app-tab-swipe-root h-full w-full overflow-hidden",
+        "swipe-pager-root tm-tab-swipe-root h-full w-full overflow-hidden",
         dragging && "swipe-pager-root--dragging",
         className
       )}

@@ -48,15 +48,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}
-    >
+    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}>
       <head>
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon.png" />
       </head>
-      <body className="bg-zinc-950 font-sans text-zinc-100">
+      <body className="antialiased touch-manipulation">
         {children}
       </body>
     </html>

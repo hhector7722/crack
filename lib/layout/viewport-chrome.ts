@@ -1,6 +1,6 @@
 const TAB_BAR_SELECTOR = 'nav[aria-label="Navegacion principal"]';
 
-export const VIEWPORT_CHROME_SYNC_EVENT = "crack:viewport-chrome-sync";
+export const VIEWPORT_CHROME_SYNC_EVENT = "tm:viewport-chrome-sync";
 
 /** Espacio layout bajo el visual viewport (iOS PWA / barra dinámica). */
 export function measureChromeBottomLift(): number {
@@ -23,26 +23,24 @@ export function applyVisualViewportChrome(): void {
   const chromeBottom = measureChromeBottomLift();
   const root = document.documentElement;
 
-  root.style.setProperty("--app-vv-height", `${height}px`);
-  root.style.setProperty("--app-vv-offset-top", `${offsetTop}px`);
-  root.style.setProperty("--app-chrome-bottom", `${chromeBottom}px`);
-  root.style.setProperty("--app-shell-height", `${height + offsetTop}px`);
+  root.style.setProperty("--tm-vv-height", `${height}px`);
+  root.style.setProperty("--tm-vv-offset-top", `${offsetTop}px`);
+  root.style.setProperty("--tm-chrome-bottom", `${chromeBottom}px`);
+  root.style.setProperty("--tm-app-height", `${height + offsetTop}px`);
 }
 
 export function resetVisualViewportChrome(): void {
   if (typeof document === "undefined") return;
 
   const root = document.documentElement;
-  root.style.removeProperty("--app-vv-height");
-  root.style.removeProperty("--app-vv-offset-top");
-  root.style.removeProperty("--app-chrome-bottom");
-  root.style.removeProperty("--app-shell-height");
+  root.style.removeProperty("--tm-vv-height");
+  root.style.removeProperty("--tm-vv-offset-top");
+  root.style.removeProperty("--tm-chrome-bottom");
+  root.style.removeProperty("--tm-app-height");
 }
 
 function readTabBarCorePx(): number {
-  const raw = getComputedStyle(document.documentElement).getPropertyValue(
-    "--app-tabbar-core"
-  );
+  const raw = getComputedStyle(document.documentElement).getPropertyValue("--tm-tabbar-core");
   const parsed = parseFloat(raw);
   if (Number.isFinite(parsed) && parsed > 0) {
     return parsed;
@@ -62,30 +60,21 @@ export function readTabBarTop(): number {
     return nav.getBoundingClientRect().top;
   }
 
-  const shellRaw = getComputedStyle(document.documentElement).getPropertyValue(
-    "--app-tabbar-shell"
-  );
+  const shellRaw = getComputedStyle(document.documentElement).getPropertyValue("--tm-tabbar-shell");
   const shellPx = parseFloat(shellRaw);
-  const tabBarShell =
-    Number.isFinite(shellPx) && shellPx > 0 ? shellPx : readTabBarCorePx();
+  const tabBarShell = Number.isFinite(shellPx) && shellPx > 0 ? shellPx : readTabBarCorePx();
 
   return readVisibleViewportBottom() - tabBarShell;
 }
 
-/** Borde inferior de la TabBar (debe coincidir con el borde visible del viewport). */
-export function readTabBarBottom(): number {
-  const nav = document.querySelector<HTMLElement>(TAB_BAR_SELECTOR);
-  if (nav) {
-    return nav.getBoundingClientRect().bottom;
-  }
-
-  return readVisibleViewportBottom();
+function readLayoutContentBottom(): number {
+  return readTabBarTop();
 }
 
 /** Fija la altura de un contenedor flex desde su top hasta la TabBar. */
 export function syncLayoutAboveTabBar(root: HTMLElement): number {
   const top = root.getBoundingClientRect().top;
-  const height = Math.max(0, Math.floor(readTabBarTop() - top));
+  const height = Math.max(0, Math.floor(readLayoutContentBottom() - top));
 
   root.style.height = `${height}px`;
   root.style.maxHeight = `${height}px`;
