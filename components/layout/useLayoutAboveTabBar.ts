@@ -38,6 +38,7 @@ export function useLayoutAboveTabBar(
     observeNode(root.parentElement);
 
     const observeChromeNodes = () => {
+      observeNode(document.querySelector("[data-tm-bottom-chrome]"));
       observeNode(document.querySelector('nav[aria-label="Navegacion principal"]'));
     };
 

@@ -8,11 +8,14 @@
   --tm-muted: #71717a;
   --tm-accent: #fafafa;
   --tm-border: rgba(39, 39, 42, 0.8);
-  --tm-tabbar-height: 5rem;
-  --tm-tabbar-height-md: 4rem;
+  --tm-tabbar-height: 3.5rem;
+  --tm-tabbar-height-md: 3rem;
   --tm-tabbar-core: var(--tm-tabbar-height);
-  /* Solo 5rem: pb-safe ya vive dentro del h-20 (border-box). Sumar safe otra vez duplica la zona inferior. */
-  --tm-tabbar-shell: var(--tm-tabbar-height);
+  --tm-chrome-dots: 1.25rem;
+  --tm-chrome-fab: 3.5rem;
+  --tm-tabbar-shell: calc(
+    var(--tm-tabbar-core) + var(--tm-chrome-dots) + var(--tm-chrome-fab)
+  );
   --tm-chrome-bottom: 0px;
   --tab-bar-height: var(--tm-tabbar-shell);
   --tm-content-bottom: var(--tm-tabbar-shell);
@@ -37,8 +40,11 @@
 
 @media (min-width: 768px) {
   :root {
-    --tm-tabbar-shell: var(--tm-tabbar-height-md);
     --tm-tabbar-core: var(--tm-tabbar-height-md);
+    --tm-chrome-fab: 3rem;
+    --tm-tabbar-shell: calc(
+      var(--tm-tabbar-core) + var(--tm-chrome-dots) + var(--tm-chrome-fab)
+    );
   }
 }
 
@@ -192,16 +198,18 @@ html[data-modal-open] .tm-app-header-fixed {
   -webkit-overflow-scrolling: touch;
 }
 
-.tm-app-tabbar {
+.tm-bottom-chrome {
   box-sizing: border-box;
-  bottom: 0;
-  /* Sin lift en PWA: el teclado se compensa solo con foco en input (viewport-chrome.ts). */
   transform: none;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
 
-html[data-modal-open] .tm-app-tabbar {
+.tm-app-tabbar {
+  box-sizing: border-box;
+}
+
+html[data-modal-open] .tm-bottom-chrome {
   filter: blur(6px);
   opacity: 0.35;
   pointer-events: none;

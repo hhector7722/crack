@@ -8,7 +8,6 @@ import {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { TabBarWrapper } from "@/components/layout/TabBarWrapper";
 import { VisualViewportSync } from "@/components/layout/VisualViewportSync";
@@ -105,16 +104,8 @@ export default function AppLayout({
           />
 
           <header className="tm-app-header tm-app-header-fixed fixed right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
-            <div className="tm-app-header__row relative flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-center">
+            <div className="tm-app-header__row flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-center">
               <h1 className="text-lg font-bold tracking-tight">Crack</h1>
-              <button
-                type="button"
-                onClick={openCaptureMenu}
-                aria-label="Crear"
-                className="absolute right-0 flex h-10 min-h-10 w-10 min-w-10 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 shadow-lg shadow-black/40 transition-transform active:scale-95 sm:h-12 sm:min-h-12 sm:w-12 sm:min-w-12"
-              >
-                <Plus className="h-6 w-6" strokeWidth={2.5} />
-              </button>
             </div>
           </header>
 

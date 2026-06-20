@@ -1,3 +1,4 @@
+const BOTTOM_CHROME_SELECTOR = "[data-tm-bottom-chrome]";
 const TAB_BAR_SELECTOR = 'nav[aria-label="Navegacion principal"]';
 
 export const VIEWPORT_CHROME_SYNC_EVENT = "tm:viewport-chrome-sync";
@@ -65,8 +66,13 @@ function readVisibleViewportBottom(): number {
   return vv ? vv.offsetTop + vv.height : window.innerHeight;
 }
 
-/** Borde superior de la TabBar fija (fin del área útil del contenido). */
+/** Borde superior del chrome inferior fijo (fin del área útil del contenido). */
 export function readTabBarTop(): number {
+  const chrome = document.querySelector<HTMLElement>(BOTTOM_CHROME_SELECTOR);
+  if (chrome) {
+    return chrome.getBoundingClientRect().top;
+  }
+
   const nav = document.querySelector<HTMLElement>(TAB_BAR_SELECTOR);
   if (nav) {
     return nav.getBoundingClientRect().top;
