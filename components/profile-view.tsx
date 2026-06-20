@@ -184,30 +184,24 @@ export function ProfileView() {
               <summary className="cursor-pointer font-medium text-zinc-300">
                 Cómo crear el Atajo en iPhone
               </summary>
+              <p className="mt-3 text-xs leading-relaxed text-amber-300/90">
+                No busques «Recibir» en acciones. Activa primero Mostrar en hoja
+                de compartir (ⓘ) y la franja gris aparece sola arriba.
+              </p>
               <ol className="mt-3 list-decimal space-y-2 pl-5 text-xs leading-relaxed">
-                <li>Abre la app Atajos → + → Atajo.</li>
+                <li>Atajos → + → toca ⓘ → activa Mostrar en hoja de compartir.</li>
                 <li>
-                  Añade Recibir → Compartir (URLs, Texto, Páginas web de
-                  Safari).
+                  Toca Cualquier en la franja gris → solo URLs y Páginas web de
+                  Safari.
                 </li>
+                <li>Añade Obtener URL de Entrada del atajo.</li>
                 <li>
                   Añade Obtener contenido de URL → POST a{" "}
                   <span className="text-zinc-300">{apiUrl}</span>
                 </li>
                 <li>
-                  Cabecera:{" "}
-                  <code className="text-zinc-300">
-                    Authorization: Bearer TU_TOKEN
-                  </code>
-                </li>
-                <li>
-                  Cuerpo JSON:{" "}
-                  <code className="text-zinc-300">
-                    {`{"url":"[Entrada del atajo]"}`}
-                  </code>
-                </li>
-                <li>
-                  En Ajustes del atajo activa Mostrar en hoja de compartir.
+                  Cabecera Authorization: Bearer [tu token]. JSON: url = variable
+                  URL del paso anterior.
                 </li>
               </ol>
               <p className="mt-3 text-xs">

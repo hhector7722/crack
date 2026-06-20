@@ -28,33 +28,56 @@ Redespliega la app.
 
 ## 4. Crear el Atajo en iPhone
 
-1. Abre **Atajos** → **+** → **Atajo**
-2. **Añadir acción** → **Recibir** → **Compartir**
-   - Tipos: **URLs**, **Texto**, **Páginas web de Safari**
-3. **Añadir acción** → **Obtener contenido de URL**
-   - URL: `https://TU-DOMINIO.vercel.app/api/share-link`
-   - Método: **POST**
-   - Cabeceras:
+> **Importante:** No busques una acción llamada «Recibir» en la lista de acciones.
+> Esa parte **aparece sola** cuando activas «Mostrar en hoja de compartir».
+
+### Paso A — Activar la hoja de compartir (primero)
+
+1. Abre **Atajos** → botón **+** (nuevo atajo).
+2. Toca el **ⓘ** abajo a la derecha (o el nombre del atajo arriba → **Detalles**).
+3. Activa **Mostrar en hoja de compartir**.
+4. Vuelve al editor: arriba del atajo verás una franja gris tipo:
+   - *«Recibir **Cualquier** entrada de la hoja de compartir»*  
+   - o en inglés: *«Receive **Any** input from Share Sheet»*
+5. Toca **Cualquier** / **Any** → deja marcado solo:
+   - **URLs**
+   - **Páginas web de Safari** (o categoría **Web**)
+6. En *«Si no hay entrada»* deja **Continuar**.
+
+Si no ves esa franja gris, **Mostrar en hoja de compartir** no está activado.
+
+### Paso B — Acciones del atajo
+
+7. **Añadir acción** → busca **«URL»** → elige **«Obtener URL de Entrada del atajo»**  
+   (en inglés: *Get URLs from Shortcut Input*).  
+   Si compartes desde Safari/YouTube, esto extrae el enlace.
+8. **Añadir acción** → **«Obtener contenido de URL»** / *Get Contents of URL*:
+   - **URL:** `https://TU-DOMINIO.vercel.app/api/share-link`
+   - **Método:** POST
+   - **Cabeceras:**
      - `Authorization` → `Bearer TU_TOKEN_AQUI`
      - `Content-Type` → `application/json`
-   - Cuerpo de solicitud: **JSON**
-   - JSON:
-     ```json
-     {
-       "url": "[Entrada del atajo]"
-     }
-     ```
-     (Selecciona la variable **Entrada del atajo** / **Shortcut Input** en lugar del texto literal)
-4. (Opcional) **Mostrar notificación** → "Guardado en Crack"
-5. Toca el nombre del atajo arriba → **Ajustes del atajo**
-6. Activa **Mostrar en hoja de compartir**
-7. Nombre sugerido: **Guardar en Crack**
+   - **Cuerpo de solicitud:** JSON
+   - **Cuerpo JSON:** toca el campo `url` y elige la variable **URL** del paso anterior (no escribas texto fijo).
+9. (Opcional) **Mostrar notificación** → «Guardado en Crack»
+10. Nombra el atajo: **Guardar en Crack**
+
+### Si no encuentras una acción
+
+| Qué buscas | Prueba a buscar en Atajos |
+|------------|---------------------------|
+| Entrada compartida | Activa **Mostrar en hoja de compartir** (no es acción suelta) |
+| Extraer enlace | `URL`, `Obtener URL`, `Get URLs` |
+| Llamada API | `Obtener contenido de URL`, `Get Contents of URL` |
+| Variable del enlace | `Entrada del atajo`, `Shortcut Input` |
 
 ## 5. Probar
 
-1. Abre un vídeo en YouTube o un enlace en Safari
-2. **Compartir** → **Guardar en Crack**
-3. Abre Crack → **Notas** → debe aparecer la nota con el enlace
+1. Abre un vídeo en YouTube o un enlace en Safari.
+2. **Compartir** → desplázate → **Guardar en Crack**.
+3. Abre Crack → **Notas** → debe aparecer la nota con el enlace.
+
+Si el atajo no sale en Compartir: desplázate hasta el final de la hoja y toca **Más** / **Editar acciones** → activa tu atajo.
 
 ## Android (automático)
 
@@ -68,9 +91,11 @@ Si instalas la PWA en Android, **Crack** también puede aparecer en Compartir gr
 
 ## Solución de problemas
 
-| Error | Causa |
-|-------|--------|
+| Problema | Solución |
+|----------|----------|
+| No aparece «Recibir» al buscar acciones | Normal. Activa **Mostrar en hoja de compartir** en ⓘ |
+| No aparece la franja gris arriba | **Mostrar en hoja de compartir** desactivado |
+| Atajo no sale en Compartir | Compartir → **Más** → activar el atajo |
 | `Token inválido` | Token mal copiado o revocado |
 | `503` / service role | Falta `SUPABASE_SERVICE_ROLE_KEY` en Vercel |
-| `No se encontró URL` | El Atajo no pasa la URL en el JSON |
-| Atajo no aparece en Compartir | Falta activar "Mostrar en hoja de compartir" |
+| `No se encontró URL` | Falta paso «Obtener URL de Entrada del atajo» |
