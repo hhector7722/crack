@@ -104,7 +104,7 @@ export default function AppLayout({
             aria-hidden
           />
 
-          <header className="tm-app-header tm-app-header-fixed fixed right-0 left-0 z-[100] shrink-0 border-b border-[var(--tm-border)] bg-[var(--tm-bg)]/80 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur-md">
+          <header className="tm-app-header tm-app-header-fixed fixed right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
             <div className="tm-app-header__row relative flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-center">
               <h1 className="text-lg font-bold tracking-tight">Crack</h1>
               <button
