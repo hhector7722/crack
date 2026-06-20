@@ -128,13 +128,13 @@ export function ResizableEmptyCard() {
         touchAction: resizing ? "none" : "pan-y",
       }}
       className={cn(
-        "relative shrink-0 rounded-2xl bg-zinc-800 shadow-sm shadow-black/40 transition-shadow",
-        resizing && "ring-2 ring-zinc-500/80 ring-offset-2 ring-offset-zinc-950"
+        "relative shrink-0",
+        resizing && "outline outline-1 outline-dashed outline-zinc-700/60"
       )}
     >
       {resizing && (
         <div className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center">
-          <span className="rounded-full bg-zinc-700/90 px-3 py-1 text-xs font-medium text-zinc-300">
+          <span className="text-xs font-medium text-zinc-500">
             Desliza para ajustar altura
           </span>
         </div>

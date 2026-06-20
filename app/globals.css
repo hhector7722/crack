@@ -100,9 +100,15 @@ html[data-modal-open='true'] .marbella-fixed-bottombar {
 
 .app-pager-panel {
   height: 100%;
-  padding: 1rem 1rem 1.5rem;
+  padding: 1rem 1rem calc(1.5rem + 5rem + env(safe-area-inset-bottom, 0px));
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+}
+
+@media (min-width: 768px) {
+  .app-pager-panel {
+    padding-bottom: calc(1.5rem + 4rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 /* Pager swipe iOS */

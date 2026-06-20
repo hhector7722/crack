@@ -29,7 +29,7 @@ export function AppBottomNav() {
   return (
     <nav
       ref={navRef}
-      className="marbella-fixed-bottombar fixed bottom-0 left-0 right-0 z-[95] flex h-20 items-center justify-around border-t border-zinc-800/60 bg-zinc-950/95 px-2 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.25)] backdrop-blur-md md:h-16 md:px-8 print:hidden"
+      className="marbella-fixed-bottombar fixed bottom-0 left-0 right-0 z-[95] flex h-20 items-center justify-around bg-zinc-950 px-2 pb-safe md:h-16 md:px-8 print:hidden"
       aria-label="Navegación principal"
     >
       {CRACK_NAV_ITEMS.map((item) => {

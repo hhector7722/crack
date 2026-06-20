@@ -138,7 +138,7 @@ export default function AppLayout({
             </p>
           )}
 
-          <main className="app-main pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-[calc(4rem+env(safe-area-inset-bottom))]">
+          <main className="app-main">
             <AppPager refreshKey={refreshKey} />
           </main>
 
