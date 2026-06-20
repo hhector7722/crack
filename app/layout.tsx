@@ -50,13 +50,18 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full overflow-hidden antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} dark overflow-hidden antialiased`}
     >
       <head>
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon.png" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){function s(){var h=(window.visualViewport&&window.visualViewport.height)||window.innerHeight;document.documentElement.style.setProperty('--app-height',h+'px')}s();window.addEventListener('resize',s);window.addEventListener('orientationchange',s);window.visualViewport&&window.visualViewport.addEventListener('resize',s)})();`,
+          }}
+        />
       </head>
-      <body className="h-full overflow-hidden bg-zinc-950 font-sans text-zinc-100">
+      <body className="overflow-hidden bg-zinc-950 font-sans text-zinc-100">
         {children}
       </body>
     </html>

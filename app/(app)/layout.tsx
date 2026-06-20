@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { TabBar } from "@/components/tab-bar";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { AppPager } from "@/components/app-pager";
+import { ViewportHeight } from "@/components/viewport-height";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
 
@@ -104,6 +105,7 @@ export default function AppLayout({
       <AppShellProvider
         value={{ openCamera, openGallery, openCapture, openCaptureMenu }}
       >
+        <ViewportHeight />
         <div className="app-shell">
           <header className="app-header">
             <h1 className="text-lg font-bold tracking-tight">Crack</h1>
@@ -141,9 +143,9 @@ export default function AppLayout({
             onOpenChange={setSheetOpen}
             onSaved={bumpRefresh}
           />
-        </div>
 
-        <TabBar />
+          <TabBar />
+        </div>
       </AppShellProvider>
     </RefreshContext.Provider>
   );
