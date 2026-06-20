@@ -182,31 +182,24 @@ export function ProfileView() {
 
             <details className="pt-2 text-sm text-zinc-400">
               <summary className="cursor-pointer font-medium text-zinc-300">
-                Cómo crear el Atajo en iPhone
+                Atajo iPhone (recomendado: portapapeles)
               </summary>
-              <p className="mt-3 text-xs leading-relaxed text-amber-300/90">
-                No busques «Recibir» en acciones. Activa primero Mostrar en hoja
-                de compartir (ⓘ) y la franja gris aparece sola arriba.
+              <p className="mt-3 text-xs leading-relaxed text-emerald-300/90">
+                Si no puedes activar «Mostrar en hoja de compartir», usa este
+                método: Compartir → Copiar enlace → ejecutar atajo.
               </p>
               <ol className="mt-3 list-decimal space-y-2 pl-5 text-xs leading-relaxed">
-                <li>Atajos → + → toca ⓘ → activa Mostrar en hoja de compartir.</li>
+                <li>Obtener contenido del portapapeles</li>
+                <li>Obtener URL de [portapapeles]</li>
                 <li>
-                  Toca Cualquier en la franja gris → solo URLs y Páginas web de
-                  Safari.
-                </li>
-                <li>Añade Obtener URL de Entrada del atajo.</li>
-                <li>
-                  Añade Obtener contenido de URL → POST a{" "}
+                  Obtener contenido de URL → POST a{" "}
                   <span className="text-zinc-300">{apiUrl}</span>
                 </li>
-                <li>
-                  Cabecera Authorization: Bearer [tu token]. JSON: url = variable
-                  URL del paso anterior.
-                </li>
+                <li>Authorization: Bearer [token]. JSON: url = variable URL</li>
+                <li>ⓘ → Añadir a pantalla de inicio</li>
               </ol>
-              <p className="mt-3 text-xs">
-                Guía completa:{" "}
-                <span className="text-zinc-300">docs/ios-shortcuts.md</span>
+              <p className="mt-3 text-xs text-zinc-500">
+                Hoja Compartir directa: docs/ios-shortcuts.md (método B)
               </p>
             </details>
           </div>
