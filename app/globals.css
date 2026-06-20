@@ -4,6 +4,7 @@
   --background: #09090b;
   --foreground: #fafafa;
   --app-height: 100dvh;
+  --app-chrome-height: 4rem;
   --crack-ios-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --crack-page-push-ms: 360ms;
   --crack-modal-enter-ms: 260ms;
@@ -60,14 +61,25 @@ body {
 
 .app-header {
   z-index: 30;
+  box-sizing: border-box;
   display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  background: rgb(9 9 11 / 0.95);
-  padding: 0.75rem 1rem;
-  padding-top: max(0.75rem, env(safe-area-inset-top, 0px));
-  backdrop-filter: blur(16px);
+  height: calc(var(--app-chrome-height) + env(safe-area-inset-top, 0px));
+  min-height: calc(var(--app-chrome-height) + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 1rem 0;
+  background: #09090b;
+}
+
+.app-chrome-bar {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: calc(var(--app-chrome-height) + env(safe-area-inset-bottom, 0px));
+  min-height: calc(var(--app-chrome-height) + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: #09090b;
 }
 
 .app-main {
@@ -100,15 +112,10 @@ html[data-modal-open='true'] .marbella-fixed-bottombar {
 
 .app-pager-panel {
   height: 100%;
-  padding: 1rem 1rem calc(1.5rem + 5rem + env(safe-area-inset-bottom, 0px));
+  padding: 1rem 1rem
+    calc(1.5rem + var(--app-chrome-height) + env(safe-area-inset-bottom, 0px));
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
-}
-
-@media (min-width: 768px) {
-  .app-pager-panel {
-    padding-bottom: calc(1.5rem + 4rem + env(safe-area-inset-bottom, 0px));
-  }
 }
 
 /* Pager swipe iOS */
