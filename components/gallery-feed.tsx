@@ -7,7 +7,6 @@ import { fetchItems, deleteItem } from "@/lib/items";
 import { deleteFile, getSignedUrl } from "@/lib/storage";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
 import { ItemDetail } from "@/components/item-detail";
-import { cn } from "@/lib/utils";
 import type { Item } from "@/lib/types";
 
 interface GalleryFeedProps {
@@ -149,13 +148,7 @@ export function GalleryFeed({
             <button
               type="button"
               onClick={() => handleSelect(item)}
-              className={cn(
-                "aspect-square w-full overflow-hidden rounded-md active:opacity-80",
-                compact ? "bg-zinc-100" : "bg-zinc-800",
-                compact
-                  ? "shadow-sm shadow-zinc-400/50"
-                  : "shadow-sm shadow-black/40"
-              )}
+              className="aspect-square w-full overflow-hidden rounded-md bg-zinc-800 shadow-sm shadow-black/40 active:opacity-80"
             >
               {url ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -166,7 +159,7 @@ export function GalleryFeed({
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center">
-                  <Loader2 className={cn("h-4 w-4 animate-spin", compact ? "text-zinc-300" : "text-zinc-600")} />
+                  <Loader2 className="h-4 w-4 animate-spin text-zinc-600" />
                 </div>
               )}
             </button>

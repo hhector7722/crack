@@ -13,7 +13,7 @@ interface HomeDashboardProps {
 
 function SectionCard({ children }: { children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm">
+    <section className="rounded-2xl bg-zinc-800 p-4 shadow-sm shadow-black/40">
       {children}
     </section>
   );
@@ -36,7 +36,6 @@ export function HomeDashboard({ refreshKey = 0 }: HomeDashboardProps) {
           <NoteList
             refreshKey={combinedRefresh}
             compact
-            light
             onSelect={setSelectedItem}
           />
         </SectionCard>
@@ -55,7 +54,6 @@ export function HomeDashboard({ refreshKey = 0 }: HomeDashboardProps) {
           <AudioFeed
             refreshKey={combinedRefresh}
             compact
-            light
             onSelect={setSelectedItem}
           />
         </SectionCard>

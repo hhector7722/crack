@@ -8,10 +8,9 @@ import { cn } from "@/lib/utils";
 interface LinkNotePreviewProps {
   url: string;
   itemTitle?: string | null;
-  light?: boolean;
 }
 
-export function LinkNotePreview({ url, itemTitle, light }: LinkNotePreviewProps) {
+export function LinkNotePreview({ url, itemTitle }: LinkNotePreviewProps) {
   const [previewTitle, setPreviewTitle] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,19 +57,9 @@ export function LinkNotePreview({ url, itemTitle, light }: LinkNotePreviewProps)
 
   return (
     <div className="flex items-center gap-3 py-3">
-      <div
-        className={cn(
-          "flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md",
-          light ? "bg-zinc-100 shadow-sm shadow-zinc-400/50" : "bg-zinc-800 shadow-sm shadow-black/40"
-        )}
-      >
+      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-zinc-900 shadow-sm shadow-black/40">
         {loading ? (
-          <Loader2
-            className={cn(
-              "h-5 w-5 animate-spin",
-              light ? "text-zinc-400" : "text-zinc-500"
-            )}
-          />
+          <Loader2 className="h-5 w-5 animate-spin text-zinc-600" />
         ) : image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -80,18 +69,11 @@ export function LinkNotePreview({ url, itemTitle, light }: LinkNotePreviewProps)
             onError={() => setImage(null)}
           />
         ) : (
-          <Link2
-            className={cn("h-6 w-6", light ? "text-zinc-400" : "text-zinc-500")}
-          />
+          <Link2 className="h-6 w-6 text-zinc-500" />
         )}
       </div>
 
-      <p
-        className={cn(
-          "min-w-0 flex-1 truncate text-sm font-semibold",
-          light ? "text-zinc-800" : "text-zinc-100"
-        )}
-      >
+      <p className="min-w-0 flex-1 truncate text-sm font-semibold text-zinc-100">
         {displayTitle}
       </p>
 
@@ -99,10 +81,7 @@ export function LinkNotePreview({ url, itemTitle, light }: LinkNotePreviewProps)
         type="button"
         onClick={openLink}
         aria-label="Abrir enlace"
-        className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center active:opacity-60",
-          light ? "text-zinc-600" : "text-zinc-300"
-        )}
+        className="flex h-9 w-9 shrink-0 items-center justify-center text-zinc-300 active:opacity-60"
       >
         <ExternalLink className="h-5 w-5" strokeWidth={2} />
       </button>

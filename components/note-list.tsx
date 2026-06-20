@@ -8,25 +8,22 @@ import { deleteFile } from "@/lib/storage";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
 import { ItemDetail } from "@/components/item-detail";
 import { LinkNotePreview } from "@/components/link-note-preview";
-import { displayValue, getNoteUrl, cn } from "@/lib/utils";
+import { displayValue, getNoteUrl } from "@/lib/utils";
 import type { Item } from "@/lib/types";
 
 interface NoteListProps {
   refreshKey?: number;
   compact?: boolean;
-  light?: boolean;
   onSelect?: (item: Item) => void;
 }
 
 function NoteRow({
   item,
   compact,
-  light,
   onClick,
 }: {
   item: Item;
   compact?: boolean;
-  light?: boolean;
   onClick: () => void;
 }) {
   const url = getNoteUrl(item);
@@ -35,9 +32,7 @@ function NoteRow({
   const title = displayValue(item.title) === " " ? "Sin título" : item.title;
 
   if (url) {
-    return (
-      <LinkNotePreview url={url} itemTitle={item.title} light={light} />
-    );
+    return <LinkNotePreview url={url} itemTitle={item.title} />;
   }
 
   function handleClick() {
@@ -51,14 +46,7 @@ function NoteRow({
         onClick={handleClick}
         className="flex w-full py-3 text-left last:border-b-0 active:opacity-70"
       >
-        <p
-          className={cn(
-            "line-clamp-2 text-sm",
-            light ? "text-zinc-600" : "text-zinc-300"
-          )}
-        >
-          {summary}
-        </p>
+        <p className="line-clamp-2 text-sm text-zinc-300">{summary}</p>
       </button>
     );
   }
@@ -71,7 +59,7 @@ function NoteRow({
   );
 }
 
-export function NoteList({ refreshKey = 0, compact, light, onSelect }: NoteListProps) {
+export function NoteList({ refreshKey = 0, compact, onSelect }: NoteListProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -162,7 +150,7 @@ export function NoteList({ refreshKey = 0, compact, light, onSelect }: NoteListP
     );
   }
 
-  const listClass = compact ? "divide-y divide-zinc-100" : "content-list";
+  const listClass = compact ? "divide-y divide-zinc-700/50" : "content-list";
 
   return (
     <>
@@ -173,7 +161,6 @@ export function NoteList({ refreshKey = 0, compact, light, onSelect }: NoteListP
               key={item.id}
               item={item}
               compact
-              light={light}
               onClick={() => handleClick(item)}
             />
           ) : (

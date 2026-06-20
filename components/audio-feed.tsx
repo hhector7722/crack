@@ -13,11 +13,10 @@ import type { Item } from "@/lib/types";
 interface AudioFeedProps {
   refreshKey?: number;
   compact?: boolean;
-  light?: boolean;
   onSelect?: (item: Item) => void;
 }
 
-export function AudioFeed({ refreshKey = 0, compact, light, onSelect }: AudioFeedProps) {
+export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [mediaUrls, setMediaUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -205,7 +204,7 @@ export function AudioFeed({ refreshKey = 0, compact, light, onSelect }: AudioFee
     );
   }
 
-  const listClass = compact ? "divide-y divide-zinc-100" : "content-list";
+  const listClass = compact ? "divide-y divide-zinc-700/50" : "content-list";
 
   return (
     <>
@@ -218,7 +217,6 @@ export function AudioFeed({ refreshKey = 0, compact, light, onSelect }: AudioFee
               progress={playingId === item.id ? progress : 0}
               onTogglePlay={() => toggleAudioPlay(item)}
               onOpen={onSelect ? () => handleOpen(item) : undefined}
-              light={light}
             />
           );
 

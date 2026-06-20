@@ -15,7 +15,7 @@ const PAGE_COUNT = 3;
 
 function SectionCard({ children }: { children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm">
+    <section className="rounded-2xl bg-zinc-800 p-4 shadow-sm shadow-black/40">
       {children}
     </section>
   );
@@ -106,7 +106,6 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             <NoteList
               refreshKey={combinedRefresh}
               compact
-              light
               onSelect={setSelectedItem}
             />
           </SectionCard>
@@ -125,7 +124,6 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             <AudioFeed
               refreshKey={combinedRefresh}
               compact
-              light
               onSelect={setSelectedItem}
             />
           </SectionCard>
