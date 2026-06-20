@@ -132,7 +132,10 @@ export function LoginForm() {
         setError(mapAuthError(authError.message));
       } else {
         sessionStorage.removeItem(PENDING_EMAIL_KEY);
-        router.replace("/");
+        const next = searchParams.get("next");
+        const safeNext =
+          next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+        router.replace(safeNext);
         router.refresh();
       }
     } catch (err) {

@@ -23,7 +23,7 @@ cp .env.example .env.local
 ### 2. Supabase
 
 1. Crear proyecto en [supabase.com](https://supabase.com)
-2. SQL Editor → ejecutar [`supabase/migrations/001_init.sql`](supabase/migrations/001_init.sql)
+2. SQL Editor → ejecutar [`supabase/migrations/001_init.sql`](supabase/migrations/001_init.sql) y [`supabase/migrations/002_share_tokens.sql`](supabase/migrations/002_share_tokens.sql)
 3. Storage → verificar bucket `crack-files` (privado)
 4. Authentication → Email provider activado
 5. Authentication → URL Configuration:
@@ -116,6 +116,20 @@ El plan gratuito de Supabase limita magic links (~3–4 emails/hora). Si ves *em
 1. Abrir la app en Safari
 2. Compartir → **Añadir a pantalla de inicio**
 3. La app se abre en modo standalone
+
+## Compartir enlaces desde otras apps
+
+### iPhone (Atajos — gratis)
+
+1. Ejecuta la migración `002_share_tokens.sql` y configura `SUPABASE_SERVICE_ROLE_KEY` en Vercel
+2. En Crack → **Perfil** → **Generar token**
+3. Crea un Atajo siguiendo [`docs/ios-shortcuts.md`](docs/ios-shortcuts.md)
+
+Tras configurarlo, **Guardar en Crack** aparece en el menú Compartir de Safari, YouTube, etc.
+
+### Android (PWA instalada)
+
+Con la PWA instalada, Crack puede aparecer directamente en Compartir (manifest `share_target` → `/share`).
 
 ## Estructura
 
