@@ -5,6 +5,7 @@ import { NoteList } from "@/components/note-list";
 import { GalleryFeed } from "@/components/gallery-feed";
 import { AudioFeed } from "@/components/audio-feed";
 import { ProfileView } from "@/components/profile-view";
+import { ResizableEmptyCard } from "@/components/resizable-empty-card";
 import { SwipePager } from "@/components/swipe-pager";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 import { ItemDetail } from "@/components/item-detail";
@@ -111,6 +112,8 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
                   onSelect={setSelectedItem}
                 />
               </SectionCard>
+
+              <ResizableEmptyCard />
             </div>
           </PullToRefresh>
 
