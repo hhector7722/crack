@@ -9,7 +9,6 @@ import {
   useEffect,
 } from "react";
 import { useRouter } from "next/navigation";
-import { TabBar } from "@/components/tab-bar";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { AppPager } from "@/components/app-pager";
 import { ViewportHeight } from "@/components/viewport-height";
@@ -157,8 +156,6 @@ export default function AppLayout({
             onOpenChange={setSheetOpen}
             onSaved={bumpRefresh}
           />
-
-          <TabBar />
         </div>
       </AppShellProvider>
     </RefreshContext.Provider>

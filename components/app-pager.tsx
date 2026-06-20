@@ -7,7 +7,7 @@ import { AudioFeed } from "@/components/audio-feed";
 import { ProfileView } from "@/components/profile-view";
 import { ResizableEmptyCard } from "@/components/resizable-empty-card";
 import { SwipePager } from "@/components/swipe-pager";
-import { PullToRefresh } from "@/components/pull-to-refresh";
+import { PagerPanel } from "@/components/pager-panel";
 import { ItemDetail } from "@/components/item-detail";
 import { usePager } from "@/components/app-shell-context";
 import { useBumpRefresh } from "@/app/(app)/layout";
@@ -68,24 +68,24 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
     <>
       <div className="h-full">
         <SwipePager index={pagerIndex} onIndexChange={handleIndexChange}>
-          <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
+          <PagerPanel pageIndex={0} onRefresh={handleRefresh}>
             <div className="pb-2">
               <AudioFeed
                 refreshKey={combinedRefresh}
                 onSelect={setSelectedItem}
               />
             </div>
-          </PullToRefresh>
+          </PagerPanel>
 
-          <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
+          <PagerPanel pageIndex={1} onRefresh={handleRefresh}>
             <GalleryFeed
               refreshKey={combinedRefresh}
               columns={5}
               onSelect={setSelectedItem}
             />
-          </PullToRefresh>
+          </PagerPanel>
 
-          <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
+          <PagerPanel pageIndex={2} onRefresh={handleRefresh}>
             <div className="space-y-5 pb-2">
               <SectionCard>
                 <NoteList
@@ -115,20 +115,20 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
 
               <ResizableEmptyCard />
             </div>
-          </PullToRefresh>
+          </PagerPanel>
 
-          <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
+          <PagerPanel pageIndex={3} onRefresh={handleRefresh}>
             <div className="pb-2">
               <NoteList
                 refreshKey={combinedRefresh}
                 onSelect={setSelectedItem}
               />
             </div>
-          </PullToRefresh>
+          </PagerPanel>
 
-          <PullToRefresh onRefresh={handleRefresh} className="app-pager-panel">
+          <PagerPanel pageIndex={4} onRefresh={handleRefresh}>
             <ProfileView />
-          </PullToRefresh>
+          </PagerPanel>
         </SwipePager>
       </div>
 
