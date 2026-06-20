@@ -67,7 +67,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
   return (
     <>
         <SwipePager
-          className="min-h-0 min-w-0 flex-1"
+          className="w-full"
           index={pagerIndex}
           onIndexChange={handleIndexChange}
         >

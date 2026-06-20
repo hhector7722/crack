@@ -19,14 +19,18 @@ const CRACK_NAV_ITEMS: CrackNavItem[] = [
 ];
 
 const TABBAR_NAV_CLASS =
-  "tm-app-tabbar fixed bottom-0 left-0 right-0 z-[95] flex h-[var(--tm-tabbar-core)] items-center justify-around border-t border-[var(--tm-border)] bg-[var(--tm-tabbar-bg-hex)] px-2 pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.1)] backdrop-blur-md md:px-8";
+  "tm-app-tabbar fixed bottom-0 left-0 right-0 z-[95] flex flex-col justify-end bg-[var(--tm-tabbar-bg-hex)] pb-safe shadow-[0_-4px_20px_rgba(0,0,0,0.1)] backdrop-blur-md";
+
+const TABBAR_ROW_CLASS =
+  "flex h-[var(--tm-tabbar-core)] w-full items-center justify-around border-t border-[var(--tm-border)] px-2 md:px-8";
 
 export function TabBar() {
   const { pagerIndex, navigateToPage } = useAppShell();
 
   return (
     <nav className={TABBAR_NAV_CLASS} aria-label="Navegacion principal">
-      {CRACK_NAV_ITEMS.map((item) => {
+      <div className={TABBAR_ROW_CLASS}>
+        {CRACK_NAV_ITEMS.map((item) => {
         const active = pagerIndex === item.pageIndex;
         const Icon = item.icon;
 
@@ -50,6 +54,7 @@ export function TabBar() {
           </button>
         );
       })}
+      </div>
     </nav>
   );
 }

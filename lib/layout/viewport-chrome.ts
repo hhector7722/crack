@@ -2,14 +2,26 @@ const TAB_BAR_SELECTOR = 'nav[aria-label="Navegacion principal"]';
 
 export const VIEWPORT_CHROME_SYNC_EVENT = "tm:viewport-chrome-sync";
 
-/** Espacio layout bajo el visual viewport (iOS PWA / barra dinámica). */
+function isFormControlFocused(): boolean {
+  if (typeof document === "undefined") return false;
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement)) return false;
+  if (active.isContentEditable) return true;
+  return (
+    active instanceof HTMLInputElement ||
+    active instanceof HTMLTextAreaElement ||
+    active instanceof HTMLSelectElement
+  );
+}
+
+/** Espacio layout bajo el visual viewport (solo con teclado real abierto). */
 export function measureChromeBottomLift(): number {
   if (typeof window === "undefined") return 0;
   const vv = window.visualViewport;
   if (!vv) return 0;
-  // Solo compensar con teclado abierto; sin teclado evita TabBar flotante en PWA iOS.
-  const keyboardOpen = vv.height < window.innerHeight * 0.82;
-  if (!keyboardOpen) return 0;
+  // En PWA iOS vv.height < innerHeight sin teclado; exigir foco en control de formulario.
+  if (!isFormControlFocused()) return 0;
+  if (vv.height >= window.innerHeight * 0.75) return 0;
   return Math.max(0, Math.round(window.innerHeight - vv.offsetTop - vv.height));
 }
 

@@ -38,8 +38,13 @@ export function VisualViewportSync() {
     sync();
     const frame = requestAnimationFrame(sync);
 
+    const handleFocusIn = (event: FocusEvent) => {
+      syncAfterFormControl(event.target);
+    };
+
     const handleFocusOut = (event: FocusEvent) => {
       syncAfterFormControl(event.target);
+      window.setTimeout(sync, 0);
     };
 
     const handlePageShow = () => {
@@ -60,6 +65,7 @@ export function VisualViewportSync() {
     window.addEventListener("orientationchange", sync);
     window.addEventListener("pageshow", handlePageShow);
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("focusin", handleFocusIn);
     document.addEventListener("focusout", handleFocusOut);
 
     return () => {
@@ -70,6 +76,7 @@ export function VisualViewportSync() {
       window.removeEventListener("orientationchange", sync);
       window.removeEventListener("pageshow", handlePageShow);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("focusout", handleFocusOut);
     };
   }, [pathname]);
