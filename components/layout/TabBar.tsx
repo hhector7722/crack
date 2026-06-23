@@ -23,7 +23,7 @@ export function TabBar() {
 
   return (
     <nav
-      className="tm-app-tabbar flex h-[var(--tm-tabbar-core)] w-full shrink-0 items-center justify-around px-2 md:px-8"
+      className="tm-app-tabbar pointer-events-none flex h-[var(--tm-tabbar-core)] w-full shrink-0 items-center justify-around px-2 md:px-8"
       aria-label="Navegacion principal"
     >
       {CRACK_NAV_ITEMS.map((item) => {
@@ -35,7 +35,7 @@ export function TabBar() {
             key={item.name}
             type="button"
             className={cn(
-              "flex min-h-12 min-w-12 flex-1 items-end justify-center pb-1",
+              "pointer-events-auto flex min-h-12 min-w-12 flex-1 items-end justify-center pb-1",
               "transition-[color,transform,opacity] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-95",
               active ? "text-[var(--tm-accent)]" : "text-[var(--tm-muted)]"
             )}

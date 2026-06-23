@@ -13,7 +13,7 @@ export function PagerDots() {
 
   return (
     <div
-      className="flex h-[var(--tm-chrome-dots)] min-h-[var(--tm-chrome-dots)] shrink-0 items-center justify-center gap-1.5"
+      className="pointer-events-auto flex h-[var(--tm-chrome-dots)] min-h-[var(--tm-chrome-dots)] shrink-0 items-center justify-center gap-1.5"
       role="tablist"
       aria-label="Paginas"
     >
