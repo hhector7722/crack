@@ -18,7 +18,7 @@ export function FabButton({ onClick, className }: FabButtonProps) {
         "fixed left-1/2 z-50 flex h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 shadow-lg shadow-black/40 transition-transform active:scale-95",
         className
       )}
-      style={{ bottom: "calc(3.75rem + env(safe-area-inset-bottom))" }}
+      style={{ bottom: "3.75rem" }}
     >
       <Plus className="h-7 w-7" strokeWidth={2.5} />
     </button>

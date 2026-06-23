@@ -15,14 +15,12 @@
   --tm-tabbar-shell: calc(
     var(--tm-tabbar-core) + var(--tm-chrome-dots)
   );
-  --tm-bottom-chrome-block: calc(
-    var(--tm-tabbar-shell) + env(safe-area-inset-bottom, 0px)
-  );
+  --tm-bottom-chrome-block: var(--tm-tabbar-shell);
   --tm-chrome-bottom: 0px;
   --tab-bar-height: var(--tm-bottom-chrome-block);
   --tm-content-bottom: var(--tm-bottom-chrome-block);
   --tm-app-header-inner: 3rem;
-  --tm-app-header-pt: max(0.75rem, env(safe-area-inset-top, 0px));
+  --tm-app-header-pt: 0.75rem;
   --tm-app-header-pb: 0.5rem;
   --tm-app-header-block: calc(
     var(--tm-app-header-pt) + var(--tm-app-header-inner) + var(--tm-app-header-pb)
@@ -47,7 +45,7 @@
 }
 
 .tm-bottom-chrome {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: 0px;
 }
 
 @media (min-width: 1024px) {
@@ -125,17 +123,6 @@ html[data-modal-open] .tm-app-main {
   touch-action: none;
 }
 
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
-.pt-safe {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-
-.safe-top {
-  padding-top: env(safe-area-inset-top, 0px);
-}
 
 .scroll-end-touch {
   min-height: var(--tm-bottom-chrome-block);
