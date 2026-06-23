@@ -105,7 +105,7 @@ export default function AppLayout({
             aria-hidden
           />
 
-          <header className="tm-app-header tm-app-header-fixed fixed right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-12">
+          <header className="tm-app-header tm-app-header-fixed fixed top-0 right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-12">
             <div className="tm-app-header__row flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-between px-2">
               <div />
               <h1 className="text-lg font-bold tracking-tight">Crack</h1>
@@ -120,7 +120,7 @@ export default function AppLayout({
             </div>
           </header>
 
-          <main className="tm-app-main tm-app-main--internal-scroll relative z-10 flex w-full flex-col overflow-hidden pb-0 pt-0">
+          <main className="tm-app-main tm-app-main--internal-scroll relative z-10 flex w-full flex-col overflow-hidden pb-0 pt-[var(--tm-app-header-block)]">
             {uploadError ? (
               <p className="mx-4 shrink-0 px-4 text-sm text-red-300">{uploadError}</p>
             ) : null}
