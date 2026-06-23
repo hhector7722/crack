@@ -207,7 +207,7 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
         )}
       </div>
 
-      <div className="mt-auto mx-auto w-[98%] pb-8 pt-4">
+      <div className="mt-auto mx-auto w-[98%] pt-4">
         <BottomNavCard />
       </div>
 

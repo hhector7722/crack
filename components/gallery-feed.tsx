@@ -204,7 +204,7 @@ export function GalleryFeed({
         })}
       </div>
 
-      <div className="mt-auto mx-auto w-[98%] pb-8 pt-4">
+      <div className="mt-auto mx-auto w-[98%] pt-4">
         <BottomNavCard />
       </div>
 
