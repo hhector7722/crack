@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { fetchItems, deleteItem } from "@/lib/items";
 import { deleteFile, getSignedUrl } from "@/lib/storage";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
+import { BottomNavCard } from "@/components/layout/BottomNavCard";
 import { ItemDetail } from "@/components/item-detail";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useItemShare } from "@/hooks/use-item-share";
@@ -201,6 +202,10 @@ export function GalleryFeed({
             </SwipeToDelete>
           );
         })}
+      </div>
+
+      <div className="mx-auto w-[98%] pb-8 pt-4">
+        <BottomNavCard />
       </div>
 
       {selectedItem && !onSelect && (

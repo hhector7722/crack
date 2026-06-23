@@ -10,7 +10,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Settings, X } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
-import { TabBarWrapper } from "@/components/layout/TabBarWrapper";
+
 import { VisualViewportSync } from "@/components/layout/VisualViewportSync";
 import { AppPager } from "@/components/app-pager";
 import { ProfileView } from "@/components/profile-view";
@@ -165,7 +165,7 @@ export default function AppLayout({
           />
         </div>
 
-        <TabBarWrapper />
+
         <VisualViewportSync />
       </AppShellProvider>
     </RefreshContext.Provider>

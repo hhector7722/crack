@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { fetchItems, deleteItem } from "@/lib/items";
 import { deleteFile } from "@/lib/storage";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
+import { BottomNavCard } from "@/components/layout/BottomNavCard";
 import { ItemDetail } from "@/components/item-detail";
 import { CompactLinkItem, CompactNoteItem } from "@/components/compact-items";
 import { useLongPress } from "@/hooks/use-long-press";
@@ -204,6 +205,10 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
             </SwipeToDelete>
           )
         )}
+      </div>
+
+      <div className="mx-auto w-[98%] pb-8 pt-4">
+        <BottomNavCard />
       </div>
 
       {selectedItem && !onSelect && (

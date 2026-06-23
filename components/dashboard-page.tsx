@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { fetchItems } from "@/lib/items";
 import { getSignedUrl } from "@/lib/storage";
 import { usePager } from "@/components/app-shell-context";
+import { resolveLinkTitle, titleFromUrl } from "@/lib/link-preview";
+import { BottomNavCard } from "@/components/layout/BottomNavCard";
 import { displayValue, getNoteUrl } from "@/lib/utils";
 import type { Item } from "@/lib/types";
 import { CompactAudioItem, CompactLinkItem, CompactNoteItem } from "@/components/compact-items";
@@ -144,6 +146,8 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
           </div>
         </SectionWrapper>
       )}
+
+      <BottomNavCard />
     </div>
   );
 }
