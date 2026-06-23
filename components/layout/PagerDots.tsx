@@ -10,17 +10,15 @@ import {
 
 export function PagerDots() {
   const { pagerIndex, navigateToPage } = useAppShell();
-  const visualDot = pagerIndexToDotIndex(pagerIndex);
 
   return (
     <div
       className="flex h-[var(--tm-chrome-dots)] min-h-[var(--tm-chrome-dots)] shrink-0 items-center justify-center gap-1.5"
       role="tablist"
-      aria-label="Paginas centrales"
+      aria-label="Paginas"
     >
       {PAGER_PATHS.map((path, dotIndex) => {
-        const pageIndex = PAGER_DOT_INDICES[dotIndex];
-        const active = visualDot === pageIndex;
+        const active = pagerIndex === dotIndex;
 
         return (
           <button
@@ -29,7 +27,7 @@ export function PagerDots() {
             role="tab"
             aria-selected={active}
             aria-label={`Pagina ${dotIndex + 1}`}
-            onClick={() => navigateToPage(pageIndex)}
+            onClick={() => navigateToPage(dotIndex)}
             className={cn(
               "h-1.5 shrink-0 rounded-full bg-white transition-all duration-300",
               active ? "w-4 opacity-100" : "w-1.5 opacity-50"

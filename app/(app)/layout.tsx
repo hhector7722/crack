@@ -8,10 +8,12 @@ import {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
+import { Settings, X } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { TabBarWrapper } from "@/components/layout/TabBarWrapper";
 import { VisualViewportSync } from "@/components/layout/VisualViewportSync";
 import { AppPager } from "@/components/app-pager";
+import { ProfileView } from "@/components/profile-view";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
 
@@ -40,6 +42,7 @@ export default function AppLayout({
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<CaptureMode>("menu");
   const [sheetKey, setSheetKey] = useState(0);
+  const [showProfile, setShowProfile] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -104,8 +107,17 @@ export default function AppLayout({
           />
 
           <header className="tm-app-header tm-app-header-fixed fixed right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top))]">
-            <div className="tm-app-header__row flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-center">
+            <div className="tm-app-header__row flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-between px-2">
+              <div />
               <h1 className="text-lg font-bold tracking-tight">Crack</h1>
+              <button
+                type="button"
+                onClick={() => setShowProfile((v) => !v)}
+                aria-label="Ajustes"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors active:text-zinc-100"
+              >
+                {showProfile ? <X className="h-5 w-5" /> : <Settings className="h-5 w-5" />}
+              </button>
             </div>
           </header>
 
@@ -118,7 +130,13 @@ export default function AppLayout({
                 Subiendo imagen...
               </p>
             ) : null}
-            <AppPager refreshKey={refreshKey} />
+            {showProfile ? (
+              <div className="flex-1 overflow-y-auto px-4 pb-6">
+                <ProfileView />
+              </div>
+            ) : (
+              <AppPager refreshKey={refreshKey} />
+            )}
           </main>
 
           <input

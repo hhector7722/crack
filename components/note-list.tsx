@@ -17,6 +17,7 @@ interface NoteListProps {
   refreshKey?: number;
   compact?: boolean;
   onSelect?: (item: Item) => void;
+  filterType?: "note" | "link";
 }
 
 function NoteRow({
@@ -91,7 +92,7 @@ function NoteRow({
   );
 }
 
-export function NoteList({ refreshKey = 0, compact, onSelect }: NoteListProps) {
+export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: NoteListProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -175,10 +176,22 @@ export function NoteList({ refreshKey = 0, compact, onSelect }: NoteListProps) {
     );
   }
 
-  if (items.length === 0) {
+  function hasUrl(item: Item): boolean {
+    const url = getNoteUrl(item);
+    return !!url;
+  }
+
+  const filtered =
+    filterType === "link"
+      ? items.filter(hasUrl)
+      : filterType === "note"
+        ? items.filter((i) => !hasUrl(i))
+        : items;
+
+  if (filtered.length === 0) {
     return (
       <p className="py-6 text-center text-sm text-zinc-400">
-        Sin notas todavía
+        {filterType === "link" ? "Sin enlaces todavía" : "Sin notas todavía"}
       </p>
     );
   }
@@ -188,7 +201,7 @@ export function NoteList({ refreshKey = 0, compact, onSelect }: NoteListProps) {
   return (
     <>
       <div className={listClass}>
-        {items.map((item) =>
+        {filtered.map((item) =>
           compact ? (
             <NoteRow
               key={item.id}

@@ -1,24 +1,16 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { DashboardPage } from "@/components/dashboard-page";
 import { NoteList } from "@/components/note-list";
 import { GalleryFeed } from "@/components/gallery-feed";
 import { AudioFeed } from "@/components/audio-feed";
-import { ProfileView } from "@/components/profile-view";
 import { SwipePager } from "@/components/swipe-pager";
 import { PagerPanel } from "@/components/pager-panel";
 import { ItemDetail } from "@/components/item-detail";
 import { usePager } from "@/components/app-shell-context";
 import { useBumpRefresh } from "@/app/(app)/layout";
 import type { Item } from "@/lib/types";
-
-function SectionCard({ children }: { children: React.ReactNode }) {
-  return (
-    <section className="rounded-2xl bg-zinc-800 p-4 shadow-sm shadow-black/40">
-      {children}
-    </section>
-  );
-}
 
 interface AppPagerProps {
   refreshKey?: number;
@@ -72,6 +64,10 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
           onIndexChange={handleIndexChange}
         >
           <PagerPanel onRefresh={handleRefresh}>
+            <DashboardPage refreshKey={combinedRefresh} />
+          </PagerPanel>
+
+          <PagerPanel onRefresh={handleRefresh}>
             <div className="pb-2">
               <AudioFeed
                 refreshKey={combinedRefresh}
@@ -89,32 +85,12 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
           </PagerPanel>
 
           <PagerPanel onRefresh={handleRefresh}>
-            <div className="space-y-5 pb-2">
-              <SectionCard>
-                <NoteList
-                  refreshKey={combinedRefresh}
-                  compact
-                  onSelect={setSelectedItem}
-                />
-              </SectionCard>
-
-              <SectionCard>
-                <GalleryFeed
-                  refreshKey={combinedRefresh}
-                  columns={4}
-                  limit={12}
-                  compact
-                  onSelect={setSelectedItem}
-                />
-              </SectionCard>
-
-              <SectionCard>
-                <AudioFeed
-                  refreshKey={combinedRefresh}
-                  compact
-                  onSelect={setSelectedItem}
-                />
-              </SectionCard>
+            <div className="pb-2">
+              <NoteList
+                refreshKey={combinedRefresh}
+                filterType="note"
+                onSelect={setSelectedItem}
+              />
             </div>
           </PagerPanel>
 
@@ -122,13 +98,10 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             <div className="pb-2">
               <NoteList
                 refreshKey={combinedRefresh}
+                filterType="link"
                 onSelect={setSelectedItem}
               />
             </div>
-          </PagerPanel>
-
-          <PagerPanel onRefresh={handleRefresh}>
-            <ProfileView />
           </PagerPanel>
         </SwipePager>
       </div>
