@@ -179,7 +179,7 @@ export function GalleryFeed({
     columns === 5 ? "grid-cols-5" : columns === 4 ? "grid-cols-4" : "grid-cols-3";
 
   return (
-    <div className="mx-auto flex min-h-full w-full flex-col pt-[var(--tm-app-header-block)]">
+    <div className="mx-auto flex min-h-full w-full flex-col pb-32 pt-[var(--tm-app-header-block)]">
       <div className={`grid ${gridCols} gap-1`}>
         {visible.map((item) => {
           const url = item.file_url ? urls[item.file_url] : null;

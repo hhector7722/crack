@@ -184,7 +184,7 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
   const listClass = compact ? "divide-y divide-zinc-700/50" : "grid grid-cols-2 gap-x-4 gap-y-3 px-4 pt-2";
 
   return (
-    <div className="mx-auto flex min-h-full w-full flex-col pt-[var(--tm-app-header-block)]">
+    <div className="mx-auto flex min-h-full w-full flex-col pb-32 pt-[var(--tm-app-header-block)]">
       <div className={listClass}>
         {filtered.map((item) =>
           compact ? (
