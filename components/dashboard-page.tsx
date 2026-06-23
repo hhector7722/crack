@@ -24,7 +24,7 @@ type Categorized = {
 
 function SectionWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <section className="rounded-[32px] bg-[#1c1c1e] p-5">
+    <section className="rounded-2xl bg-[#1c1c1e] p-5">
       {children}
     </section>
   );
@@ -51,29 +51,29 @@ function CompactAudioItem({ item }: { item: Item }) {
     "Audio";
 
   return (
-    <div className="flex flex-col gap-2 py-1">
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          aria-label="Reproducir"
-          className="flex h-8 w-8 shrink-0 items-center justify-center text-xs font-bold text-zinc-200"
-        >
-          ▶
-        </button>
-        <div className="flex-1">
+    <div className="flex items-center gap-3 py-1">
+      <button
+        type="button"
+        aria-label="Reproducir"
+        className="flex h-8 w-8 shrink-0 items-center justify-center text-xs font-bold text-zinc-200"
+      >
+        ▶
+      </button>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="w-full">
           <AudioWaveform bars={bars} progress={0} active={false} />
         </div>
+        <p className="mt-1.5 line-clamp-1 text-[10px] text-zinc-500">
+          {transcript}
+        </p>
       </div>
-      <p className="line-clamp-1 text-[11px] text-zinc-500">
-        {transcript}
-      </p>
     </div>
   );
 }
 
 function ImageThumb({ url }: { url: string | null }) {
   return (
-    <div className="aspect-square w-full overflow-hidden rounded-xl bg-zinc-800/50">
+    <div className="aspect-square w-full overflow-hidden rounded-md bg-zinc-800/50">
       {url ? (
         <img src={url} alt="" className="h-full w-full object-cover transition-transform active:scale-95" />
       ) : (
@@ -140,7 +140,7 @@ function CompactLinkItem({ item }: { item: Item }) {
       rel="noopener noreferrer"
       className="flex items-center gap-3 overflow-hidden py-1 transition-opacity active:opacity-70"
     >
-      <div className="aspect-square h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-zinc-800/50">
+      <div className="aspect-square h-10 w-10 shrink-0 overflow-hidden rounded-md bg-zinc-800/50">
         {loading ? (
           <div className="flex h-full w-full items-center justify-center">
             <Loader2 className="h-3 w-3 animate-spin text-zinc-600" />
@@ -220,7 +220,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   if (!categorized) return null;
 
   return (
-    <div className="mx-auto w-[90%] space-y-5 pb-8 pt-4">
+    <div className="mx-auto w-[95%] space-y-5 pb-8 pt-4">
       {categorized.audios.length > 0 && (
         <SectionWrapper>
           <div className="grid grid-cols-2 gap-4">
@@ -246,13 +246,13 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
 
       {categorized.notes.length > 0 && (
         <SectionWrapper>
-          <div className="flex flex-col gap-4">
-            {categorized.notes.slice(0, 5).map((item) => (
-              <div key={item.id} className="flex flex-col">
-                <p className="line-clamp-1 text-sm font-medium text-zinc-100">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+            {categorized.notes.slice(0, 6).map((item) => (
+              <div key={item.id} className="flex min-w-0 flex-col">
+                <p className="line-clamp-1 text-[11px] font-semibold text-zinc-100">
                   {displayValue(item.title)}
                 </p>
-                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-zinc-400">
+                <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-zinc-400">
                   {item.metadata.summary ?? item.content ?? ""}
                 </p>
               </div>
