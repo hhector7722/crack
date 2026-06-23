@@ -10,6 +10,7 @@ const payloadSchema = z.object({
   url: z.string().optional(),
   text: z.string().optional(),
   title: z.string().optional(),
+  imageUrl: z.string().optional(),
 });
 
 function getBearerToken(request: Request): string | null {
@@ -43,15 +44,17 @@ async function saveWithToken(
 
   let itemId: string;
 
-  if (file && file.type.startsWith("image/")) {
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-    const path = await uploadFile(admin, row.user_id, "images", file, ext);
+  const imageFile = file || (payload.imageUrl ? await fetchImageFile(payload.imageUrl) : undefined);
 
-    let title = file.name.replace(/\.[^.]+$/, "") || "Imagen compartida";
+  if (imageFile) {
+    const ext = imageFile.name.split(".").pop()?.toLowerCase() ?? "jpg";
+    const path = await uploadFile(admin, row.user_id, "images", imageFile, ext);
+
+    let title = imageFile.name.replace(/\.[^.]+$/, "") || "Imagen compartida";
     let metadata: Record<string, unknown> = {};
 
     try {
-      const result = await classifyImage(file);
+      const result = await classifyImage(imageFile);
       if (result.title) title = result.title;
       metadata = {
         themes: result.themes || [],
@@ -84,6 +87,19 @@ async function saveWithToken(
   return NextResponse.json({ ok: true, id: itemId });
 }
 
+async function fetchImageFile(imageUrl: string): Promise<File | undefined> {
+  try {
+    const response = await fetch(imageUrl);
+    if (!response.ok) return undefined;
+    const blob = await response.blob();
+    const contentType = blob.type || "image/jpeg";
+    const name = imageUrl.split("/").pop()?.split("?")[0] || "imagen";
+    return new File([blob], name, { type: contentType });
+  } catch {
+    return undefined;
+  }
+}
+
 export async function GET(request: Request) {
   const adminConfig = getSupabaseAdminConfig();
   if (!adminConfig.ok) {
@@ -100,6 +116,7 @@ export async function GET(request: Request) {
     url: searchParams.get("url") ?? undefined,
     text: searchParams.get("text") ?? undefined,
     title: searchParams.get("title") ?? undefined,
+    imageUrl: searchParams.get("imageUrl") ?? undefined,
   });
 
   if (!payload.success) {
