@@ -1,21 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink, Link2, Loader2 } from "lucide-react";
+import { Link2, Loader2, ExternalLink } from "lucide-react";
 import { resolveLinkTitle, titleFromUrl } from "@/lib/link-preview";
 import { cn } from "@/lib/utils";
+import type { ItemMetadata } from "@/lib/types";
 
 interface LinkNotePreviewProps {
   url: string;
   itemTitle?: string | null;
+  metadata?: ItemMetadata | null;
 }
 
-export function LinkNotePreview({ url, itemTitle }: LinkNotePreviewProps) {
-  const [previewTitle, setPreviewTitle] = useState<string | null>(null);
-  const [image, setImage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+function getDomain(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+export function LinkNotePreview({ url, itemTitle, metadata }: LinkNotePreviewProps) {
+  const [previewTitle, setPreviewTitle] = useState<string | null>(
+    metadata?.link_title ?? null
+  );
+  const [image, setImage] = useState<string | null>(
+    metadata?.link_image ?? null
+  );
+  const [description, setDescription] = useState<string | null>(
+    metadata?.link_description ?? null
+  );
+  const [loading, setLoading] = useState(!metadata?.link_title);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
+    if (metadata?.link_title && metadata?.link_image) return;
     let cancelled = false;
 
     async function load() {
@@ -27,15 +46,16 @@ export function LinkNotePreview({ url, itemTitle }: LinkNotePreviewProps) {
         const data = (await res.json()) as {
           title?: string | null;
           image?: string | null;
+          description?: string | null;
         };
         if (!cancelled) {
-          setPreviewTitle(data.title ?? null);
-          setImage(data.image ?? null);
+          if (!metadata?.link_title) setPreviewTitle(data.title ?? null);
+          if (!metadata?.link_image) setImage(data.image ?? null);
+          if (!metadata?.link_description) setDescription(data.description ?? null);
         }
       } catch {
         if (!cancelled) {
-          setPreviewTitle(titleFromUrl(url));
-          setImage(null);
+          if (!metadata?.link_title) setPreviewTitle(titleFromUrl(url));
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -46,9 +66,10 @@ export function LinkNotePreview({ url, itemTitle }: LinkNotePreviewProps) {
     return () => {
       cancelled = true;
     };
-  }, [url]);
+  }, [url, metadata]);
 
   const displayTitle = resolveLinkTitle(url, previewTitle, itemTitle);
+  const domain = getDomain(url);
 
   function openLink(e: React.MouseEvent) {
     e.stopPropagation();
@@ -56,35 +77,43 @@ export function LinkNotePreview({ url, itemTitle }: LinkNotePreviewProps) {
   }
 
   return (
-    <div className="flex items-center gap-3 py-3">
-      <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-zinc-900 shadow-sm shadow-black/40">
-        {loading ? (
-          <Loader2 className="h-5 w-5 animate-spin text-zinc-600" />
-        ) : image ? (
-          // eslint-disable-next-line @next/next/no-img-element
+    <button
+      type="button"
+      onClick={openLink}
+      className="group w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 text-left active:opacity-80"
+    >
+      {loading ? (
+        <div className="flex aspect-[16/9] items-center justify-center bg-zinc-900">
+          <Loader2 className="h-6 w-6 animate-spin text-zinc-600" />
+        </div>
+      ) : image && !imgError ? (
+        <div className="aspect-[16/9] overflow-hidden bg-zinc-900">
           <img
             src={image}
             alt=""
-            className="h-full w-full object-cover"
-            onError={() => setImage(null)}
+            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            onError={() => setImgError(true)}
           />
-        ) : (
-          <Link2 className="h-6 w-6 text-zinc-500" />
+        </div>
+      ) : (
+        <div className="flex aspect-[16/9] items-center justify-center bg-zinc-900">
+          <Link2 className="h-10 w-10 text-zinc-600" />
+        </div>
+      )}
+
+      <div className="space-y-1 px-4 py-3">
+        <p className="line-clamp-1 text-sm font-semibold text-zinc-100">
+          {displayTitle}
+        </p>
+        {description && (
+          <p className="line-clamp-2 text-xs leading-relaxed text-zinc-400">
+            {description}
+          </p>
         )}
+        <p className="text-xs text-zinc-600">{domain}</p>
       </div>
 
-      <p className="min-w-0 flex-1 truncate text-sm font-semibold text-zinc-100">
-        {displayTitle}
-      </p>
-
-      <button
-        type="button"
-        onClick={openLink}
-        aria-label="Abrir enlace"
-        className="flex h-9 w-9 shrink-0 items-center justify-center text-zinc-300 active:opacity-60"
-      >
-        <ExternalLink className="h-5 w-5" strokeWidth={2} />
-      </button>
-    </div>
+      <ExternalLink className="absolute right-3 top-3 h-4 w-4 text-zinc-600 opacity-0 transition-opacity group-hover:opacity-100" />
+    </button>
   );
 }

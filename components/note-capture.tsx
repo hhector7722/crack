@@ -19,11 +19,13 @@ export const NoteCapture = forwardRef<NoteCaptureHandle, NoteCaptureProps>(
   function NoteCapture({ onSaved, onError }, ref) {
     const [content, setContent] = useState("");
     const [itemId, setItemId] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
     const savingRef = useRef(false);
 
     async function saveNote(notify = true): Promise<boolean> {
       if (savingRef.current || !content.trim()) return false;
       savingRef.current = true;
+      setIsSaving(true);
 
       try {
         const supabase = createClient();
@@ -32,8 +34,34 @@ export const NoteCapture = forwardRef<NoteCaptureHandle, NoteCaptureProps>(
         } = await supabase.auth.getUser();
         if (!user) throw new Error("No autenticado");
 
-        const title =
-          content.trim().split("\n")[0].slice(0, 80) || "Nota sin título";
+        let title = content.trim().split("\n")[0].slice(0, 80) || "Nota sin título";
+        let metadata: Record<string, unknown> = {
+          classification_type: "note",
+          summary: content.trim().slice(0, 120),
+        };
+
+        if (!itemId) {
+          try {
+            const classifyRes = await fetch("/api/classify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ transcript: content.trim() }),
+            });
+            if (classifyRes.ok) {
+              const result = await classifyRes.json();
+              if (result.title) title = result.title;
+              metadata = {
+                themes: result.themes || [],
+                tags: result.tags || [],
+                priority: result.priority,
+                classification_type: result.type || "note",
+                summary: result.summary || metadata.summary,
+              };
+            }
+          } catch (e) {
+            console.error("Error clasificando nota", e);
+          }
+        }
 
         if (itemId) {
           await updateItem(supabase, itemId, {
@@ -46,10 +74,7 @@ export const NoteCapture = forwardRef<NoteCaptureHandle, NoteCaptureProps>(
             title,
             content: content.trim(),
             user_id: user.id,
-            metadata: {
-              classification_type: "note",
-              summary: content.trim().slice(0, 120),
-            },
+            metadata,
           });
           setItemId(item.id);
         }
@@ -61,6 +86,7 @@ export const NoteCapture = forwardRef<NoteCaptureHandle, NoteCaptureProps>(
         return false;
       } finally {
         savingRef.current = false;
+        setIsSaving(false);
       }
     }
 
@@ -88,10 +114,10 @@ export const NoteCapture = forwardRef<NoteCaptureHandle, NoteCaptureProps>(
         <button
           type="button"
           onClick={() => saveNote(true)}
-          disabled={!content.trim()}
+          disabled={!content.trim() || isSaving}
           className="mt-4 h-12 w-full rounded-xl bg-zinc-100 font-semibold text-zinc-950 disabled:opacity-50"
         >
-          Guardar ahora
+          {isSaving ? "Guardando y clasificando..." : "Guardar ahora"}
         </button>
       </div>
     );

@@ -40,12 +40,36 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       const path = await uploadFile(supabase, user.id, "images", file, ext);
 
+      let metadata: Record<string, unknown> = {};
+      let title = file.name.replace(/\.[^.]+$/, "");
+
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const classifyRes = await fetch("/api/classify-image", {
+          method: "POST",
+          body: formData,
+        });
+        if (classifyRes.ok) {
+          const result = await classifyRes.json();
+          if (result.title) title = result.title;
+          metadata = {
+            themes: result.themes || [],
+            tags: result.tags || [],
+            classification_type: result.type,
+            summary: result.summary,
+          };
+        }
+      } catch (e) {
+        console.error("Error clasificando imagen", e);
+      }
+
       await createItem(supabase, {
         type: "image",
-        title: file.name.replace(/\.[^.]+$/, ""),
+        title,
         file_url: path,
         user_id: user.id,
-        metadata: {},
+        metadata,
       });
 
       onSaved();
@@ -128,7 +152,7 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
             ) : (
               <>
                 <Upload className="mr-2 h-4 w-4" />
-                Guardar
+                {uploading ? "Guardando y clasificando..." : "Guardar"}
               </>
             )}
           </Button>

@@ -1,4 +1,4 @@
-import { classifyWithGemini, transcribeWithGemini } from "./gemini";
+import { classifyWithGemini, transcribeWithGemini, classifyImageWithGemini } from "./gemini";
 import { classifyWithOpenAI, transcribeWithOpenAI } from "./openai";
 import { isOpenAIQuotaError } from "./ai-errors";
 import type { ClassificationResult } from "./types";
@@ -21,4 +21,8 @@ export async function transcribeAudio(file: File): Promise<string> {
     if (!isOpenAIQuotaError(err)) throw err;
     return transcribeWithGemini(file);
   }
+}
+
+export async function classifyImage(file: File): Promise<ClassificationResult> {
+  return classifyImageWithGemini(file);
 }

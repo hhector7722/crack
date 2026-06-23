@@ -3,7 +3,9 @@ import { z } from "zod";
 import { saveSharedLink } from "@/lib/share-link-save";
 import { createAdminClient, getSupabaseAdminConfig } from "@/lib/supabase/admin";
 import { hashShareToken, tokensMatch } from "@/lib/share-token";
-
+import { uploadFile } from "@/lib/storage";
+import { createItem } from "@/lib/items";
+import { classifyImage } from "@/lib/ai";
 const payloadSchema = z.object({
   url: z.string().optional(),
   text: z.string().optional(),
@@ -17,7 +19,11 @@ function getBearerToken(request: Request): string | null {
   return token.length > 0 ? token : null;
 }
 
-async function saveWithToken(token: string, payload: z.infer<typeof payloadSchema>) {
+async function saveWithToken(
+  token: string,
+  payload: z.infer<typeof payloadSchema>,
+  file?: File
+) {
   const admin = createAdminClient();
   const tokenHash = hashShareToken(token);
 
@@ -35,14 +41,47 @@ async function saveWithToken(token: string, payload: z.infer<typeof payloadSchem
     return NextResponse.json({ error: "Token inválido" }, { status: 401 });
   }
 
-  const item = await saveSharedLink(admin, row.user_id, payload);
+  let itemId: string;
+
+  if (file && file.type.startsWith("image/")) {
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+    const path = await uploadFile(admin, row.user_id, "images", file, ext);
+
+    let title = file.name.replace(/\.[^.]+$/, "") || "Imagen compartida";
+    let metadata: Record<string, unknown> = {};
+
+    try {
+      const result = await classifyImage(file);
+      if (result.title) title = result.title;
+      metadata = {
+        themes: result.themes || [],
+        tags: result.tags || [],
+        classification_type: result.type,
+        summary: result.summary,
+      };
+    } catch (e) {
+      console.error("Error clasificando imagen compartida", e);
+    }
+
+    const item = await createItem(admin, {
+      type: "image",
+      title,
+      file_url: path,
+      user_id: row.user_id,
+      metadata,
+    });
+    itemId = item.id;
+  } else {
+    const item = await saveSharedLink(admin, row.user_id, payload);
+    itemId = item.id;
+  }
 
   await admin
     .from("share_tokens")
     .update({ last_used_at: new Date().toISOString() })
     .eq("token_hash", tokenHash);
 
-  return NextResponse.json({ ok: true, id: item.id });
+  return NextResponse.json({ ok: true, id: itemId });
 }
 
 export async function GET(request: Request) {
@@ -87,16 +126,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Token requerido" }, { status: 401 });
   }
 
-  let body: z.infer<typeof payloadSchema>;
+  const contentType = request.headers.get("content-type") || "";
+
+  let payload: z.infer<typeof payloadSchema> = {};
+  let file: File | undefined = undefined;
+
   try {
-    const json = await request.json();
-    body = payloadSchema.parse(json);
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      const url = formData.get("url") as string | null;
+      const text = formData.get("text") as string | null;
+      const title = formData.get("title") as string | null;
+      const f = formData.get("file") ?? formData.get("image");
+
+      if (url) payload.url = url;
+      if (text) payload.text = text;
+      if (title) payload.title = title;
+
+      if (f instanceof File) {
+        file = f;
+      }
+    } else {
+      const json = await request.json();
+      payload = payloadSchema.parse(json);
+    }
   } catch {
-    return NextResponse.json({ error: "Cuerpo JSON inválido" }, { status: 400 });
+    return NextResponse.json({ error: "Cuerpo de la petición inválido" }, { status: 400 });
   }
 
   try {
-    return await saveWithToken(token, body);
+    return await saveWithToken(token, payload, file);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Error guardando enlace";
     const status = message.includes("URL") ? 400 : 500;

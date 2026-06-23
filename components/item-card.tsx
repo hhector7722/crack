@@ -2,14 +2,16 @@
 
 import { Pin, Mic, FileText, Image as ImageIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { LinkNotePreview } from "@/components/link-note-preview";
 import {
   classificationColor,
   classificationLabel,
   displayValue,
   formatRelative,
+  getNoteUrl,
   cn,
 } from "@/lib/utils";
-import type { Item } from "@/lib/types";
+import { themeColor, themeLabel, type Item, type Theme } from "@/lib/types";
 
 interface ItemCardProps {
   item: Item;
@@ -28,6 +30,16 @@ function TypeIcon({ type }: { type: Item["type"] }) {
 }
 
 export function ItemCard({ item, onClick }: ItemCardProps) {
+  const url = getNoteUrl(item);
+
+  if (url) {
+    return (
+      <div className="content-row" onClick={onClick}>
+        <LinkNotePreview url={url} itemTitle={item.title} metadata={item.metadata} />
+      </div>
+    );
+  }
+
   const classificationType = item.metadata.classification_type;
   const summary =
     item.metadata.summary ?? item.content?.slice(0, 120) ?? " ";
@@ -50,7 +62,18 @@ export function ItemCard({ item, onClick }: ItemCardProps) {
 
       <p className="mb-3 line-clamp-2 text-sm text-zinc-400">{summary}</p>
 
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {(item.metadata.themes ?? []).map((theme) => (
+          <span
+            key={theme}
+            className={cn("inline-block rounded-full px-2 py-0.5 text-[10px] font-medium", themeColor(theme as Theme))}
+          >
+            {themeLabel(theme as Theme)}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-2 flex items-center justify-between gap-2">
         {classificationType ? (
           <Badge className={cn(classificationColor(classificationType))}>
             {classificationLabel(classificationType)}

@@ -51,6 +51,33 @@
   }
 }
 
+@media (min-width: 1024px) {
+  .tm-app-main--internal-scroll {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .content-list {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .content-row {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .tm-tab-scroll-layout__viewport {
+    overscroll-behavior-y: auto;
+  }
+
+  header h1 {
+    font-size: 1.25rem;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

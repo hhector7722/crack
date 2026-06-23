@@ -203,6 +203,7 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
         file_url: path,
         user_id: user.id,
         metadata: {
+          themes: classification.themes || [],
           tags: tags
             .split(",")
             .map((t) => t.trim().toLowerCase())
@@ -215,6 +216,20 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
           duration_seconds: duration,
         },
       });
+
+      if (classification.create_note_from_audio) {
+        await createItem(supabase, {
+          type: "note",
+          title,
+          content: transcript,
+          user_id: user.id,
+          metadata: {
+            themes: classification.themes || [],
+            classification_type: "note",
+            summary: classification.summary,
+          },
+        });
+      }
 
       onSaved();
     } catch (err) {

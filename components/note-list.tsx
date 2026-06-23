@@ -10,8 +10,8 @@ import { ItemDetail } from "@/components/item-detail";
 import { LinkNotePreview } from "@/components/link-note-preview";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useItemShare } from "@/hooks/use-item-share";
-import { displayValue, getNoteUrl } from "@/lib/utils";
-import type { Item } from "@/lib/types";
+import { displayValue, getNoteUrl, cn } from "@/lib/utils";
+import { themeColor, themeLabel, type Item, type Theme } from "@/lib/types";
 
 interface NoteListProps {
   refreshKey?: number;
@@ -48,7 +48,7 @@ function NoteRow({
         {...longPress}
         onClick={() => handleActivate(onClick)}
       >
-        <LinkNotePreview url={url} itemTitle={item.title} />
+        <LinkNotePreview url={url} itemTitle={item.title} metadata={item.metadata} />
       </div>
     );
   }
@@ -75,6 +75,18 @@ function NoteRow({
     >
       <h3 className="truncate font-semibold text-zinc-100">{title}</h3>
       <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{summary}</p>
+      {(item.metadata.themes ?? []).length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {(item.metadata.themes ?? []).map((theme) => (
+            <span
+              key={theme}
+              className={cn("inline-block rounded-full px-2 py-0.5 text-[10px] font-medium", themeColor(theme as Theme))}
+            >
+              {themeLabel(theme as Theme)}
+            </span>
+          ))}
+        </div>
+      )}
     </button>
   );
 }

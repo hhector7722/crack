@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createItem } from "@/lib/items";
-import { titleFromUrl } from "@/lib/link-preview";
+import { titleFromUrl, fetchLinkPreview } from "@/lib/link-preview";
 import { extractFirstUrl } from "@/lib/utils";
 
 export function resolveSharedUrl(input: {
@@ -52,14 +52,28 @@ export async function saveSharedLink(
 
   const noteTitle = resolveSharedTitle(url, input.title, input.text);
 
+  const preview = await fetchLinkPreview(url);
+
+  const metadata: Record<string, unknown> = {
+    classification_type: "note",
+    summary: preview.title ?? noteTitle,
+  };
+
+  if (preview.image) {
+    metadata.link_image = preview.image;
+  }
+  if (preview.title) {
+    metadata.link_title = preview.title;
+  }
+  if (preview.description) {
+    metadata.link_description = preview.description;
+  }
+
   return createItem(supabase, {
     type: "note",
-    title: noteTitle,
+    title: preview.title ?? noteTitle,
     content: url,
     user_id: userId,
-    metadata: {
-      classification_type: "note",
-      summary: noteTitle,
-    },
+    metadata,
   });
 }
