@@ -5,7 +5,7 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchItems, deleteItem } from "@/lib/items";
 import { deleteFile, getSignedUrl } from "@/lib/storage";
-import { AudioItemRow } from "@/components/audio-item-row";
+import { CompactAudioItem } from "@/components/compact-items";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
 import { ItemDetail } from "@/components/item-detail";
 import { useLongPress } from "@/hooks/use-long-press";
@@ -38,8 +38,8 @@ function AudioRow({
   const longPress = useLongPress(() => onShare(item, mediaUrl));
 
   return (
-    <div {...longPress}>
-      <AudioItemRow
+    <div {...longPress} className="h-full">
+      <CompactAudioItem
         item={item}
         playing={playing}
         progress={progress}
@@ -47,7 +47,7 @@ function AudioRow({
           if (longPress.consumeLongPress()) return;
           onTogglePlay();
         }}
-        onOpen={
+        onClick={
           onOpen
             ? () => {
                 if (longPress.consumeLongPress()) return;
@@ -249,7 +249,7 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
     );
   }
 
-  const listClass = compact ? "divide-y divide-zinc-700/50" : "content-list";
+  const listClass = compact ? "divide-y divide-zinc-700/50" : "grid grid-cols-2 gap-4 px-4 pt-2";
 
   return (
     <>

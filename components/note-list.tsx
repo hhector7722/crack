@@ -7,7 +7,7 @@ import { fetchItems, deleteItem } from "@/lib/items";
 import { deleteFile } from "@/lib/storage";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
 import { ItemDetail } from "@/components/item-detail";
-import { LinkNotePreview } from "@/components/link-note-preview";
+import { CompactLinkItem, CompactNoteItem } from "@/components/compact-items";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useItemShare } from "@/hooks/use-item-share";
 import { displayValue, getNoteUrl, cn } from "@/lib/utils";
@@ -45,11 +45,10 @@ function NoteRow({
   if (url) {
     return (
       <div
-        className={compact ? undefined : "content-row"}
+        className={compact ? undefined : "h-full w-full"}
         {...longPress}
-        onClick={() => handleActivate(onClick)}
       >
-        <LinkNotePreview url={url} itemTitle={item.title} metadata={item.metadata} />
+        <CompactLinkItem item={item} onClick={() => handleActivate(onClick)} />
       </div>
     );
   }
@@ -68,27 +67,12 @@ function NoteRow({
   }
 
   return (
-    <button
-      type="button"
+    <div
       {...longPress}
-      onClick={() => handleActivate(onClick)}
-      className="content-row"
+      className={compact ? undefined : "h-full w-full"}
     >
-      <h3 className="truncate font-semibold text-zinc-100">{title}</h3>
-      <p className="mt-1 line-clamp-2 text-sm text-zinc-400">{summary}</p>
-      {(item.metadata.themes ?? []).length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {(item.metadata.themes ?? []).map((theme) => (
-            <span
-              key={theme}
-              className={cn("inline-block rounded-full px-2 py-0.5 text-[10px] font-medium", themeColor(theme as Theme))}
-            >
-              {themeLabel(theme as Theme)}
-            </span>
-          ))}
-        </div>
-      )}
-    </button>
+      <CompactNoteItem item={item} onClick={() => handleActivate(onClick)} />
+    </div>
   );
 }
 
@@ -196,7 +180,7 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
     );
   }
 
-  const listClass = compact ? "divide-y divide-zinc-700/50" : "content-list";
+  const listClass = compact ? "divide-y divide-zinc-700/50" : "grid grid-cols-2 gap-x-4 gap-y-3 px-4 pt-2";
 
   return (
     <>
