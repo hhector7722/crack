@@ -9,6 +9,7 @@ import { usePager } from "@/components/app-shell-context";
 import { displayValue, getNoteUrl } from "@/lib/utils";
 import type { Item } from "@/lib/types";
 import { AudioWaveform } from "@/components/audio-item-row";
+import { LinkNotePreview } from "@/components/link-note-preview";
 
 interface DashboardPageProps {
   refreshKey?: number;
