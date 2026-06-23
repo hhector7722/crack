@@ -48,7 +48,7 @@ export function AudioWaveform({
   const fill = active ? Math.min(1, Math.max(0, progress)) : 0;
 
   return (
-    <div className="relative h-8 w-full">
+    <div className="relative h-5 w-full">
       <div className="flex h-full w-full items-end gap-px">
         <BarLayer bars={bars} color="bg-zinc-700" />
       </div>

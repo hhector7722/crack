@@ -17,7 +17,7 @@ export function BottomChrome() {
   return (
     <div
       data-tm-bottom-chrome
-      className="tm-bottom-chrome fixed bottom-0 left-0 right-0 z-[95] flex flex-col items-center bg-[var(--tm-tabbar-bg-hex)]"
+      className="tm-bottom-chrome fixed bottom-0 left-0 right-0 z-[95] flex flex-col items-center bg-[var(--tm-tabbar-bg-hex)] pt-4"
     >
       <button
         type="button"

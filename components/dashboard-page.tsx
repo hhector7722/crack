@@ -220,7 +220,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   if (!categorized) return null;
 
   return (
-    <div className="mx-auto w-[95%] space-y-5 pb-8 pt-4">
+    <div className="mx-auto w-[98%] space-y-5 pb-8 pt-4">
       {categorized.audios.length > 0 && (
         <SectionWrapper>
           <div className="grid grid-cols-2 gap-4">
