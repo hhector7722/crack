@@ -118,7 +118,7 @@ function CompactLinkItem({ item }: { item: Item }) {
         }
       } catch {
         if (!cancelled) {
-          if (!item.metadata?.link_title) setPreviewTitle(titleFromUrl(url));
+          if (!item.metadata?.link_title) setPreviewTitle(titleFromUrl(url!));
         }
       } finally {
         if (!cancelled) setLoading(false);
