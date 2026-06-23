@@ -117,7 +117,7 @@ export function CompactLinkItem({ item, onClick }: { item: Item; onClick?: () =>
 
   const inner = (
     <>
-      <div className="aspect-square h-10 w-10 shrink-0 overflow-hidden rounded-md bg-zinc-800/50">
+      <div className="aspect-square h-10 w-10 shrink-0 overflow-hidden rounded-md bg-white">
         {loading ? (
           <div className="flex h-full w-full items-center justify-center">
             <Loader2 className="h-3 w-3 animate-spin text-zinc-600" />

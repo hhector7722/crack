@@ -80,14 +80,14 @@ export function LinkNotePreview({ url, itemTitle, metadata }: LinkNotePreviewPro
     <button
       type="button"
       onClick={openLink}
-      className="group w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 text-left active:opacity-80"
+      className="group relative w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 text-left active:opacity-80"
     >
       {loading ? (
         <div className="flex aspect-[16/9] items-center justify-center bg-zinc-900">
           <Loader2 className="h-6 w-6 animate-spin text-zinc-600" />
         </div>
       ) : image && !imgError ? (
-        <div className="aspect-[16/9] overflow-hidden bg-zinc-900">
+        <div className="aspect-[16/9] overflow-hidden bg-white">
           <img
             src={image}
             alt=""

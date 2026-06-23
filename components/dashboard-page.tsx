@@ -35,7 +35,7 @@ function SectionWrapper({ children }: { children: React.ReactNode }) {
 
 function ImageThumb({ url }: { url: string | null }) {
   return (
-    <div className="aspect-square w-full overflow-hidden rounded-md bg-zinc-800/50">
+    <div className="aspect-square w-full overflow-hidden rounded-md bg-white">
       {url ? (
         <img src={url} alt="" className="h-full w-full object-contain transition-transform active:scale-95" />
       ) : (
