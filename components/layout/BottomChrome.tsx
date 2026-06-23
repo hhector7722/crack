@@ -28,7 +28,9 @@ export function BottomChrome() {
         <Plus className="h-6 w-6" strokeWidth={2} />
       </button>
 
-      <PagerDots />
+      <div className="relative top-3 z-10">
+        <PagerDots />
+      </div>
       <TabBar />
     </div>
   );
