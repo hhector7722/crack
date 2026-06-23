@@ -103,7 +103,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   if (!categorized) return null;
 
   return (
-    <div className="mx-auto flex min-h-full w-[98%] flex-col pb-32 pt-[calc(1rem+var(--tm-app-header-block))]">
+    <div className="mx-auto flex min-h-full w-[98%] flex-col pt-[calc(1rem+var(--tm-app-header-block))]">
       <div className="flex-1 space-y-5">
         {categorized.audios.length > 0 && (
         <SectionWrapper>
