@@ -12,7 +12,7 @@ type TabScrollLayoutProps = {
 export function TabScrollLayout({ children, className }: TabScrollLayoutProps) {
   return (
     <div className={cn("tm-tab-scroll-layout", className)}>
-      <div className="tm-tab-scroll-layout__viewport scroll-pb-end">
+      <div className="tm-tab-scroll-layout__viewport scroll-pb-end pb-safe">
         {children}
       </div>
     </div>
