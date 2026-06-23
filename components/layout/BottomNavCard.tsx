@@ -9,7 +9,7 @@ export function BottomNavCard() {
   const { openCaptureMenu } = useAppShell();
 
   return (
-    <div className="relative mt-8 flex flex-col items-center rounded-2xl bg-[#1c1c1e] py-4">
+    <div className="relative mt-8 flex flex-col items-center rounded-2xl bg-[#1c1c1e] pt-4">
       <button
         type="button"
         onClick={openCaptureMenu}
