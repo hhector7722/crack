@@ -191,10 +191,13 @@ html[data-modal-open] .tm-app-main {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  min-height: 0;
+  height: 100%;
 }
 
 .tm-app-main--internal-scroll > .tm-app-pager {
   flex: 1 1 auto;
+  min-height: 0;
 }
 
 .tm-tab-scroll-layout {
@@ -202,6 +205,10 @@ html[data-modal-open] .tm-app-main {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .tm-tab-scroll-layout__viewport {
@@ -209,6 +216,13 @@ html[data-modal-open] .tm-app-main {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tm-bottom-chrome {
