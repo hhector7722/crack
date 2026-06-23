@@ -24,7 +24,7 @@ type Categorized = {
 
 function SectionWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <section className="rounded-[32px] bg-[#1c1c1e] p-4">
+    <section className="rounded-[32px] bg-[#1c1c1e] p-5">
       {children}
     </section>
   );
@@ -51,7 +51,7 @@ function CompactAudioItem({ item }: { item: Item }) {
     "Audio";
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl bg-zinc-800/40 p-3 transition-colors active:bg-zinc-800/60">
+    <div className="flex flex-col gap-2 py-1">
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -138,7 +138,7 @@ function CompactLinkItem({ item }: { item: Item }) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center gap-3 overflow-hidden rounded-xl bg-zinc-800/40 p-2.5 transition-colors active:bg-zinc-800/60"
+      className="flex items-center gap-3 overflow-hidden py-1 transition-opacity active:opacity-70"
     >
       <div className="aspect-square h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-zinc-800/50">
         {loading ? (
@@ -220,7 +220,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   if (!categorized) return null;
 
   return (
-    <div className="space-y-4 px-2 pb-8 pt-4">
+    <div className="mx-auto w-[90%] space-y-5 pb-8 pt-4">
       {categorized.audios.length > 0 && (
         <SectionWrapper>
           <div className="grid grid-cols-2 gap-4">
@@ -246,9 +246,9 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
 
       {categorized.notes.length > 0 && (
         <SectionWrapper>
-          <div className="divide-y divide-zinc-800/50">
+          <div className="flex flex-col gap-4">
             {categorized.notes.slice(0, 5).map((item) => (
-              <div key={item.id} className="py-2.5 first:pt-0 last:pb-0">
+              <div key={item.id} className="flex flex-col">
                 <p className="line-clamp-1 text-sm font-medium text-zinc-100">
                   {displayValue(item.title)}
                 </p>
@@ -263,7 +263,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
 
       {categorized.links.length > 0 && (
         <SectionWrapper>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             {categorized.links.slice(0, 4).map((item) => (
               <CompactLinkItem key={item.id} item={item} />
             ))}
