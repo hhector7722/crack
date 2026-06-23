@@ -121,7 +121,7 @@ export default function AppLayout({
             </div>
           </header>
 
-          <main className="tm-app-main tm-app-main--internal-scroll relative z-10 flex w-full flex-col overflow-hidden pb-0 pt-[var(--tm-app-header-block)]">
+          <main className="tm-app-main tm-app-main--internal-scroll relative z-10 flex w-full flex-col overflow-hidden pb-0 pt-0">
             {uploadError ? (
               <p className="mx-4 shrink-0 px-4 text-sm text-red-300">{uploadError}</p>
             ) : null}
