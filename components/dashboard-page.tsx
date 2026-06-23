@@ -9,7 +9,7 @@ import { usePager } from "@/components/app-shell-context";
 import { displayValue, getNoteUrl } from "@/lib/utils";
 import type { Item } from "@/lib/types";
 import { AudioWaveform } from "@/components/audio-item-row";
-import { LinkNotePreview } from "@/components/link-note-preview";
+import { resolveLinkTitle, titleFromUrl } from "@/lib/link-preview";
 
 interface DashboardPageProps {
   refreshKey?: number;
@@ -22,35 +22,9 @@ type Categorized = {
   links: Item[];
 };
 
-function WidgetCard({
-  title,
-  icon: Icon,
-  pageIndex,
-  children,
-}: {
-  title: string;
-  icon: React.ComponentType<{ className?: string }>;
-  pageIndex: number;
-  children: React.ReactNode;
-}) {
-  const { navigateToPage } = usePager();
-  const IconComponent = Icon;
-
+function SectionWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <section className="rounded-[32px] bg-[#1c1c1e] p-6">
-      <div className="mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <IconComponent className="h-5 w-5 text-zinc-400" />
-          <h2 className="text-xl font-bold tracking-tight text-white">{title}</h2>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigateToPage(pageIndex)}
-          className="text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-300 active:opacity-70"
-        >
-          Ver todos
-        </button>
-      </div>
+    <section className="rounded-[32px] bg-[#1c1c1e] p-4">
       {children}
     </section>
   );
@@ -119,6 +93,79 @@ function getDomain(url: string): string {
   }
 }
 
+function CompactLinkItem({ item }: { item: Item }) {
+  const url = getNoteUrl(item);
+  const [previewTitle, setPreviewTitle] = useState<string | null>(item.metadata?.link_title ?? null);
+  const [image, setImage] = useState<string | null>(item.metadata?.link_image ?? null);
+  const [description, setDescription] = useState<string | null>(item.metadata?.link_description ?? null);
+  const [loading, setLoading] = useState(!item.metadata?.link_title);
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    if (!url) return;
+    if (item.metadata?.link_title && item.metadata?.link_image) return;
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
+        if (!cancelled) {
+          if (!item.metadata?.link_title) setPreviewTitle(data.title ?? null);
+          if (!item.metadata?.link_image) setImage(data.image ?? null);
+          if (!item.metadata?.link_description) setDescription(data.description ?? null);
+        }
+      } catch {
+        if (!cancelled) {
+          if (!item.metadata?.link_title) setPreviewTitle(titleFromUrl(url));
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void load();
+    return () => { cancelled = true; };
+  }, [url, item.metadata]);
+
+  if (!url) return null;
+  const displayTitle = resolveLinkTitle(url, previewTitle, item.title);
+  const domain = getDomain(url);
+  const bodyText = description || domain;
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-3 overflow-hidden rounded-xl bg-zinc-800/40 p-2.5 transition-colors active:bg-zinc-800/60"
+    >
+      <div className="aspect-square h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-zinc-800/50">
+        {loading ? (
+          <div className="flex h-full w-full items-center justify-center">
+            <Loader2 className="h-3 w-3 animate-spin text-zinc-600" />
+          </div>
+        ) : image && !imgError ? (
+          <img
+            src={image}
+            alt=""
+            className="h-full w-full object-cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <Link2 className="h-4 w-4 text-zinc-600" />
+          </div>
+        )}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col justify-center">
+        <p className="truncate text-xs font-semibold text-zinc-100">{displayTitle}</p>
+        <p className="truncate text-[10px] text-zinc-400">{bodyText}</p>
+      </div>
+    </a>
+  );
+}
+
 export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   const [categorized, setCategorized] = useState<Categorized | null>(null);
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
@@ -173,19 +220,19 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   if (!categorized) return null;
 
   return (
-    <div className="space-y-6 px-5 pb-8 pt-4">
+    <div className="space-y-4 px-2 pb-8 pt-4">
       {categorized.audios.length > 0 && (
-        <WidgetCard title="Audios" icon={Mic} pageIndex={1}>
+        <SectionWrapper>
           <div className="grid grid-cols-2 gap-4">
             {categorized.audios.slice(0, 4).map((item) => (
               <CompactAudioItem key={item.id} item={item} />
             ))}
           </div>
-        </WidgetCard>
+        </SectionWrapper>
       )}
 
       {categorized.images.length > 0 && (
-        <WidgetCard title="Imágenes" icon={ImageIcon} pageIndex={2}>
+        <SectionWrapper>
           <div className="grid grid-cols-5 gap-2">
             {categorized.images.slice(0, 10).map((item) => (
               <ImageThumb
@@ -194,45 +241,34 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
               />
             ))}
           </div>
-        </WidgetCard>
+        </SectionWrapper>
       )}
 
       {categorized.notes.length > 0 && (
-        <WidgetCard title="Notas" icon={FileText} pageIndex={3}>
+        <SectionWrapper>
           <div className="divide-y divide-zinc-800/50">
             {categorized.notes.slice(0, 5).map((item) => (
-              <div key={item.id} className="py-3.5 first:pt-0 last:pb-0">
-                <p className="line-clamp-1 text-base font-medium text-zinc-100">
+              <div key={item.id} className="py-2.5 first:pt-0 last:pb-0">
+                <p className="line-clamp-1 text-sm font-medium text-zinc-100">
                   {displayValue(item.title)}
                 </p>
-                <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-zinc-400">
+                <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-zinc-400">
                   {item.metadata.summary ?? item.content ?? ""}
                 </p>
               </div>
             ))}
           </div>
-        </WidgetCard>
+        </SectionWrapper>
       )}
 
       {categorized.links.length > 0 && (
-        <WidgetCard title="Enlaces" icon={Link2} pageIndex={4}>
-          <div className="grid grid-cols-2 gap-3">
-            {categorized.links.slice(0, 4).map((item) => {
-              const url = getNoteUrl(item);
-              if (!url) return null;
-              return (
-                <div key={item.id} className="relative overflow-hidden rounded-xl bg-zinc-800/40">
-                  <LinkNotePreview
-                    url={url}
-                    itemTitle={item.title}
-                    metadata={item.metadata}
-                  />
-                  <div className="absolute inset-0 z-10 pointer-events-none rounded-xl border border-white/5" />
-                </div>
-              );
-            })}
+        <SectionWrapper>
+          <div className="grid grid-cols-2 gap-2">
+            {categorized.links.slice(0, 4).map((item) => (
+              <CompactLinkItem key={item.id} item={item} />
+            ))}
           </div>
-        </WidgetCard>
+        </SectionWrapper>
       )}
     </div>
   );
