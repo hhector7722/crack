@@ -12,9 +12,8 @@
   --tm-tabbar-height-md: 3rem;
   --tm-tabbar-core: var(--tm-tabbar-height);
   --tm-chrome-dots: 1.25rem;
-  --tm-chrome-fab: 3.5rem;
   --tm-tabbar-shell: calc(
-    var(--tm-tabbar-core) + var(--tm-chrome-dots) + var(--tm-chrome-fab)
+    var(--tm-tabbar-core) + var(--tm-chrome-dots)
   );
   --tm-bottom-chrome-block: calc(
     var(--tm-tabbar-shell) + env(safe-area-inset-bottom, 0px)
@@ -44,14 +43,18 @@
 @media (min-width: 768px) {
   :root {
     --tm-tabbar-core: var(--tm-tabbar-height-md);
-    --tm-chrome-fab: 3rem;
-    --tm-tabbar-shell: calc(
-      var(--tm-tabbar-core) + var(--tm-chrome-dots) + var(--tm-chrome-fab)
-    );
   }
 }
 
+.tm-bottom-chrome {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 @media (min-width: 1024px) {
+  .tm-bottom-chrome {
+    padding-bottom: 0;
+  }
+
   .tm-app-main--internal-scroll {
     max-width: 960px;
     margin-left: auto;
