@@ -91,7 +91,7 @@ export function LinkNotePreview({ url, itemTitle, metadata }: LinkNotePreviewPro
           <img
             src={image}
             alt=""
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            className="h-full w-full object-contain transition-transform group-hover:scale-105"
             onError={() => setImgError(true)}
           />
         </div>

@@ -104,7 +104,7 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
           <img
             src={preview}
             alt="Vista previa"
-            className="max-h-[300px] w-full object-cover"
+            className="max-h-[300px] w-full object-contain"
           />
         </div>
       ) : (

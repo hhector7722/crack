@@ -35,7 +35,7 @@ function ImageThumb({ url }: { url: string | null }) {
   return (
     <div className="aspect-square w-full overflow-hidden rounded-md bg-zinc-800/50">
       {url ? (
-        <img src={url} alt="" className="h-full w-full object-cover transition-transform active:scale-95" />
+        <img src={url} alt="" className="h-full w-full object-contain transition-transform active:scale-95" />
       ) : (
         <div className="flex h-full w-full items-center justify-center">
           <Loader2 className="h-4 w-4 animate-spin text-zinc-600" />
