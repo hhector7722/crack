@@ -20,7 +20,7 @@
   --tab-bar-height: var(--tm-bottom-chrome-block);
   --tm-content-bottom: var(--tm-bottom-chrome-block);
   --tm-app-header-inner: 3rem;
-  --tm-app-header-pt: 0.75rem;
+  --tm-app-header-pt: 3rem;
   --tm-app-header-pb: 0.5rem;
   --tm-app-header-block: calc(
     var(--tm-app-header-pt) + var(--tm-app-header-inner) + var(--tm-app-header-pb)

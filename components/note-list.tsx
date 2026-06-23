@@ -184,7 +184,7 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
   const listClass = compact ? "divide-y divide-zinc-700/50" : "grid grid-cols-2 gap-x-4 gap-y-3 px-4 pt-2";
 
   return (
-    <>
+    <div className="mx-auto flex min-h-[calc(100dvh-var(--tm-app-header-block))] w-full flex-col">
       <div className={listClass}>
         {filtered.map((item) =>
           compact ? (
@@ -207,7 +207,7 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
         )}
       </div>
 
-      <div className="mx-auto w-[98%] pb-8 pt-4">
+      <div className="mt-auto mx-auto w-[98%] pb-8 pt-4">
         <BottomNavCard />
       </div>
 
@@ -226,6 +226,6 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
       )}
 
       {sheet}
-    </>
+    </div>
   );
 }

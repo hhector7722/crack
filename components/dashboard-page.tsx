@@ -103,8 +103,9 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   if (!categorized) return null;
 
   return (
-    <div className="mx-auto w-[98%] space-y-5 pb-8 pt-4">
-      {categorized.audios.length > 0 && (
+    <div className="mx-auto flex min-h-[calc(100dvh-var(--tm-app-header-block))] w-[98%] flex-col pb-8 pt-4">
+      <div className="flex-1 space-y-5">
+        {categorized.audios.length > 0 && (
         <SectionWrapper>
           <div className="grid grid-cols-2 gap-4">
             {categorized.audios.slice(0, 4).map((item) => (
@@ -116,8 +117,8 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
 
       {categorized.images.length > 0 && (
         <SectionWrapper>
-          <div className="grid grid-cols-5 gap-2">
-            {categorized.images.slice(0, 10).map((item) => (
+          <div className="grid grid-cols-4 gap-2">
+            {categorized.images.slice(0, 8).map((item) => (
               <ImageThumb
                 key={item.id}
                 url={item.file_url ? imageUrls[item.file_url] ?? null : null}
@@ -146,8 +147,11 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
           </div>
         </SectionWrapper>
       )}
+      </div>
 
-      <BottomNavCard />
+      <div className="mt-auto pt-8">
+        <BottomNavCard />
+      </div>
     </div>
   );
 }

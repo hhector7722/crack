@@ -57,7 +57,7 @@ function GalleryThumb({
 
 export function GalleryFeed({
   refreshKey = 0,
-  columns = 5,
+  columns = 4,
   limit,
   compact,
   onSelect,
@@ -179,7 +179,7 @@ export function GalleryFeed({
     columns === 5 ? "grid-cols-5" : columns === 4 ? "grid-cols-4" : "grid-cols-3";
 
   return (
-    <>
+    <div className="mx-auto flex min-h-[calc(100dvh-var(--tm-app-header-block))] w-full flex-col">
       <div className={`grid ${gridCols} gap-1`}>
         {visible.map((item) => {
           const url = item.file_url ? urls[item.file_url] : null;
@@ -204,7 +204,7 @@ export function GalleryFeed({
         })}
       </div>
 
-      <div className="mx-auto w-[98%] pb-8 pt-4">
+      <div className="mt-auto mx-auto w-[98%] pb-8 pt-4">
         <BottomNavCard />
       </div>
 
@@ -223,6 +223,6 @@ export function GalleryFeed({
       )}
 
       {sheet}
-    </>
+    </div>
   );
 }

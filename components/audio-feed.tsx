@@ -253,7 +253,7 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
   const listClass = compact ? "divide-y divide-zinc-700/50" : "grid grid-cols-2 gap-4 px-4 pt-2";
 
   return (
-    <>
+    <div className="mx-auto flex min-h-[calc(100dvh-var(--tm-app-header-block))] w-full flex-col">
       <div className={listClass}>
         {items.map((item) => {
           const mediaUrl = item.file_url ? mediaUrls[item.file_url] ?? null : null;
@@ -281,7 +281,7 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
         })}
       </div>
 
-      <div className="mx-auto w-[98%] pb-8 pt-4">
+      <div className="mt-auto mx-auto w-[98%] pb-8 pt-4">
         <BottomNavCard />
       </div>
 
@@ -300,6 +300,6 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
       )}
 
       {sheet}
-    </>
+    </div>
   );
 }
