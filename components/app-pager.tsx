@@ -10,6 +10,7 @@ import { PagerPanel } from "@/components/pager-panel";
 import { ItemDetail } from "@/components/item-detail";
 import { usePager } from "@/components/app-shell-context";
 import { useBumpRefresh } from "@/app/(app)/layout";
+import { BottomNavCard } from "@/components/layout/BottomNavCard";
 import type { Item } from "@/lib/types";
 
 interface AppPagerProps {
@@ -104,6 +105,9 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             </div>
           </PagerPanel>
         </SwipePager>
+        <div className="mx-auto w-[98%] shrink-0">
+          <BottomNavCard />
+        </div>
       </div>
 
       {itemDetail}
