@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { Settings, X } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
 
-import { VisualViewportSync } from "@/components/layout/VisualViewportSync";
 import { AppPager } from "@/components/app-pager";
 import { ProfileView } from "@/components/profile-view";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
@@ -164,9 +163,6 @@ export default function AppLayout({
             onSaved={bumpRefresh}
           />
         </div>
-
-
-        <VisualViewportSync />
       </AppShellProvider>
     </RefreshContext.Provider>
   );
