@@ -109,7 +109,7 @@ function CompactLinkItem({ item }: { item: Item }) {
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+        const res = await fetch(`/api/link-preview?url=${encodeURIComponent(url!)}`);
         const data = await res.json();
         if (!cancelled) {
           if (!item.metadata?.link_title) setPreviewTitle(data.title ?? null);
