@@ -338,6 +338,7 @@ export function SwipePager({
         style={{ width: width > 0 ? width * count : `${count * 100}%` }}
       >
         {children.map((child, i) => {
+          // eslint-disable-next-line
           const depth = panelDepthTransform(
             i,
             visualActiveIndex,

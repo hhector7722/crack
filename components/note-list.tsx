@@ -98,6 +98,7 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line
     void loadItems();
   }, [loadItems, refreshKey]);
 

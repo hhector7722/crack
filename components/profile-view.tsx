@@ -40,6 +40,7 @@ export function ProfileView() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line
     void loadStatus();
   }, [loadStatus]);
 

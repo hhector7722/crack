@@ -19,7 +19,7 @@ export function BottomNavCard() {
         <Plus className="h-6 w-6" strokeWidth={2} />
       </button>
 
-      <div className="relative top-3 z-10">
+      <div className="relative top-6 z-10">
         <PagerDots />
       </div>
       <TabBar />
