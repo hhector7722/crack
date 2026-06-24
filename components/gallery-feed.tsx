@@ -181,7 +181,7 @@ export function GalleryFeed({
     columns === 5 ? "grid-cols-5" : columns === 4 ? "grid-cols-4" : "grid-cols-3";
 
   return (
-    <div className="mx-auto flex min-h-full w-full flex-col pt-[var(--tm-app-header-block)]">
+    <div className="mx-auto flex min-h-full w-full flex-col pt-4">
       <div className={`grid ${gridCols} gap-1`}>
         {isRefreshing && (
           <div className="aspect-square w-full animate-pulse rounded-md bg-zinc-800"></div>

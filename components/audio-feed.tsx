@@ -256,7 +256,7 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
   const listClass = compact ? "divide-y divide-zinc-700/50" : "grid grid-cols-2 gap-4 px-4 pt-2";
 
   return (
-    <div className="mx-auto flex min-h-full w-full flex-col pt-[var(--tm-app-header-block)]">
+    <div className="mx-auto flex min-h-full w-full flex-col pt-4">
       <div className={listClass}>
         {isRefreshing && (
           compact ? (
