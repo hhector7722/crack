@@ -53,9 +53,11 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [audioUrls, setAudioUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (background = false) => {
+    if (!background) setLoading(true);
+    setIsRefreshing(true);
     try {
       const supabase = createClient();
 
@@ -84,11 +86,12 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
       // silent
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
-    void load();
+    void load(categorized !== null);
   }, [load, refreshKey]);
 
   if (loading) {
@@ -104,6 +107,14 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   return (
     <div className="mx-auto flex min-h-full w-[98%] flex-col pt-[calc(1rem+var(--tm-app-header-block))]">
       <div className="flex-1 space-y-5">
+        {isRefreshing && (
+          <SectionWrapper>
+            <div className="flex items-center gap-3">
+              <Loader2 className="h-5 w-5 animate-spin text-zinc-500" />
+              <div className="h-4 w-1/3 animate-pulse rounded bg-zinc-800"></div>
+            </div>
+          </SectionWrapper>
+        )}
         {categorized.audios.length > 0 && (
         <SectionWrapper>
           <div className="grid grid-cols-2 gap-4">

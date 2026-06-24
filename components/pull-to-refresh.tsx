@@ -23,19 +23,16 @@ export function PullToRefresh({
   const [refreshing, setRefreshing] = useState(false);
   const startY = useRef(0);
   const pulling = useRef(false);
-  const pullRef = useRef(0);
 
   async function triggerRefresh() {
     if (refreshing) return;
     setRefreshing(true);
     setPull(48);
-    pullRef.current = 48;
     try {
       await onRefresh();
     } finally {
       setRefreshing(false);
       setPull(0);
-      pullRef.current = 0;
     }
   }
 
@@ -54,36 +51,32 @@ export function PullToRefresh({
     if (!el || el.scrollTop > 0) {
       pulling.current = false;
       setPull(0);
-      pullRef.current = 0;
       return;
     }
 
     const dy = e.touches[0].clientY - startY.current;
     if (dy > 0) {
-      const next = Math.min(dy * 0.45, 96);
-      pullRef.current = next;
+      const next = Math.min(dy * 0.45, 120);
       setPull(next);
+      if (e.cancelable) e.preventDefault();
     }
   }
 
   function onTouchEnd() {
     if (!pulling.current) return;
     pulling.current = false;
-    if (pullRef.current >= PULL_THRESHOLD) {
+    if (pull >= PULL_THRESHOLD) {
       void triggerRefresh();
     } else {
       setPull(0);
-      pullRef.current = 0;
     }
   }
-
-  const indicatorHeight = refreshing ? 48 : pull;
 
   return (
     <div
       ref={scrollRef}
       className={cn(
-        "h-full overflow-y-auto overscroll-y-contain",
+        "relative h-full overflow-y-auto overscroll-y-none",
         className
       )}
       onTouchStart={onTouchStart}
@@ -92,19 +85,35 @@ export function PullToRefresh({
       onTouchCancel={onTouchEnd}
     >
       <div
-        className="flex items-center justify-center overflow-hidden"
-        style={{ height: indicatorHeight, transition: iosTransition("height", 200) }}
+        className="absolute left-0 top-0 flex w-full items-center justify-center pointer-events-none"
+        style={{
+          transform: `translateY(${Math.max(0, pull - 40)}px)`,
+          opacity: pull > 10 ? 1 : 0,
+          transition: pulling.current ? "none" : iosTransition("transform", 300),
+        }}
       >
-        {(pull > 0 || refreshing) && (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 shadow-md">
           <Loader2
             className={cn(
-              "h-6 w-6 text-zinc-400",
+              "h-5 w-5 text-zinc-400",
               refreshing && "animate-spin"
             )}
+            style={{
+              transform: `rotate(${pull * 2}deg)`,
+              animation: refreshing ? "spin 1s linear infinite" : "none"
+            }}
           />
-        )}
+        </div>
       </div>
-      {children}
+      <div
+        className="min-h-full"
+        style={{
+          transform: `translateY(${refreshing ? 48 : pull}px)`,
+          transition: pulling.current ? "none" : iosTransition("transform", 300),
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }

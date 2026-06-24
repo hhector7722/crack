@@ -7,9 +7,9 @@ interface PagerPanelProps {
   children: React.ReactNode;
 }
 
-export function PagerPanel({ onRefresh: _onRefresh, children }: PagerPanelProps) {
+export function PagerPanel({ onRefresh, children }: PagerPanelProps) {
   return (
-    <TabScrollLayout className="px-[var(--app-gutter)] pt-[var(--app-gutter)]">
+    <TabScrollLayout onRefresh={onRefresh} className="px-[var(--app-gutter)] pt-[var(--app-gutter)]">
       {children}
     </TabScrollLayout>
   );

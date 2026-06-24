@@ -1,5 +1,8 @@
 "use client";
 
+import { Suspense } from "react";
+import { UrlSyncObserver } from "@/components/url-sync-observer";
+
 import {
   createContext,
   useContext,
@@ -134,7 +137,12 @@ export default function AppLayout({
                 <ProfileView />
               </div>
             ) : (
-              <AppPager refreshKey={refreshKey} />
+              <>
+                <Suspense fallback={null}>
+                  <UrlSyncObserver />
+                </Suspense>
+                <AppPager refreshKey={refreshKey} />
+              </>
             )}
           </main>
 

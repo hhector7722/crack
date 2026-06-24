@@ -65,6 +65,7 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
   const [items, setItems] = useState<Item[]>([]);
   const [mediaUrls, setMediaUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -73,8 +74,9 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
   const rafRef = useRef(0);
   const { shareItem, sheet } = useItemShare();
 
-  const loadItems = useCallback(async () => {
-    setLoading(true);
+  const loadItems = useCallback(async (background = false) => {
+    if (!background) setLoading(true);
+    setIsRefreshing(true);
     setError(null);
     try {
       const supabase = createClient();
@@ -103,11 +105,12 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
       setError(err instanceof Error ? err.message : "Error cargando audios");
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
-    void loadItems();
+    void loadItems(items.length > 0);
   }, [loadItems, refreshKey]);
 
   useEffect(() => {
@@ -255,6 +258,15 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
   return (
     <div className="mx-auto flex min-h-full w-full flex-col pt-[var(--tm-app-header-block)]">
       <div className={listClass}>
+        {isRefreshing && (
+          compact ? (
+            <div className="flex w-full animate-pulse py-3">
+              <div className="h-4 w-2/3 rounded bg-zinc-800"></div>
+            </div>
+          ) : (
+            <div className="h-24 w-full animate-pulse rounded-xl bg-zinc-800/50"></div>
+          )
+        )}
         {items.map((item) => {
           const mediaUrl = item.file_url ? mediaUrls[item.file_url] ?? null : null;
           const row = (

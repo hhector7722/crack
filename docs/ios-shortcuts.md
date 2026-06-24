@@ -31,29 +31,42 @@ No uses POST ni JSON. Son 6 acciones en la app **Atajos**.
 
 ### Paso a paso
 
-#### 1. Obtener portapapeles
+#### 1. Configurar Hoja para compartir (Opcional pero recomendado)
 
-Busca **Obtener portapapeles** y añádela.
+Para no tener que copiar el enlace cada vez, puedes ejecutar el atajo directamente desde el menú de compartir de cualquier app (Safari, X, YouTube):
+
+1. Abre las opciones del atajo (icono `i` abajo o arriba).
+2. Activa **Mostrar en la hoja para compartir**.
+3. Aparecerá un bloque arriba del todo: `Recibir [Cualquier entrada] de la hoja para compartir`.
 
 ---
 
-#### 2. Obtener direcciones URL de
+#### 2. Obtener portapapeles o entrada
+
+Si no usas la hoja para compartir, añade **Obtener portapapeles**.
+
+---
+
+#### 3. Obtener direcciones URL de
 
 Busca **Obtener direcciones URL de la entrada** (o «Obtener direcciones URL de»).
 
-- Toca el hueco de entrada → **Seleccionar variable** → **Portapapeles**
+- Toca el hueco de entrada → **Seleccionar variable**
+- Elige **Entrada del atajo** (si has activado el paso 1) o **Portapapeles**.
+
+*(Consejo Pro: si usas una condición "Si [Entrada del atajo] tiene un valor", puedes hacer que lea la entrada y, si está vacía, lea el portapapeles).*
 
 ---
 
-#### 3. Codificar con URL
+#### 4. Codificar con URL
 
 Busca **Codificar con URL**.
 
-- Entrada: **Direcciones URL** (variable del paso 2)
+- Entrada: **Direcciones URL** (variable del paso 3)
 
 ---
 
-#### 4. Texto
+#### 5. Texto
 
 Busca **Texto** y pega la siguiente URL (que ya incluye tu token).
 **Muy importante:** Justo después de `&url=`, inserta la variable **Texto codificado con URL** (o Direcciones URL con codificación URL).
@@ -67,12 +80,12 @@ No añadas espacios ni saltos de línea.
 
 ---
 
-#### 5. Obtener contenido de URL
+#### 6. Obtener contenido de URL
 
 Busca **Obtener contenido de URL**.
 
 - Toca el **hueco vacío** junto a «Obtener contenido de» (no el campo de abajo suelto)
-- **Seleccionar variable** → **Texto** (el bloque del paso 4)
+- **Seleccionar variable** → **Texto** (el bloque del paso 5)
 - Método: **GET** (viene por defecto; no cambies a POST)
 
 Si ves el error *«No se ha especificado ninguna URL»*, es porque este hueco sigue vacío. Debe mostrar la variable **Texto**, no una URL escrita aparte.
@@ -182,7 +195,7 @@ Abre Safari, copia manualmente `https://youtube.com/watch?v=dQw4w9WgXcQ`, ejecut
 
 | Mensaje | Qué hacer |
 |---------|-----------|
-| No se ha especificado ninguna URL | Paso 5: el hueco principal debe ser la variable **Texto** |
+| No se ha especificado ninguna URL | Paso 6: el hueco principal debe ser la variable **Texto** |
 | Token inválido | Regenera token en Perfil y actualiza el paso 4 |
 | No se encontró ninguna URL válida | Copia un enlace real antes de ejecutar el atajo |
 | 503 | Falta `SUPABASE_SERVICE_ROLE_KEY` en Vercel |

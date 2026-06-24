@@ -79,12 +79,14 @@ function NoteRow({
 export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: NoteListProps) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const { shareItem, sheet } = useItemShare();
 
-  const loadItems = useCallback(async () => {
-    setLoading(true);
+  const loadItems = useCallback(async (background = false) => {
+    if (!background) setLoading(true);
+    setIsRefreshing(true);
     setError(null);
     try {
       const supabase = createClient();
@@ -94,12 +96,13 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
       setError(err instanceof Error ? err.message : "Error cargando notas");
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
     // eslint-disable-next-line
-    void loadItems();
+    void loadItems(items.length > 0);
   }, [loadItems, refreshKey]);
 
   async function handleDelete(item: Item) {
@@ -186,6 +189,15 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
   return (
     <div className="mx-auto flex min-h-full w-full flex-col pt-[var(--tm-app-header-block)]">
       <div className={listClass}>
+        {isRefreshing && (
+          compact ? (
+            <div className="flex w-full animate-pulse py-3">
+              <div className="h-4 w-2/3 rounded bg-zinc-800"></div>
+            </div>
+          ) : (
+            <div className="h-32 w-full animate-pulse rounded-2xl bg-zinc-800/50"></div>
+          )
+        )}
         {filtered.map((item) =>
           compact ? (
             <NoteRow

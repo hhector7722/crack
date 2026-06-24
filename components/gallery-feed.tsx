@@ -64,12 +64,14 @@ export function GalleryFeed({
   const [items, setItems] = useState<Item[]>([]);
   const [urls, setUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const { shareItem, sheet } = useItemShare();
 
-  const loadItems = useCallback(async () => {
-    setLoading(true);
+  const loadItems = useCallback(async (background = false) => {
+    if (!background) setLoading(true);
+    setIsRefreshing(true);
     setError(null);
     try {
       const supabase = createClient();
@@ -98,11 +100,12 @@ export function GalleryFeed({
       setError(err instanceof Error ? err.message : "Error cargando galería");
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
-    void loadItems();
+    void loadItems(items.length > 0);
   }, [loadItems, refreshKey]);
 
   async function handleDelete(item: Item) {
@@ -180,6 +183,9 @@ export function GalleryFeed({
   return (
     <div className="mx-auto flex min-h-full w-full flex-col pt-[var(--tm-app-header-block)]">
       <div className={`grid ${gridCols} gap-1`}>
+        {isRefreshing && (
+          <div className="aspect-square w-full animate-pulse rounded-md bg-zinc-800"></div>
+        )}
         {visible.map((item) => {
           const url = item.file_url ? urls[item.file_url] : null;
           const thumb = (
