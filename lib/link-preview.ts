@@ -99,11 +99,24 @@ export async function fetchLinkPreview(url: string): Promise<LinkPreviewData> {
     return { title: titleFromUrl(url), image: null, description: null };
   }
 
+  let fetchUrl = parsed.href;
+  let userAgent = "Mozilla/5.0 (compatible; CrackLinkPreview/1.0; +https://crack.app)";
+
+  if (
+    parsed.hostname === "x.com" ||
+    parsed.hostname === "twitter.com" ||
+    parsed.hostname === "www.x.com" ||
+    parsed.hostname === "www.twitter.com"
+  ) {
+    parsed.hostname = "vxtwitter.com";
+    fetchUrl = parsed.href;
+    userAgent = "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)";
+  }
+
   try {
-    const res = await fetch(parsed.href, {
+    const res = await fetch(fetchUrl, {
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (compatible; CrackLinkPreview/1.0; +https://crack.app)",
+        "User-Agent": userAgent,
         Accept: "text/html,application/xhtml+xml",
       },
       signal: AbortSignal.timeout(5000),

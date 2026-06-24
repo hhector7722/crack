@@ -55,36 +55,27 @@ Busca **Codificar con URL**.
 
 #### 4. Texto
 
-Busca **Texto** y pega **exactamente** esta línea (ya incluye tu token):
+Busca **Texto** y pega la siguiente URL (que ya incluye tu token).
+**Muy importante:** Justo después de `&url=`, inserta la variable **Texto codificado con URL** (o Direcciones URL con codificación URL).
+Para hacerlo, toca donde dice `&url=`, elige "Seleccionar variable" sobre el teclado y toca la pastilla azul del paso anterior.
 
 ```
-https://crackdecracks.vercel.app/api/share-link?token=ArJec1N0IytJlhviMNWjyWmuxkeHqcPDIobgdOcBhlg&url=
+https://crackdecracks.vercel.app/api/share-link?token=ArJec1N0IytJlhviMNWjyWmuxkeHqcPDIobgdOcBhlg&url=[Selecciona la variable aquí]
 ```
 
-No añadas espacios ni saltos de línea al final.
+No añadas espacios ni saltos de línea.
 
 ---
 
-#### 5. Combinar texto
-
-Busca **Combinar texto** (o «Unir texto»).
-
-- Primer bloque: **Texto** (paso 4)
-- Segundo bloque: **Texto codificado** (paso 3)
-
-Orden: primero el Texto fijo, luego el enlace codificado.
-
----
-
-#### 6. Obtener contenido de URL
+#### 5. Obtener contenido de URL
 
 Busca **Obtener contenido de URL**.
 
 - Toca el **hueco vacío** junto a «Obtener contenido de» (no el campo de abajo suelto)
-- **Seleccionar variable** → **Texto combinado** (paso 5)
+- **Seleccionar variable** → **Texto** (el bloque del paso 4)
 - Método: **GET** (viene por defecto; no cambies a POST)
 
-Si ves el error *«No se ha especificado ninguna URL»*, es porque este hueco sigue vacío. Debe mostrar la variable **Texto combinado**, no una URL escrita aparte.
+Si ves el error *«No se ha especificado ninguna URL»*, es porque este hueco sigue vacío. Debe mostrar la variable **Texto**, no una URL escrita aparte.
 
 ---
 
@@ -106,9 +97,8 @@ La URL de la imagen irá después de `&imageUrl=` (codificada).
 1. **Obtener portapapeles** (debes copiar antes el enlace de la imagen)
 2. **Obtener direcciones URL de** la entrada → Portapapeles
 3. **Codificar con URL** la URL obtenida
-4. **Texto** con la URL base: `...&imageUrl=`
-5. **Combinar texto**: Texto fijo + URL codificada
-6. **Obtener contenido de URL** con la combinación
+4. **Texto** con la URL base y la variable incrustada al final: `...&imageUrl=[Variable]`
+5. **Obtener contenido de URL** usando el Texto como entrada
 
 Resultado:
 ```
@@ -192,7 +182,7 @@ Abre Safari, copia manualmente `https://youtube.com/watch?v=dQw4w9WgXcQ`, ejecut
 
 | Mensaje | Qué hacer |
 |---------|-----------|
-| No se ha especificado ninguna URL | Paso 6: el hueco principal debe ser la variable **Texto combinado** |
+| No se ha especificado ninguna URL | Paso 5: el hueco principal debe ser la variable **Texto** |
 | Token inválido | Regenera token en Perfil y actualiza el paso 4 |
 | No se encontró ninguna URL válida | Copia un enlace real antes de ejecutar el atajo |
 | 503 | Falta `SUPABASE_SERVICE_ROLE_KEY` en Vercel |
