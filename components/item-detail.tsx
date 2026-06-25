@@ -124,7 +124,6 @@ export function ItemDetail({
   }
 
   return (
-  return (
     <AppModal open={open} onOpenChange={onOpenChange} size="fixed">
       <div className="mb-4 flex items-center justify-between gap-3">
         <span className="text-xs text-zinc-500">
