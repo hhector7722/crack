@@ -110,7 +110,7 @@ export default function AppLayout({
 
           <header className="tm-app-header tm-app-header-fixed fixed top-0 right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-12">
             <div className="tm-app-header__row flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-between px-2">
-              <div />
+              <div className="w-8" />
               <h1 className="text-lg font-bold tracking-tight">Crack</h1>
               <button
                 type="button"

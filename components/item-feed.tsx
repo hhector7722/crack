@@ -126,9 +126,7 @@ export function ItemFeed({ filter, refreshKey = 0 }: ItemFeedProps) {
     <>
       <div className="content-list">
         {items.map((item) => (
-          <SwipeToDelete key={item.id} onDelete={() => handleDelete(item)}>
-            <ItemCard item={item} onClick={() => setSelectedItem(item)} />
-          </SwipeToDelete>
+          <ItemCard key={item.id} item={item} onClick={() => setSelectedItem(item)} />
         ))}
       </div>
 

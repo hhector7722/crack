@@ -198,25 +198,15 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
             <div className="h-32 w-full animate-pulse rounded-2xl bg-zinc-800/50"></div>
           )
         )}
-        {filtered.map((item) =>
-          compact ? (
-            <NoteRow
-              key={item.id}
-              item={item}
-              compact
-              onShare={shareItem}
-              onClick={() => handleClick(item)}
-            />
-          ) : (
-            <SwipeToDelete key={item.id} onDelete={() => handleDelete(item)}>
-              <NoteRow
-                item={item}
-                onShare={shareItem}
-                onClick={() => handleClick(item)}
-              />
-            </SwipeToDelete>
-          )
-        )}
+        {filtered.map((item) => (
+          <NoteRow
+            key={item.id}
+            item={item}
+            compact={compact}
+            onShare={shareItem}
+            onClick={() => handleClick(item)}
+          />
+        ))}
       </div>
 
 

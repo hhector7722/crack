@@ -197,15 +197,7 @@ export function GalleryFeed({
             />
           );
 
-          if (compact) {
-            return <div key={item.id}>{thumb}</div>;
-          }
-
-          return (
-            <SwipeToDelete key={item.id} onDelete={() => handleDelete(item)}>
-              {thumb}
-            </SwipeToDelete>
-          );
+          return <div key={item.id}>{thumb}</div>;
         })}
       </div>
 

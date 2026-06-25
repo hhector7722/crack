@@ -281,15 +281,7 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
             />
           );
 
-          if (compact) {
-            return <div key={item.id}>{row}</div>;
-          }
-
-          return (
-            <SwipeToDelete key={item.id} onDelete={() => handleDelete(item)}>
-              {row}
-            </SwipeToDelete>
-          );
+          return <div key={item.id}>{row}</div>;
         })}
       </div>
 
