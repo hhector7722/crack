@@ -10,6 +10,7 @@ import { resolveLinkTitle, titleFromUrl } from "@/lib/link-preview";
 import { displayValue, getNoteUrl } from "@/lib/utils";
 import type { Item } from "@/lib/types";
 import { CompactAudioItem, CompactLinkItem, CompactNoteItem } from "@/components/compact-items";
+import { ItemDetail } from "@/components/item-detail";
 
 interface DashboardPageProps {
   refreshKey?: number;
@@ -32,8 +33,8 @@ function SectionWrapper({ children }: { children: React.ReactNode }) {
 
 
 
-function ImageThumb({ url }: { url: string | null }) {
-  return (
+function ImageThumb({ url, onClick }: { url: string | null; onClick?: () => void }) {
+  const inner = (
     <div className="aspect-square w-full overflow-hidden rounded-md bg-white">
       {url ? (
         <img src={url} alt="" className="h-full w-full object-contain transition-transform active:scale-95" />
@@ -44,6 +45,16 @@ function ImageThumb({ url }: { url: string | null }) {
       )}
     </div>
   );
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className="w-full h-full text-left active:opacity-80">
+        {inner}
+      </button>
+    );
+  }
+
+  return inner;
 }
 
 
@@ -54,6 +65,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   const [audioUrls, setAudioUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 
   const load = useCallback(async (background = false) => {
     if (!background) setLoading(true);
@@ -119,7 +131,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
         <SectionWrapper>
           <div className="grid grid-cols-2 gap-4">
             {categorized.audios.slice(0, 4).map((item) => (
-              <CompactAudioItem key={item.id} item={item} />
+              <CompactAudioItem key={item.id} item={item} onClick={() => setSelectedItem(item)} />
             ))}
           </div>
         </SectionWrapper>
@@ -132,6 +144,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
               <ImageThumb
                 key={item.id}
                 url={item.file_url ? imageUrls[item.file_url] ?? null : null}
+                onClick={() => setSelectedItem(item)}
               />
             ))}
           </div>
@@ -142,7 +155,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
         <SectionWrapper>
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             {categorized.notes.slice(0, 6).map((item) => (
-              <CompactNoteItem key={item.id} item={item} />
+              <CompactNoteItem key={item.id} item={item} onClick={() => setSelectedItem(item)} />
             ))}
           </div>
         </SectionWrapper>
@@ -152,13 +165,29 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
         <SectionWrapper>
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             {categorized.links.slice(0, 4).map((item) => (
-              <CompactLinkItem key={item.id} item={item} />
+              <CompactLinkItem key={item.id} item={item} onClick={() => setSelectedItem(item)} />
             ))}
           </div>
         </SectionWrapper>
       )}
       </div>
 
+      {selectedItem && (
+        <ItemDetail
+          key={selectedItem.id}
+          item={selectedItem}
+          open={!!selectedItem}
+          onOpenChange={(open) => !open && setSelectedItem(null)}
+          onUpdated={(updated) => {
+            setSelectedItem(updated);
+            void load(true);
+          }}
+          onDeleted={() => {
+            setSelectedItem(null);
+            void load(true);
+          }}
+        />
+      )}
     </div>
   );
 }
