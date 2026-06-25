@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { Mic, FileEdit, Camera } from "lucide-react";
 import { AppModal } from "@/components/app-modal";
-import { CaptureMenu } from "@/components/capture-menu";
 import { VoiceRecorder } from "@/components/voice-recorder";
 import { NoteCapture, type NoteCaptureHandle } from "@/components/note-capture";
 import { useAppShell } from "@/components/app-shell-context";
@@ -27,6 +28,9 @@ export function CaptureSheet({
   const [viewMode, setViewMode] = useState<ViewMode>(mode);
   const [error, setError] = useState<string | null>(null);
   const noteRef = useRef<NoteCaptureHandle>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   async function handleClose(nextOpen: boolean) {
     if (!nextOpen && viewMode === "note") {
@@ -73,11 +77,44 @@ export function CaptureSheet({
 
   const showBack = mode === "menu" && viewMode !== "menu";
 
+  if (!open) return null;
+
+  if (viewMode === "menu") {
+    if (!mounted) return null;
+    return createPortal(
+      <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black/40 backdrop-blur-md">
+        <div className="absolute inset-0" onClick={() => handleClose(false)} />
+        <div className="relative z-10 flex items-center justify-center gap-8">
+          <button
+            type="button"
+            onClick={() => handleMenuSelect("voice")}
+            className="flex h-20 w-20 items-center justify-center rounded-full bg-black shadow-lg shadow-black/50 active:scale-95"
+          >
+            <Mic className="h-8 w-8 text-red-500" />
+          </button>
+          <button
+            type="button"
+            onClick={() => handleMenuSelect("note")}
+            className="flex h-20 w-20 items-center justify-center rounded-full bg-black shadow-lg shadow-black/50 active:scale-95"
+          >
+            <FileEdit className="h-8 w-8 text-white" />
+          </button>
+          <button
+            type="button"
+            onClick={() => handleMenuSelect("image")}
+            className="flex h-20 w-20 items-center justify-center rounded-full bg-black shadow-lg shadow-black/50 active:scale-95"
+          >
+            <Camera className="h-8 w-8 text-white" />
+          </button>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
   return (
     <AppModal open={open} onOpenChange={handleClose} title={titles[viewMode]}>
       {error ? <p className="mb-3 text-sm text-red-300">{error}</p> : null}
-
-      {viewMode === "menu" ? <CaptureMenu onSelect={handleMenuSelect} /> : null}
 
       {viewMode === "image" ? (
         <div className="content-list">
