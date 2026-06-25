@@ -53,7 +53,7 @@ export function AppModal({
     >
       <div
         role="presentation"
-        className="crack-modal-overlay absolute inset-0 w-full h-full cursor-default bg-black/35 backdrop-blur-[6px]"
+        className="crack-modal-overlay absolute inset-0 w-full h-full cursor-default bg-black/15 backdrop-blur-[6px]"
         onClick={() => onOpenChange(false)}
       />
       <div

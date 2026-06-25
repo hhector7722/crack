@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { AppModal } from "@/components/app-modal";
 import { createClient } from "@/lib/supabase/client";
-import { updateItem, deleteItem, togglePin } from "@/lib/items";
+import { updateItem, deleteItem } from "@/lib/items";
 import { getSignedUrl, deleteFile } from "@/lib/storage";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -111,16 +111,6 @@ export function ItemDetail({
     }
   }
 
-  async function handleTogglePin() {
-    try {
-      const supabase = createClient();
-      await togglePin(supabase, item.id, !item.pinned);
-      onUpdated({ ...item, pinned: !item.pinned });
-    } catch {
-      alert("Error actualizando pin");
-    }
-  }
-
   async function handleDelete() {
     if (!window.confirm("¿Eliminar permanentemente?")) return;
     try {
@@ -145,19 +135,12 @@ export function ItemDetail({
         <button
           type="button"
           onClick={() => setMode(m => m === "view" ? "edit" : "view")}
-          className="action-ghost min-h-10 px-3 text-sm shrink-0"
+          className="action-ghost min-h-10 px-3 text-sm shrink-0 mr-1"
         >
           {mode === "view" ? "Editar" : "Ver"}
         </button>
       </div>
       <div className="mb-4 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={handleTogglePin}
-          className="action-ghost min-h-10 px-3 text-sm"
-        >
-          {item.pinned ? "Desfijar" : "Fijar"}
-        </button>
         <button
           type="button"
           onClick={handleDelete}
@@ -176,53 +159,66 @@ export function ItemDetail({
         <div className="flex min-h-0 flex-1 flex-col gap-4">
           <h1 className="text-xl font-bold text-zinc-100">{item.title || "Sin título"}</h1>
           {url ? (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-zinc-900/50"
-            >
-              {(() => {
-                const videoId = getYouTubeId(url);
-                const thumbUrl = videoId
-                  ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-                  : item.metadata.link_image || null;
-                return (
-                  <div className="relative flex-1">
-                    {thumbUrl ? (
-                      <div className="relative flex h-full min-h-[200px] items-center justify-center bg-zinc-900/80">
-                        <img
-                          src={thumbUrl}
-                          alt={item.title || ""}
-                          className="max-h-full w-full object-contain"
-                        />
-                        {videoId && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition-transform hover:scale-110">
-                              <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
+            <>
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="overflow-hidden rounded-xl bg-zinc-900/50"
+              >
+                {(() => {
+                  const videoId = getYouTubeId(url);
+                  const thumbUrl = videoId
+                    ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                    : item.metadata.link_image || null;
+                  return (
+                    <div>
+                      {thumbUrl ? (
+                        <div className="relative bg-zinc-900/80">
+                          <img
+                            src={thumbUrl}
+                            alt={item.title || ""}
+                            className="w-full object-contain max-h-[50dvh]"
+                          />
+                          {videoId && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition-transform hover:scale-110">
+                                <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex aspect-video items-center justify-center bg-zinc-900">
-                        <Link2 className="h-10 w-10 text-zinc-600" />
-                      </div>
-                    )}
-                    <div className="px-4 py-3">
-                      <p className="line-clamp-1 text-sm font-semibold text-zinc-100">
-                        {item.title || "Sin título"}
-                      </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex aspect-video items-center justify-center bg-zinc-900">
+                          <Link2 className="h-10 w-10 text-zinc-600" />
+                        </div>
+                      )}
+                      {item.title && (
+                        <div className="px-4 pt-3">
+                          <p className="text-sm font-semibold text-zinc-100">
+                            {item.title}
+                          </p>
+                        </div>
+                      )}
                       {item.metadata.link_description && (
-                        <p className="mt-1 line-clamp-2 text-xs text-zinc-400">
-                          {item.metadata.link_description}
-                        </p>
+                        <div className="px-4 pb-3">
+                          <p className="mt-1 text-xs text-zinc-400">
+                            {item.metadata.link_description}
+                          </p>
+                        </div>
                       )}
                     </div>
-                  </div>
-                );
-              })()}
-            </a>
+                  );
+                })()}
+              </a>
+              {item.content && (
+                <div className="rounded-xl bg-zinc-900/30 p-4">
+                  <p className="whitespace-pre-wrap text-sm text-zinc-400">
+                    {item.content.replace(url, "").trim() || "Sin contenido"}
+                  </p>
+                </div>
+              )}
+            </>
           ) : item.type === "image" ? (
             <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl bg-zinc-900/50">
               {loadingMedia ? (
