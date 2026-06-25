@@ -12,7 +12,7 @@ export interface AppModalProps {
   children: React.ReactNode;
   className?: string;
   /** Más ancho para formularios o detalle con mucho contenido */
-  size?: "content" | "wide";
+  size?: "content" | "wide" | "fixed";
 }
 
 /**
@@ -65,7 +65,9 @@ export function AppModal({
         data-block-tab-swipe
         className={cn(
           "crack-modal-card relative z-10 flex max-h-[calc(min(var(--tm-vv-height,100dvh),100dvh)-2*var(--app-gutter))] flex-col overflow-hidden rounded-2xl bg-zinc-800 shadow-sm shadow-black/40 outline-none",
-          size === "wide"
+          size === "fixed"
+            ? "w-[90vw] h-[90vh] max-w-[1200px]"
+            : size === "wide"
             ? "w-full max-w-[min(32rem,calc(100vw-2*var(--app-gutter)))]"
             : "w-max max-w-[calc(100vw-2*var(--app-gutter))]",
           className
@@ -81,7 +83,7 @@ export function AppModal({
         ) : null}
         <div
           className={cn(
-            "crack-modal-body min-h-0 overflow-y-auto overscroll-contain px-4 pb-4",
+            "crack-modal-body flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pb-4",
             title ? "pt-3" : "pt-4"
           )}
         >

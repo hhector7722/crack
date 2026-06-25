@@ -13,6 +13,7 @@ import {
   classificationLabel,
   displayValue,
   formatRelative,
+  getNoteUrl,
   cn,
 } from "@/lib/utils";
 import type { Item, ClassificationType, Priority } from "@/lib/types";
@@ -44,6 +45,9 @@ export function ItemDetail({
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loadingMedia, setLoadingMedia] = useState(false);
+  const [mode, setMode] = useState<"view" | "edit">("view");
+
+  const url = getNoteUrl(item);
 
   useEffect(() => {
     if (!open || !item.file_url) return;
@@ -120,12 +124,20 @@ export function ItemDetail({
   }
 
   return (
-    <AppModal open={open} onOpenChange={onOpenChange} size="wide">
+  return (
+    <AppModal open={open} onOpenChange={onOpenChange} size="fixed">
       <div className="mb-4 flex items-center justify-between gap-3">
         <span className="text-xs text-zinc-500">
           {formatRelative(item.created_at)}
         </span>
         <div className="flex shrink-0 gap-1">
+          <button
+            type="button"
+            onClick={() => setMode(m => m === "view" ? "edit" : "view")}
+            className="action-ghost min-h-10 px-3 text-sm"
+          >
+            {mode === "view" ? "Editar" : "Ver"}
+          </button>
           <button
             type="button"
             onClick={handleTogglePin}
@@ -149,116 +161,164 @@ export function ItemDetail({
         </Badge>
       ) : null}
 
-      <div className="space-y-4">
-        <div>
-          <label className="mb-1 block text-sm text-zinc-400">Título</label>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="input-float"
-          />
+      {mode === "view" ? (
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
+          <h1 className="text-xl font-bold text-zinc-100">{item.title || "Sin título"}</h1>
+          {url ? (
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-white">
+              <iframe
+                src={url}
+                className="h-full w-full border-0"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                title={item.title || "Enlace"}
+              />
+            </div>
+          ) : item.type === "image" ? (
+            <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl bg-zinc-900/50">
+              {loadingMedia ? (
+                <p className="text-sm text-zinc-500">Cargando imagen...</p>
+              ) : mediaUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={mediaUrl}
+                  alt={item.title || "Imagen"}
+                  className="max-h-full max-w-full object-contain"
+                />
+              ) : (
+                <p className="text-sm text-red-400">No se pudo cargar la imagen</p>
+              )}
+            </div>
+          ) : item.type === "audio" ? (
+            <div className="flex flex-col gap-4 rounded-xl bg-zinc-900/50 p-4">
+              {loadingMedia ? (
+                <p className="text-sm text-zinc-500">Cargando audio...</p>
+              ) : mediaUrl ? (
+                <audio controls src={mediaUrl} className="w-full" />
+              ) : null}
+              {item.content ? (
+                <div className="prose prose-invert max-w-none">
+                  <p className="whitespace-pre-wrap text-zinc-300">{item.content}</p>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-xl bg-zinc-900/50 p-4">
+              <p className="whitespace-pre-wrap text-zinc-300">{item.content || "Sin contenido"}</p>
+            </div>
+          )}
         </div>
+      ) : (
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm text-zinc-400">Título</label>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="input-float"
+            />
+          </div>
 
-        {item.type === "audio" ? (
-          <>
-            {loadingMedia ? (
-              <p className="py-2 text-sm text-zinc-500">Cargando audio...</p>
-            ) : mediaUrl ? (
-              <audio controls src={mediaUrl} className="w-full" />
-            ) : null}
+          {item.type === "audio" ? (
+            <>
+              {loadingMedia ? (
+                <p className="py-2 text-sm text-zinc-500">Cargando audio...</p>
+              ) : mediaUrl ? (
+                <audio controls src={mediaUrl} className="w-full" />
+              ) : null}
 
+              <div>
+                <label className="mb-1 block text-sm text-zinc-400">
+                  Transcripción
+                </label>
+                <Textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  rows={6}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-sm text-zinc-400">Tipo IA</label>
+                  <select
+                    value={classificationType ?? "note"}
+                    onChange={(e) =>
+                      setClassificationType(e.target.value as ClassificationType)
+                    }
+                    className="select-float"
+                  >
+                    <option value="note">Nota</option>
+                    <option value="reminder">Recordatorio</option>
+                    <option value="important">Importante</option>
+                    <option value="info">Info</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm text-zinc-400">
+                    Prioridad
+                  </label>
+                  <select
+                    value={priority ?? "medium"}
+                    onChange={(e) => setPriority(e.target.value as Priority)}
+                    className="select-float"
+                  >
+                    <option value="high">Alta</option>
+                    <option value="medium">Media</option>
+                    <option value="low">Baja</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm text-zinc-400">Tags</label>
+                <input
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  className="input-float"
+                />
+              </div>
+
+              {item.metadata.duration_seconds ? (
+                <p className="text-sm text-zinc-500">
+                  Duración: {displayValue(item.metadata.duration_seconds)}s
+                </p>
+              ) : null}
+            </>
+          ) : null}
+
+          {item.type === "note" ? (
             <div>
-              <label className="mb-1 block text-sm text-zinc-400">
-                Transcripción
-              </label>
+              <label className="mb-1 block text-sm text-zinc-400">Contenido</label>
               <Textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                rows={6}
+                rows={8}
               />
             </div>
+          ) : null}
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-sm text-zinc-400">Tipo IA</label>
-                <select
-                  value={classificationType ?? "note"}
-                  onChange={(e) =>
-                    setClassificationType(e.target.value as ClassificationType)
-                  }
-                  className="select-float"
-                >
-                  <option value="note">Nota</option>
-                  <option value="reminder">Recordatorio</option>
-                  <option value="important">Importante</option>
-                  <option value="info">Info</option>
-                </select>
-              </div>
-              <div>
-                <label className="mb-1 block text-sm text-zinc-400">
-                  Prioridad
-                </label>
-                <select
-                  value={priority ?? "medium"}
-                  onChange={(e) => setPriority(e.target.value as Priority)}
-                  className="select-float"
-                >
-                  <option value="high">Alta</option>
-                  <option value="medium">Media</option>
-                  <option value="low">Baja</option>
-                </select>
-              </div>
-            </div>
+          {item.type === "image" ? (
+            <>
+              {loadingMedia ? (
+                <p className="py-4 text-sm text-zinc-500">Cargando imagen...</p>
+              ) : mediaUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={mediaUrl}
+                  alt={title}
+                  className="max-h-[min(50dvh,calc(var(--tm-vv-height,100dvh)*0.5))] w-full object-contain"
+                />
+              ) : (
+                <p className="text-sm text-red-400">No se pudo cargar la imagen</p>
+              )}
+            </>
+          ) : null}
 
-            <div>
-              <label className="mb-1 block text-sm text-zinc-400">Tags</label>
-              <input
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                className="input-float"
-              />
-            </div>
-
-            {item.metadata.duration_seconds ? (
-              <p className="text-sm text-zinc-500">
-                Duración: {displayValue(item.metadata.duration_seconds)}s
-              </p>
-            ) : null}
-          </>
-        ) : null}
-
-        {item.type === "note" ? (
-          <div>
-            <label className="mb-1 block text-sm text-zinc-400">Contenido</label>
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={8}
-            />
-          </div>
-        ) : null}
-
-        {item.type === "image" ? (
-          <>
-            {loadingMedia ? (
-              <p className="py-4 text-sm text-zinc-500">Cargando imagen...</p>
-            ) : mediaUrl ? (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={mediaUrl}
-                alt={title}
-                className="max-h-[min(50dvh,calc(var(--tm-vv-height,100dvh)*0.5))] w-full object-contain"
-              />
-            ) : (
-              <p className="text-sm text-red-400">No se pudo cargar la imagen</p>
-            )}
-          </>
-        ) : null}
-
-        <Button onClick={handleSave} disabled={saving} className="w-full">
-          {saving ? "Guardando..." : "Guardar cambios"}
-        </Button>
-      </div>
+          <Button onClick={handleSave} disabled={saving} className="w-full">
+            {saving ? "Guardando..." : "Guardar cambios"}
+          </Button>
+        </div>
+      )}
     </AppModal>
   );
 }

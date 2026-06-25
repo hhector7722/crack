@@ -71,16 +71,9 @@ export function LinkNotePreview({ url, itemTitle, metadata }: LinkNotePreviewPro
   const displayTitle = resolveLinkTitle(url, previewTitle, itemTitle);
   const domain = getDomain(url);
 
-  function openLink(e: React.MouseEvent) {
-    e.stopPropagation();
-    window.open(url, "_blank", "noopener,noreferrer");
-  }
-
   return (
-    <button
-      type="button"
-      onClick={openLink}
-      className="group relative w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 text-left active:opacity-80"
+    <div
+      className="group relative w-full overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/50 text-left cursor-pointer active:opacity-80"
     >
       {loading ? (
         <div className="flex aspect-[16/9] items-center justify-center bg-zinc-900">
@@ -113,7 +106,16 @@ export function LinkNotePreview({ url, itemTitle, metadata }: LinkNotePreviewPro
         <p className="text-xs text-zinc-600">{domain}</p>
       </div>
 
-      <ExternalLink className="absolute right-3 top-3 h-4 w-4 text-zinc-600 opacity-0 transition-opacity group-hover:opacity-100" />
-    </button>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
+        className="absolute right-3 top-3 z-10 p-2 opacity-0 transition-opacity group-hover:opacity-100"
+        title="Abrir en nueva pestaña"
+      >
+        <ExternalLink className="h-4 w-4 text-zinc-600 hover:text-zinc-300" />
+      </a>
+    </div>
   );
 }
