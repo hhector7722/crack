@@ -8,6 +8,8 @@ import { AppModal } from "@/components/app-modal";
 import { createClient } from "@/lib/supabase/client";
 import { updateItem, deleteItem, togglePin } from "@/lib/items";
 import { getSignedUrl, deleteFile } from "@/lib/storage";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   classificationColor,
   classificationLabel,
@@ -24,6 +26,17 @@ interface ItemDetailProps {
   onOpenChange: (open: boolean) => void;
   onUpdated: (item: Item) => void;
   onDeleted: () => void;
+}
+
+function getEmbedUrl(rawUrl: string): string {
+  try {
+    const u = new URL(rawUrl);
+    if (u.hostname.includes("youtube.com") || u.hostname.includes("youtu.be")) {
+      const videoId = u.hostname.includes("youtu.be") ? u.pathname.slice(1) : u.searchParams.get("v");
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+  } catch {}
+  return rawUrl;
 }
 
 export function ItemDetail({
@@ -125,50 +138,57 @@ export function ItemDetail({
 
   return (
     <AppModal open={open} onOpenChange={onOpenChange} size="fixed">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <span className="text-xs text-zinc-500">
-          {formatRelative(item.created_at)}
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <span className="text-xs text-zinc-400 pt-2">
+          {format(new Date(item.created_at), "d 'de' MMMM yyyy 'a las' H:mm", { locale: es })}
         </span>
-        <div className="flex shrink-0 gap-1">
-          <button
-            type="button"
-            onClick={() => setMode(m => m === "view" ? "edit" : "view")}
-            className="action-ghost min-h-10 px-3 text-sm"
-          >
-            {mode === "view" ? "Editar" : "Ver"}
-          </button>
-          <button
-            type="button"
-            onClick={handleTogglePin}
-            className="action-ghost min-h-10 px-3 text-sm"
-          >
-            {item.pinned ? "Desfijar" : "Fijar"}
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="action-accent min-h-10 px-3 text-sm"
-          >
-            Eliminar
-          </button>
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={() => setMode(m => m === "view" ? "edit" : "view")}
+              className="action-ghost min-h-10 px-3 text-sm"
+            >
+              {mode === "view" ? "Editar" : "Ver"}
+            </button>
+            <button
+              type="button"
+              onClick={handleTogglePin}
+              className="action-ghost min-h-10 px-3 text-sm"
+            >
+              {item.pinned ? "Desfijar" : "Fijar"}
+            </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="action-accent min-h-10 px-3 text-sm"
+            >
+              Eliminar
+            </button>
+          </div>
+          {classificationType ? (
+            <Badge className={cn("w-fit", classificationColor(classificationType))}>
+              {classificationLabel(classificationType)}
+            </Badge>
+          ) : null}
         </div>
       </div>
-
-      {classificationType ? (
-        <Badge className={cn("mb-3", classificationColor(classificationType))}>
-          {classificationLabel(classificationType)}
-        </Badge>
-      ) : null}
 
       {mode === "view" ? (
         <div className="flex min-h-0 flex-1 flex-col gap-4">
           <h1 className="text-xl font-bold text-zinc-100">{item.title || "Sin título"}</h1>
           {url ? (
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-white">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-white relative">
+              <div className="absolute top-0 left-0 right-0 p-2 bg-zinc-900/90 text-center text-xs text-zinc-400 z-10 flex justify-between items-center">
+                <span>Vista web (algunos sitios bloquean esto)</span>
+                <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Abrir en pestaña</a>
+              </div>
               <iframe
-                src={url}
-                className="h-full w-full border-0"
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                src={getEmbedUrl(url)}
+                className="h-full w-full border-0 pt-8"
+                sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
                 title={item.title || "Enlace"}
               />
             </div>
