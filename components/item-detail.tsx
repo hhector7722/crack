@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Play, Link2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,15 +29,14 @@ interface ItemDetailProps {
   onDeleted: () => void;
 }
 
-function getEmbedUrl(rawUrl: string): string {
+function getYouTubeId(url: string): string | null {
   try {
-    const u = new URL(rawUrl);
+    const u = new URL(url);
     if (u.hostname.includes("youtube.com") || u.hostname.includes("youtu.be")) {
-      const videoId = u.hostname.includes("youtu.be") ? u.pathname.slice(1) : u.searchParams.get("v");
-      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+      return u.hostname.includes("youtu.be") ? u.pathname.slice(1) : u.searchParams.get("v");
     }
   } catch {}
-  return rawUrl;
+  return null;
 }
 
 export function ItemDetail({
@@ -139,59 +139,90 @@ export function ItemDetail({
   return (
     <AppModal open={open} onOpenChange={onOpenChange} size="fixed">
       <div className="mb-4 flex items-start justify-between gap-3">
-        <span className="text-xs text-zinc-400 pt-2">
+        <span className="text-xs text-zinc-400 pt-2 whitespace-nowrap">
           {format(new Date(item.created_at), "d 'de' MMMM yyyy 'a las' H:mm", { locale: es })}
         </span>
-        <div className="flex flex-col items-end gap-2 shrink-0">
-          <div className="flex gap-1">
-            <button
-              type="button"
-              onClick={() => setMode(m => m === "view" ? "edit" : "view")}
-              className="action-ghost min-h-10 px-3 text-sm"
-            >
-              {mode === "view" ? "Editar" : "Ver"}
-            </button>
-            <button
-              type="button"
-              onClick={handleTogglePin}
-              className="action-ghost min-h-10 px-3 text-sm"
-            >
-              {item.pinned ? "Desfijar" : "Fijar"}
-            </button>
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="action-accent min-h-10 px-3 text-sm"
-            >
-              Eliminar
-            </button>
-          </div>
-          {classificationType ? (
-            <Badge className={cn("w-fit", classificationColor(classificationType))}>
-              {classificationLabel(classificationType)}
-            </Badge>
-          ) : null}
-        </div>
+        <button
+          type="button"
+          onClick={() => setMode(m => m === "view" ? "edit" : "view")}
+          className="action-ghost min-h-10 px-3 text-sm shrink-0"
+        >
+          {mode === "view" ? "Editar" : "Ver"}
+        </button>
+      </div>
+      <div className="mb-4 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={handleTogglePin}
+          className="action-ghost min-h-10 px-3 text-sm"
+        >
+          {item.pinned ? "Desfijar" : "Fijar"}
+        </button>
+        <button
+          type="button"
+          onClick={handleDelete}
+          className="action-accent min-h-10 px-3 text-sm"
+        >
+          Eliminar
+        </button>
+        {classificationType ? (
+          <Badge className={cn("w-fit", classificationColor(classificationType))}>
+            {classificationLabel(classificationType)}
+          </Badge>
+        ) : null}
       </div>
 
       {mode === "view" ? (
         <div className="flex min-h-0 flex-1 flex-col gap-4">
           <h1 className="text-xl font-bold text-zinc-100">{item.title || "Sin título"}</h1>
           {url ? (
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-white relative">
-              <div className="absolute top-0 left-0 right-0 p-2 bg-zinc-900/90 text-center text-xs text-zinc-400 z-10 flex justify-between items-center">
-                <span>Vista web (algunos sitios bloquean esto)</span>
-                <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Abrir en pestaña</a>
-              </div>
-              <iframe
-                src={getEmbedUrl(url)}
-                className="h-full w-full border-0 pt-8"
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                title={item.title || "Enlace"}
-              />
-            </div>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-zinc-900/50"
+            >
+              {(() => {
+                const videoId = getYouTubeId(url);
+                const thumbUrl = videoId
+                  ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                  : item.metadata.link_image || null;
+                return (
+                  <div className="relative flex-1">
+                    {thumbUrl ? (
+                      <div className="relative flex h-full min-h-[200px] items-center justify-center bg-zinc-900/80">
+                        <img
+                          src={thumbUrl}
+                          alt={item.title || ""}
+                          className="max-h-full w-full object-contain"
+                        />
+                        {videoId && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition-transform hover:scale-110">
+                              <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex aspect-video items-center justify-center bg-zinc-900">
+                        <Link2 className="h-10 w-10 text-zinc-600" />
+                      </div>
+                    )}
+                    <div className="px-4 py-3">
+                      <p className="line-clamp-1 text-sm font-semibold text-zinc-100">
+                        {item.title || "Sin título"}
+                      </p>
+                      {item.metadata.link_description && (
+                        <p className="mt-1 line-clamp-2 text-xs text-zinc-400">
+                          {item.metadata.link_description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+            </a>
           ) : item.type === "image" ? (
             <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl bg-zinc-900/50">
               {loadingMedia ? (
