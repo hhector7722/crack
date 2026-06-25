@@ -51,10 +51,9 @@ export function AppModal({
       className="crack-modal-root fixed inset-0 z-[999] flex items-center justify-center p-[var(--app-gutter)]"
       data-block-tab-swipe
     >
-      <button
-        type="button"
-        aria-label="Cerrar"
-        className="crack-modal-overlay absolute inset-0 bg-black/35 backdrop-blur-[6px]"
+      <div
+        role="presentation"
+        className="crack-modal-overlay absolute inset-0 w-full h-full cursor-default bg-black/35 backdrop-blur-[6px]"
         onClick={() => onOpenChange(false)}
       />
       <div
@@ -66,7 +65,7 @@ export function AppModal({
         className={cn(
           "crack-modal-card relative z-10 flex max-h-[calc(min(var(--tm-vv-height,100dvh),100dvh)-2*var(--app-gutter))] flex-col overflow-hidden rounded-2xl bg-zinc-800 shadow-sm shadow-black/40 outline-none",
           size === "fixed"
-            ? "w-[90vw] h-[90vh] max-w-[1200px]"
+            ? "w-[80vw] h-[65vh] max-w-[400px] max-h-[500px]"
             : size === "wide"
             ? "w-full max-w-[min(32rem,calc(100vw-2*var(--app-gutter)))]"
             : "w-max max-w-[calc(100vw-2*var(--app-gutter))]",
