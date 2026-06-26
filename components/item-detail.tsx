@@ -149,16 +149,37 @@ export function ItemDetail({
     }
   }
 
-  function handleShare() {
+  async function handleShare() {
+    if (item.type === "audio" || item.type === "image") {
+      const fileUrl = mediaUrl;
+      if (fileUrl && navigator.share) {
+        try {
+          const res = await fetch(fileUrl);
+          const blob = await res.blob();
+          const ext = item.type === "audio" ? "webm" : "jpg";
+          const file = new File([blob], `crack-${item.id}.${ext}`, { type: blob.type });
+          await navigator.share({ files: [file] });
+          return;
+        } catch {}
+      }
+      const fallbackText = item.title ?? "Crack";
+      if (navigator.share) {
+        await navigator.share({ title: fallbackText }).catch(() => {});
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(fallbackText).catch(() => {});
+      }
+      return;
+    }
+
     const shareData: ShareData = {
       title: item.title ?? "Crack",
-      text: item.metadata.summary ?? item.content ?? undefined,
+      text: item.content ?? item.title ?? undefined,
       url: url ?? undefined,
     };
     if (navigator.share) {
       navigator.share(shareData).catch(() => {});
     } else if (navigator.clipboard) {
-      const text = url ?? item.content ?? item.title ?? "";
+      const text = [item.title, item.content].filter(Boolean).join("\n");
       navigator.clipboard.writeText(text).catch(() => {});
     }
   }
