@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Search, FileText, Mic, Image as ImageIcon, Loader2, Command } from "lucide-react";
+import { Search, FileText, Mic, Image as ImageIcon, Link2, Loader2, Command } from "lucide-react";
 import { createPortal } from "react-dom";
 import { useModalOpen } from "@/lib/ui/use-modal-open";
-import { cn } from "@/lib/utils";
+import { cn, getNoteUrl } from "@/lib/utils";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { SearchResultItem, SearchSource } from "@/lib/types";
@@ -15,15 +15,11 @@ interface SearchModalProps {
   onSelect: (item: SearchResultItem) => void;
 }
 
-function TypeIcon({ type, className }: { type: string; className?: string }) {
-  switch (type) {
-    case "audio":
-      return <Mic className={cn("h-4 w-4", className)} />;
-    case "image":
-      return <ImageIcon className={cn("h-4 w-4", className)} />;
-    default:
-      return <FileText className={cn("h-4 w-4", className)} />;
-  }
+function TypeIcon({ type, item }: { type: string; item: SearchResultItem }) {
+  if (type === "audio") return <Mic className="h-4 w-4 text-zinc-400" />;
+  if (type === "image") return <ImageIcon className="h-4 w-4 text-zinc-400" />;
+  if (getNoteUrl(item)) return <Link2 className="h-4 w-4 text-zinc-400" />;
+  return <FileText className="h-4 w-4 text-zinc-400" />;
 }
 
 export function SearchModal({ open, onOpenChange, onSelect }: SearchModalProps) {
@@ -214,9 +210,7 @@ export function SearchModal({ open, onOpenChange, onSelect }: SearchModalProps) 
                 }}
                 onMouseEnter={() => setSelectedIndex(i)}
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-800">
-                  <TypeIcon type={item.type} className="text-zinc-400" />
-                </div>
+                <TypeIcon type={item.type} item={item} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="truncate text-sm font-medium text-zinc-100">

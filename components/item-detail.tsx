@@ -256,7 +256,7 @@ export function ItemDetail({
               })()}
             </a>
           ) : item.type === "image" ? (
-            <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl bg-zinc-900/50">
+            <div className="flex min-h-0 flex-1 items-center justify-center">
               {loadingMedia ? (
                 <p className="text-sm text-zinc-500">Cargando imagen...</p>
               ) : mediaUrl ? (
@@ -264,14 +264,14 @@ export function ItemDetail({
                 <img
                   src={mediaUrl}
                   alt={item.title || "Imagen"}
-                  className="max-h-full max-w-full object-contain"
+                  className="max-h-full max-w-full rounded-xl object-contain"
                 />
               ) : (
                 <p className="text-sm text-red-400">No se pudo cargar la imagen</p>
               )}
             </div>
           ) : item.type === "audio" ? (
-            <div className="flex flex-col gap-3 rounded-xl bg-zinc-900/50 p-4 shrink-0">
+            <div className="flex flex-col gap-3 shrink-0">
               {loadingMedia ? (
                 <p className="text-sm text-zinc-500">Cargando audio...</p>
               ) : mediaUrl ? (
@@ -284,8 +284,17 @@ export function ItemDetail({
               ) : null}
             </div>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-zinc-900/50 p-4">
-              <p className="whitespace-pre-wrap text-zinc-300">{item.content || "Sin contenido"}</p>
+            <div className="flex min-h-0 flex-1 flex-col">
+              <p
+                className="whitespace-pre-wrap text-zinc-300 cursor-text"
+                onClick={() => {
+                  setContent(item.content ?? "");
+                  setTitle(item.title ?? "");
+                  setMode("edit");
+                }}
+              >
+                {item.content || "Sin contenido"}
+              </p>
             </div>
           )}
         </div>
