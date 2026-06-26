@@ -254,7 +254,7 @@ export function ItemDetail({
                 return (
                   <>
                     {thumbUrl ? (
-                      <div className="relative overflow-hidden rounded-xl">
+                      <div className="relative">
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
@@ -352,7 +352,7 @@ export function ItemDetail({
                 return (
                   <>
                     {thumbUrl ? (
-                      <div className="relative overflow-hidden rounded-xl">
+                      <div className="relative">
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
