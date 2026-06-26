@@ -82,7 +82,7 @@ export function AppModal({
         ) : null}
         <div
           className={cn(
-            "crack-modal-body flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pb-4",
+            "crack-modal-body flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-4",
             title ? "pt-3" : "pt-4"
           )}
         >

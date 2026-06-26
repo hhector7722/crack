@@ -156,15 +156,15 @@ export function ItemDetail({
       </div>
 
       {mode === "view" ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
-          <h1 className="text-xl font-bold text-zinc-100">{item.title || "Sin título"}</h1>
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
+          <h1 className="text-xl font-bold text-zinc-100 shrink-0">{item.title || "Sin título"}</h1>
           {url ? (
-            <>
+            <div className="flex min-h-0 flex-1 flex-col gap-3">
               <a
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="overflow-hidden rounded-xl bg-zinc-900/50"
+                className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-zinc-900/50"
               >
                 {(() => {
                   const videoId = getYouTubeId(url);
@@ -172,13 +172,13 @@ export function ItemDetail({
                     ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
                     : item.metadata.link_image || null;
                   return (
-                    <div>
+                    <>
                       {thumbUrl ? (
-                        <div className="relative bg-zinc-900/80">
+                        <div className="relative flex min-h-0 items-center justify-center bg-zinc-900/80">
                           <img
                             src={thumbUrl}
                             alt={item.title || ""}
-                            className="w-full object-contain max-h-[50dvh]"
+                            className="max-h-full w-full object-contain"
                           />
                           {videoId && (
                             <div className="absolute inset-0 flex items-center justify-center">
@@ -189,36 +189,29 @@ export function ItemDetail({
                           )}
                         </div>
                       ) : (
-                        <div className="flex aspect-video items-center justify-center bg-zinc-900">
+                        <div className="flex aspect-video items-center justify-center bg-zinc-900 shrink-0">
                           <Link2 className="h-10 w-10 text-zinc-600" />
                         </div>
                       )}
                       {item.title && (
-                        <div className="px-4 pt-3">
+                        <div className="px-4 pt-3 pb-3 shrink-0">
                           <p className="text-sm font-semibold text-zinc-100">
                             {item.title}
                           </p>
                         </div>
                       )}
-                      {item.metadata.link_description && (
-                        <div className="px-4 pb-3">
-                          <p className="mt-1 text-xs text-zinc-400">
-                            {item.metadata.link_description}
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                    </>
                   );
                 })()}
               </a>
-              {item.content && (
-                <div className="rounded-xl bg-zinc-900/30 p-4">
+              {item.metadata.link_description && (
+                <div className="overflow-hidden rounded-xl bg-zinc-900/30 p-3 shrink-0">
                   <p className="whitespace-pre-wrap text-sm text-zinc-400">
-                    {item.content.replace(url, "").trim() || "Sin contenido"}
+                    {item.metadata.link_description}
                   </p>
                 </div>
               )}
-            </>
+            </div>
           ) : item.type === "image" ? (
             <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl bg-zinc-900/50">
               {loadingMedia ? (
@@ -235,7 +228,7 @@ export function ItemDetail({
               )}
             </div>
           ) : item.type === "audio" ? (
-            <div className="flex flex-col gap-4 rounded-xl bg-zinc-900/50 p-4">
+            <div className="flex flex-col gap-3 rounded-xl bg-zinc-900/50 p-4 shrink-0">
               {loadingMedia ? (
                 <p className="text-sm text-zinc-500">Cargando audio...</p>
               ) : mediaUrl ? (
@@ -248,7 +241,7 @@ export function ItemDetail({
               ) : null}
             </div>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-xl bg-zinc-900/50 p-4">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-zinc-900/50 p-4">
               <p className="whitespace-pre-wrap text-zinc-300">{item.content || "Sin contenido"}</p>
             </div>
           )}
