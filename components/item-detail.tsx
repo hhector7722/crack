@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Play, Link2, Pencil, Trash2, Share2 } from "lucide-react";
+import { Play, Link2, Pencil, Trash2, Share2, Sparkles, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -208,12 +208,7 @@ export function ItemDetail({
       {mode === "view" ? (
         <div className="flex min-h-0 flex-1 flex-col gap-3">
           {url ? (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col gap-2"
-            >
+            <div className="flex flex-col gap-2">
               {(() => {
                 const videoId = getYouTubeId(url);
                 const thumbUrl = videoId
@@ -226,11 +221,11 @@ export function ItemDetail({
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="w-full object-contain max-h-[200px]"
+                          className="w-full rounded-xl object-cover"
                         />
                         {videoId && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition-transform hover:scale-110">
+                          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
                               <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
                             </div>
                           </div>
@@ -254,7 +249,16 @@ export function ItemDetail({
                   </>
                 );
               })()}
-            </a>
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Abrir enlace
+              </a>
+            </div>
           ) : item.type === "image" ? (
             <div className="flex min-h-0 flex-1 items-center justify-center">
               {loadingMedia ? (
@@ -405,9 +409,34 @@ export function ItemDetail({
             </>
           ) : null}
 
-          <Button onClick={handleSave} disabled={saving} className="w-full">
-            {saving ? "Guardando..." : "Guardar cambios"}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleSave} disabled={saving} className="flex-1">
+              {saving ? "Guardando..." : "Guardar cambios"}
+            </Button>
+            <button
+              onClick={async () => {
+                const text = [title, content].filter(Boolean).join("\n");
+                if (!text.trim()) return;
+                try {
+                  const res = await fetch("/api/classify", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ transcript: text }),
+                  });
+                  if (!res.ok) return;
+                  const data = await res.json();
+                  if (data.title) setTitle(data.title);
+                  if (data.type) setClassificationType(data.type);
+                  if (data.tags) setTags(data.tags);
+                  if (data.priority) setPriority(data.priority);
+                } catch {}
+              }}
+              className="btn-icon"
+              title="Reclasificar con IA"
+            >
+              <Sparkles className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       )}
     </AppModal>
