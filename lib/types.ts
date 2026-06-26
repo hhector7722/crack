@@ -67,3 +67,16 @@ export interface ClassificationResult {
   summary: string;
   create_note_from_audio?: boolean;
 }
+
+export type SearchSource = "fts" | "semantic" | "hybrid";
+
+export interface SearchResultItem extends Item {
+  score: number;
+  search_source: SearchSource;
+}
+
+export interface SearchResponse {
+  results: SearchResultItem[];
+  search_source: SearchSource;
+  query: string;
+}

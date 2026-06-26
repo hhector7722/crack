@@ -3,7 +3,7 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
-import { createItem, updateItem } from "@/lib/items";
+import { createItem, updateItem, triggerEmbed } from "@/lib/items";
 
 export interface NoteCaptureHandle {
   saveIfNeeded: () => Promise<boolean>;
@@ -77,6 +77,7 @@ export const NoteCapture = forwardRef<NoteCaptureHandle, NoteCaptureProps>(
             metadata,
           });
           setItemId(item.id);
+          triggerEmbed(item.id);
         }
 
         if (notify) onSaved();

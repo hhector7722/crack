@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
-import { createItem } from "@/lib/items";
+import { createItem, triggerEmbed } from "@/lib/items";
 import { uploadFile } from "@/lib/storage";
 import {
   classificationColor,
@@ -196,7 +196,7 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
         ext
       );
 
-      await createItem(supabase, {
+      const audioItem = await createItem(supabase, {
         type: "audio",
         title,
         content: transcript,
@@ -216,9 +216,10 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
           duration_seconds: duration,
         },
       });
+      triggerEmbed(audioItem.id);
 
       if (classification.create_note_from_audio) {
-        await createItem(supabase, {
+        const noteItem = await createItem(supabase, {
           type: "note",
           title,
           content: transcript,
@@ -229,6 +230,7 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
             summary: classification.summary,
           },
         });
+        triggerEmbed(noteItem.id);
       }
 
       onSaved();

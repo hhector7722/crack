@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { UrlSyncObserver } from "@/components/url-sync-observer";
 
 import {
@@ -17,6 +17,7 @@ import { CaptureSheet } from "@/components/capture-sheet";
 import { AppPager } from "@/components/app-pager";
 import { ProfileView } from "@/components/profile-view";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
+import { SearchProvider, useSearch } from "@/components/search-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
 
 const RefreshContext = createContext({
@@ -30,6 +31,23 @@ export function useRefreshKey() {
 
 export function useBumpRefresh() {
   return useContext(RefreshContext).bumpRefresh;
+}
+
+function KeyboardShortcuts() {
+  const { toggleSearch } = useSearch();
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        toggleSearch();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [toggleSearch]);
+
+  return null;
 }
 
 export default function AppLayout({
@@ -100,77 +118,80 @@ export default function AppLayout({
       <AppShellProvider
         value={{ openCamera, openGallery, openCapture, openCaptureMenu }}
       >
-        <div className="tm-app-shell relative">
-          <div className="tm-app-shell-bg" aria-hidden="true" />
-          <div
-            id="tm-safe-probe"
-            className="pointer-events-none fixed left-0 top-0 -z-50 h-0 w-0 overflow-hidden pb-safe"
-            aria-hidden
-          />
+        <SearchProvider>
+          <KeyboardShortcuts />
+          <div className="tm-app-shell relative">
+            <div className="tm-app-shell-bg" aria-hidden="true" />
+            <div
+              id="tm-safe-probe"
+              className="pointer-events-none fixed left-0 top-0 -z-50 h-0 w-0 overflow-hidden pb-safe"
+              aria-hidden
+            />
 
-          <header className="tm-app-header tm-app-header-fixed fixed top-0 right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-12">
-            <div className="tm-app-header__row flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-between px-2">
-              <div className="w-8" />
-              <h1 className="text-lg font-bold tracking-tight">Crack</h1>
-              <button
-                type="button"
-                onClick={() => setShowProfile((v) => !v)}
-                aria-label="Ajustes"
-                className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors active:text-zinc-100"
-              >
-                {showProfile ? <X className="h-5 w-5" /> : <Settings className="h-5 w-5" />}
-              </button>
-            </div>
-          </header>
-
-          <main className="tm-app-main tm-app-main--internal-scroll relative z-10 flex w-full flex-col overflow-hidden pb-0 pt-[var(--tm-app-header-block)]">
-            {uploadError ? (
-              <p className="mx-4 shrink-0 px-4 text-sm text-red-300">{uploadError}</p>
-            ) : null}
-            {uploading ? (
-              <p className="mx-4 shrink-0 text-center text-sm text-zinc-400">
-                Subiendo imagen...
-              </p>
-            ) : null}
-            {showProfile ? (
-              <div className="flex-1 overflow-y-auto px-4 pb-6">
-                <ProfileView />
+            <header className="tm-app-header tm-app-header-fixed fixed top-0 right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-12">
+              <div className="tm-app-header__row flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-between px-2">
+                <div className="w-8" />
+                <h1 className="text-lg font-bold tracking-tight">Crack</h1>
+                <button
+                  type="button"
+                  onClick={() => setShowProfile((v) => !v)}
+                  aria-label="Ajustes"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors active:text-zinc-100"
+                >
+                  {showProfile ? <X className="h-5 w-5" /> : <Settings className="h-5 w-5" />}
+                </button>
               </div>
-            ) : (
-              <>
-                <Suspense fallback={null}>
-                  <UrlSyncObserver />
-                </Suspense>
-                <AppPager refreshKey={refreshKey} />
-              </>
-            )}
-          </main>
+            </header>
 
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            className="hidden"
-            onChange={(e) => handleImageSelected(e, "camera")}
-          />
+            <main className="tm-app-main tm-app-main--internal-scroll relative z-10 flex w-full flex-col overflow-hidden pb-0 pt-[var(--tm-app-header-block)]">
+              {uploadError ? (
+                <p className="mx-4 shrink-0 px-4 text-sm text-red-300">{uploadError}</p>
+              ) : null}
+              {uploading ? (
+                <p className="mx-4 shrink-0 text-center text-sm text-zinc-400">
+                  Subiendo imagen...
+                </p>
+              ) : null}
+              {showProfile ? (
+                <div className="flex-1 overflow-y-auto px-4 pb-6">
+                  <ProfileView />
+                </div>
+              ) : (
+                <>
+                  <Suspense fallback={null}>
+                    <UrlSyncObserver />
+                  </Suspense>
+                  <AppPager refreshKey={refreshKey} />
+                </>
+              )}
+            </main>
 
-          <input
-            ref={galleryInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => handleImageSelected(e, "gallery")}
-          />
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => handleImageSelected(e, "camera")}
+            />
 
-          <CaptureSheet
-            key={sheetKey}
-            open={sheetOpen}
-            mode={sheetMode}
-            onOpenChange={setSheetOpen}
-            onSaved={bumpRefresh}
-          />
-        </div>
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleImageSelected(e, "gallery")}
+            />
+
+            <CaptureSheet
+              key={sheetKey}
+              open={sheetOpen}
+              mode={sheetMode}
+              onOpenChange={setSheetOpen}
+              onSaved={bumpRefresh}
+            />
+          </div>
+        </SearchProvider>
       </AppShellProvider>
     </RefreshContext.Provider>
   );

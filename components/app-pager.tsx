@@ -8,10 +8,12 @@ import { AudioFeed } from "@/components/audio-feed";
 import { SwipePager } from "@/components/swipe-pager";
 import { PagerPanel } from "@/components/pager-panel";
 import { ItemDetail } from "@/components/item-detail";
+import { SearchModal } from "@/components/search-modal";
+import { useSearch } from "@/components/search-context";
 import { usePager } from "@/components/app-shell-context";
 import { useBumpRefresh } from "@/app/(app)/layout";
 import { BottomNavCard } from "@/components/layout/BottomNavCard";
-import type { Item } from "@/lib/types";
+import type { Item, SearchResultItem } from "@/lib/types";
 
 interface AppPagerProps {
   refreshKey?: number;
@@ -20,10 +22,15 @@ interface AppPagerProps {
 export function AppPager({ refreshKey = 0 }: AppPagerProps) {
   const bumpRefresh = useBumpRefresh();
   const { pagerIndex, navigateToPage } = usePager();
+  const { searchOpen, setSearchOpen } = useSearch();
 
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [localRefresh, setLocalRefresh] = useState(0);
   const combinedRefresh = refreshKey + localRefresh;
+
+  function handleSearchSelect(item: SearchResultItem) {
+    setSelectedItem(item);
+  }
 
   const handleRefresh = useCallback(async () => {
     bumpRefresh();
@@ -111,6 +118,12 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
       </div>
 
       {itemDetail}
+
+      <SearchModal
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onSelect={handleSearchSelect}
+      />
     </>
   );
 }

@@ -99,3 +99,11 @@ export async function togglePin(
     throw new Error(`Error actualizando pin: ${error.message}`);
   }
 }
+
+export function triggerEmbed(itemId: string): void {
+  fetch("/api/embed", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ item_id: itemId }),
+  }).catch(() => {});
+}

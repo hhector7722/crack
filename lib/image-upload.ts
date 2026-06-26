@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import { createItem } from "@/lib/items";
+import { createItem, triggerEmbed } from "@/lib/items";
 import { uploadFile } from "@/lib/storage";
 
 export async function uploadImageFromFile(file: File): Promise<void> {
@@ -12,11 +12,12 @@ export async function uploadImageFromFile(file: File): Promise<void> {
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
   const path = await uploadFile(supabase, user.id, "images", file, ext);
 
-  await createItem(supabase, {
+  const item = await createItem(supabase, {
     type: "image",
     title: file.name.replace(/\.[^.]+$/, "") || "Imagen",
     file_url: path,
     user_id: user.id,
     metadata: {},
   });
+  triggerEmbed(item.id);
 }

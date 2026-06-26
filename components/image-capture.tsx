@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { Camera, Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { createItem } from "@/lib/items";
+import { createItem, triggerEmbed } from "@/lib/items";
 import { uploadFile } from "@/lib/storage";
 
 interface ImageCaptureProps {
@@ -64,13 +64,14 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
         console.error("Error clasificando imagen", e);
       }
 
-      await createItem(supabase, {
+      const imgItem = await createItem(supabase, {
         type: "image",
         title,
         file_url: path,
         user_id: user.id,
         metadata,
       });
+      triggerEmbed(imgItem.id);
 
       onSaved();
     } catch (err) {

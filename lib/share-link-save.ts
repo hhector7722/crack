@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createItem } from "@/lib/items";
+import { createItem, triggerEmbed } from "@/lib/items";
 import { titleFromUrl, fetchLinkPreview } from "@/lib/link-preview";
 import { extractFirstUrl } from "@/lib/utils";
 
@@ -69,11 +69,13 @@ export async function saveSharedLink(
     metadata.link_description = preview.description;
   }
 
-  return createItem(supabase, {
+  const item = await createItem(supabase, {
     type: "note",
     title: preview.title ?? noteTitle,
     content: url,
     user_id: userId,
     metadata,
   });
+  triggerEmbed(item.id);
+  return item;
 }
