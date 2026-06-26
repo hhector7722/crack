@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Play, Link2, Pencil, Trash2, Share2, Sparkles } from "lucide-react";
+import { Link2, Pencil, Trash2, Share2, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { AppModal } from "@/components/app-modal";
@@ -263,12 +263,13 @@ export function ItemDetail({
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="max-w-full max-h-[160px] rounded-lg"
+                          className="max-w-full rounded-lg"
                         />
                         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition-transform hover:scale-110">
-                            <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
-                          </div>
+                          <svg width="68" height="48" viewBox="0 0 68 48" className="drop-shadow-lg">
+                            <rect width="68" height="48" rx="6" fill="red" />
+                            <polygon points="27,12 27,36 52,24" fill="white" />
+                          </svg>
                         </div>
                       </a>
                     ) : (
@@ -306,16 +307,16 @@ export function ItemDetail({
               )}
             </div>
           ) : item.type === "audio" ? (
-            <div className="flex flex-col gap-3 shrink-0">
-              {loadingMedia ? (
-                <p className="text-sm text-zinc-500">Cargando audio...</p>
-              ) : mediaUrl ? (
-                <audio controls src={mediaUrl} className="w-full" />
-              ) : null}
+            <div className="flex flex-col gap-3">
               {item.content ? (
                 <div className="prose prose-invert max-w-none">
                   <p className="whitespace-pre-wrap text-zinc-300">{item.content}</p>
                 </div>
+              ) : null}
+              {loadingMedia ? (
+                <p className="text-sm text-zinc-500">Cargando audio...</p>
+              ) : mediaUrl ? (
+                <audio controls src={mediaUrl} className="w-full" />
               ) : null}
             </div>
           ) : (
@@ -355,12 +356,13 @@ export function ItemDetail({
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="max-w-full max-h-[160px] rounded-lg"
+                          className="max-w-full rounded-lg"
                         />
                         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition-transform hover:scale-110">
-                            <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
-                          </div>
+                          <svg width="68" height="48" viewBox="0 0 68 48" className="drop-shadow-lg">
+                            <rect width="68" height="48" rx="6" fill="red" />
+                            <polygon points="27,12 27,36 52,24" fill="white" />
+                          </svg>
                         </div>
                       </a>
                     ) : (
@@ -388,7 +390,12 @@ export function ItemDetail({
               )}
             </div>
           ) : item.type === "audio" ? (
-            <div className="flex flex-col gap-3 shrink-0">
+            <div className="flex flex-col gap-3">
+              {content ? (
+                <div className="prose prose-invert max-w-none">
+                  <p className="whitespace-pre-wrap text-zinc-300">{content}</p>
+                </div>
+              ) : null}
               {loadingMedia ? (
                 <p className="text-sm text-zinc-500">Cargando audio...</p>
               ) : mediaUrl ? (
