@@ -72,10 +72,6 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
           onIndexChange={handleIndexChange}
         >
           <PagerPanel onRefresh={handleRefresh}>
-            <DashboardPage refreshKey={combinedRefresh} />
-          </PagerPanel>
-
-          <PagerPanel onRefresh={handleRefresh}>
             <div className="pb-2">
               <AudioFeed
                 refreshKey={combinedRefresh}
@@ -93,10 +89,14 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
           </PagerPanel>
 
           <PagerPanel onRefresh={handleRefresh}>
+            <DashboardPage refreshKey={combinedRefresh} />
+          </PagerPanel>
+
+          <PagerPanel onRefresh={handleRefresh}>
             <div className="pb-2">
               <NoteList
                 refreshKey={combinedRefresh}
-                filterType="note"
+                filterType="link"
                 onSelect={setSelectedItem}
               />
             </div>
@@ -106,7 +106,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             <div className="pb-2">
               <NoteList
                 refreshKey={combinedRefresh}
-                filterType="link"
+                filterType="note"
                 onSelect={setSelectedItem}
               />
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Play, Link2, Pencil, Trash2 } from "lucide-react";
+import { Play, Link2, Pencil, Trash2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -150,6 +150,20 @@ export function ItemDetail({
     }
   }
 
+  function handleShare() {
+    const shareData: ShareData = {
+      title: item.title ?? "Crack",
+      text: item.metadata.summary ?? item.content ?? undefined,
+      url: url ?? undefined,
+    };
+    if (navigator.share) {
+      navigator.share(shareData).catch(() => {});
+    } else if (navigator.clipboard) {
+      const text = url ?? item.content ?? item.title ?? "";
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
+  }
+
   return (
     <AppModal open={open} onOpenChange={onOpenChange} size="fixed">
       <div className="mb-4 flex flex-col items-end gap-2">
@@ -166,6 +180,13 @@ export function ItemDetail({
               <Trash2 className="h-4 w-4" />
             </button>
           )}
+          <button
+            type="button"
+            onClick={handleShare}
+            className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
           <button
             type="button"
             onClick={() => setMode(m => m === "view" ? "edit" : "view")}
@@ -187,59 +208,53 @@ export function ItemDetail({
       {mode === "view" ? (
         <div className="flex min-h-0 flex-1 flex-col gap-3">
           {url ? (
-            <div className="flex min-h-0 flex-1 flex-col gap-3">
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex min-h-0 flex-col overflow-hidden rounded-xl bg-zinc-900/50"
-              >
-                {(() => {
-                  const videoId = getYouTubeId(url);
-                  const thumbUrl = videoId
-                    ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-                    : linkImage || null;
-                  return (
-                    <>
-                      {thumbUrl ? (
-                        <div className="relative flex min-h-0 items-center justify-center bg-zinc-900/80">
-                          <img
-                            src={thumbUrl}
-                            alt={item.title || ""}
-                            className="max-h-full w-full object-contain"
-                          />
-                          {videoId && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition-transform hover:scale-110">
-                                <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
-                              </div>
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col gap-2"
+            >
+              {(() => {
+                const videoId = getYouTubeId(url);
+                const thumbUrl = videoId
+                  ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                  : linkImage || null;
+                return (
+                  <>
+                    {thumbUrl ? (
+                      <div className="relative overflow-hidden rounded-xl">
+                        <img
+                          src={thumbUrl}
+                          alt={item.title || ""}
+                          className="w-full object-contain max-h-[200px]"
+                        />
+                        {videoId && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition-transform hover:scale-110">
+                              <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
                             </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex aspect-video items-center justify-center bg-zinc-900 shrink-0">
-                          <Link2 className="h-10 w-10 text-zinc-600" />
-                        </div>
-                      )}
-                      {item.title && (
-                        <div className="px-4 pt-3 pb-3 shrink-0">
-                          <p className="text-sm font-semibold text-zinc-100">
-                            {item.title}
-                          </p>
-                        </div>
-                      )}
-                    </>
-                  );
-                })()}
-              </a>
-              {linkDescription && (
-                <div className="overflow-hidden rounded-xl bg-zinc-900/30 p-3 shrink-0">
-                  <p className="whitespace-pre-wrap text-sm text-zinc-400">
-                    {linkDescription}
-                  </p>
-                </div>
-              )}
-            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex aspect-video items-center justify-center rounded-xl bg-zinc-900">
+                        <Link2 className="h-10 w-10 text-zinc-600" />
+                      </div>
+                    )}
+                    {item.title && (
+                      <p className="text-sm font-semibold text-zinc-100">
+                        {item.title}
+                      </p>
+                    )}
+                    {linkDescription && (
+                      <p className="whitespace-pre-wrap text-sm text-zinc-400">
+                        {linkDescription}
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
+            </a>
           ) : item.type === "image" ? (
             <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-xl bg-zinc-900/50">
               {loadingMedia ? (

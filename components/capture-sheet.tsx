@@ -101,7 +101,10 @@ export function CaptureSheet({
           </button>
           <button
             type="button"
-            onClick={() => handleMenuSelect("image")}
+            onClick={() => {
+              onOpenChange(false);
+              openGallery();
+            }}
             className="flex h-20 w-20 items-center justify-center rounded-full bg-black shadow-lg shadow-black/50 active:scale-95"
           >
             <Camera className="h-8 w-8 text-white" />

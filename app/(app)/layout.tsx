@@ -135,8 +135,8 @@ export default function AppLayout({
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
-                    onClick={openGallery}
-                    aria-label="Añadir imagen"
+                    onClick={openCaptureMenu}
+                    aria-label="Crear"
                     className="flex h-8 w-8 items-center justify-center text-zinc-400 transition-colors active:text-zinc-100"
                   >
                     <Plus className="h-5 w-5" />

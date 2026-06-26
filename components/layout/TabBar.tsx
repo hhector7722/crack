@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Mic, Image, FileText, Link2, type LucideIcon } from "lucide-react";
+import { Home, Mic, Image, Link2, FileText, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppShell } from "@/components/app-shell-context";
 
@@ -11,11 +11,11 @@ type CrackNavItem = {
 };
 
 const CRACK_NAV_ITEMS: CrackNavItem[] = [
-  { name: "Resumen", pageIndex: 0, icon: LayoutDashboard },
-  { name: "Audios", pageIndex: 1, icon: Mic },
-  { name: "Imágenes", pageIndex: 2, icon: Image },
-  { name: "Notas", pageIndex: 3, icon: FileText },
-  { name: "Enlaces", pageIndex: 4, icon: Link2 },
+  { name: "Audios", pageIndex: 0, icon: Mic },
+  { name: "Imágenes", pageIndex: 1, icon: Image },
+  { name: "Inicio", pageIndex: 2, icon: Home },
+  { name: "Enlaces", pageIndex: 3, icon: Link2 },
+  { name: "Notas", pageIndex: 4, icon: FileText },
 ];
 
 export function TabBar() {
