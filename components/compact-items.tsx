@@ -117,24 +117,22 @@ export function CompactLinkItem({ item, onClick }: { item: Item; onClick?: () =>
 
   const inner = (
     <>
-      <div className="aspect-square h-10 w-10 shrink-0 overflow-hidden rounded-md bg-white">
-        {loading ? (
-          <div className="flex h-full w-full items-center justify-center">
-            <Loader2 className="h-3 w-3 animate-spin text-zinc-600" />
-          </div>
-        ) : image && !imgError ? (
-          <img
-            src={image}
-            alt=""
-            className="h-full w-full object-contain"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <Link2 className="h-4 w-4 text-zinc-600" />
-          </div>
-        )}
-      </div>
+      {loading ? (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900">
+          <Loader2 className="h-3 w-3 animate-spin text-zinc-600" />
+        </div>
+      ) : image && !imgError ? (
+        <img
+          src={image}
+          alt=""
+          className="h-10 w-10 shrink-0 rounded-xl object-cover"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900">
+          <Link2 className="h-4 w-4 text-zinc-600" />
+        </div>
+      )}
       <div className="flex min-w-0 flex-1 flex-col justify-center text-left">
         <p className="truncate text-xs font-semibold text-zinc-100">{displayTitle}</p>
         <p className="truncate text-[10px] text-zinc-400">{bodyText}</p>

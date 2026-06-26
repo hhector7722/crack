@@ -221,7 +221,7 @@ export function ItemDetail({
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="w-full rounded-xl object-cover"
+                          className="w-full max-h-[160px] rounded-xl object-contain bg-zinc-950"
                         />
                         {videoId && (
                           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
