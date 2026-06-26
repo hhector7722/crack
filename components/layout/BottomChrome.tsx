@@ -22,7 +22,7 @@ export function BottomChrome() {
         type="button"
         onClick={toggleSearch}
         aria-label="Buscar"
-        className="tm-fab pointer-events-auto absolute left-1/2 top-0 z-[96] flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black text-zinc-100 shadow-xl shadow-black/50 ring-1 ring-white/30 transition-transform active:scale-90"
+        className="tm-fab pointer-events-auto absolute left-1/2 top-0 z-[96] flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-transparent text-zinc-100 shadow-xl shadow-black/50 ring-2 ring-white/30 transition-transform active:scale-90"
       />
 
       <div className="relative top-3 z-10">
