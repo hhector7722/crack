@@ -100,14 +100,12 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
       />
 
       {preview ? (
-        <div className="overflow-hidden rounded-xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={preview}
-            alt="Vista previa"
-            className="max-h-[300px] w-full object-contain"
-          />
-        </div>
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={preview}
+          alt="Vista previa"
+          className="max-h-[300px] w-full rounded-xl object-contain"
+        />
       ) : (
         <div className="grid gap-2">
           <button
