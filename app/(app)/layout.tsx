@@ -11,7 +11,7 @@ import {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
-import { Settings, X } from "lucide-react";
+import { Plus, Settings, X } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
 
 import { AppPager } from "@/components/app-pager";
@@ -128,18 +128,28 @@ export default function AppLayout({
               aria-hidden
             />
 
-            <header className="tm-app-header tm-app-header-fixed fixed top-0 right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-12">
+              <header className="tm-app-header tm-app-header-fixed fixed top-0 right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-12">
               <div className="tm-app-header__row flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-between px-2">
                 <div className="w-8" />
                 <h1 className="text-lg font-bold tracking-tight">Crack</h1>
-                <button
-                  type="button"
-                  onClick={() => setShowProfile((v) => !v)}
-                  aria-label="Ajustes"
-                  className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors active:text-zinc-100"
-                >
-                  {showProfile ? <X className="h-5 w-5" /> : <Settings className="h-5 w-5" />}
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={openCaptureMenu}
+                    aria-label="Crear"
+                    className="flex h-8 w-8 items-center justify-center text-zinc-400 transition-colors active:text-zinc-100"
+                  >
+                    <Plus className="h-5 w-5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowProfile((v) => !v)}
+                    aria-label="Ajustes"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors active:text-zinc-100"
+                  >
+                    {showProfile ? <X className="h-5 w-5" /> : <Settings className="h-5 w-5" />}
+                  </button>
+                </div>
               </div>
             </header>
 

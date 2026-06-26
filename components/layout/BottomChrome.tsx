@@ -1,14 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Plus } from "lucide-react";
 import { TabBar } from "@/components/layout/TabBar";
 import { PagerDots } from "@/components/layout/PagerDots";
-import { useAppShell } from "@/components/app-shell-context";
+import { useSearch } from "@/components/search-context";
 
 export function BottomChrome() {
   const pathname = usePathname();
-  const { openCaptureMenu } = useAppShell();
+  const { toggleSearch } = useSearch();
 
   if (pathname === "/login" || pathname.startsWith("/auth")) {
     return null;
@@ -21,12 +20,10 @@ export function BottomChrome() {
     >
       <button
         type="button"
-        onClick={openCaptureMenu}
-        aria-label="Crear"
-        className="tm-fab pointer-events-auto absolute left-1/2 top-0 z-[96] flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 shadow-xl shadow-black/50 transition-transform active:scale-90"
-      >
-        <Plus className="h-6 w-6" strokeWidth={2} />
-      </button>
+        onClick={toggleSearch}
+        aria-label="Buscar"
+        className="tm-fab pointer-events-auto absolute left-1/2 top-0 z-[96] flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black text-zinc-100 shadow-xl shadow-black/50 ring-1 ring-white/30 transition-transform active:scale-90"
+      />
 
       <div className="relative top-3 z-10">
         <PagerDots />
