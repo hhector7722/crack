@@ -72,10 +72,10 @@ export function CaptureSheet({
     menu: "Nuevo",
     voice: "Grabar voz",
     note: "Nota de texto",
-    image: "Añadir imagen",
+    image: "",
   };
 
-  const showBack = mode === "menu" && viewMode !== "menu";
+  const showBack = mode === "menu" && viewMode !== "menu" && viewMode !== "image";
 
   if (!open) return null;
 
@@ -113,26 +113,24 @@ export function CaptureSheet({
   }
 
   return (
-    <AppModal open={open} onOpenChange={handleClose} title={titles[viewMode]}>
+    <AppModal open={open} onOpenChange={handleClose} title={titles[viewMode]} size="fixed">
       {error ? <p className="mb-3 text-sm text-red-300">{error}</p> : null}
 
       {viewMode === "image" ? (
-        <div className="content-list">
+        <div className="flex flex-col gap-2">
           <button
             type="button"
             onClick={() => pickImage("camera")}
             className="content-row min-h-12 text-left"
           >
-            <span className="block font-semibold text-zinc-100">Cámara</span>
-            <span className="block text-sm text-zinc-500">Hacer una foto nueva</span>
+            <span className="font-semibold text-zinc-100">Cámara</span>
           </button>
           <button
             type="button"
             onClick={() => pickImage("gallery")}
             className="content-row min-h-12 text-left"
           >
-            <span className="block font-semibold text-zinc-100">Galería</span>
-            <span className="block text-sm text-zinc-500">Elegir del dispositivo</span>
+            <span className="font-semibold text-zinc-100">Galería</span>
           </button>
         </div>
       ) : null}

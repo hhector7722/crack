@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Play, Link2 } from "lucide-react";
+import { Play, Link2, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -59,8 +59,32 @@ export function ItemDetail({
   const [saving, setSaving] = useState(false);
   const [loadingMedia, setLoadingMedia] = useState(false);
   const [mode, setMode] = useState<"view" | "edit">("view");
+  const [linkImage, setLinkImage] = useState<string | null>(item.metadata.link_image ?? null);
+  const [linkDescription, setLinkDescription] = useState<string | null>(item.metadata.link_description ?? null);
 
   const url = getNoteUrl(item);
+
+  useEffect(() => {
+    if (!open || !url || (item.metadata.link_image && item.metadata.link_description)) return;
+    const url_ = url;
+    let cancelled = false;
+    async function loadLinkPreview() {
+      try {
+        const res = await fetch(`/api/link-preview?url=${encodeURIComponent(url_)}`);
+        const data = (await res.json()) as {
+          title?: string | null;
+          image?: string | null;
+          description?: string | null;
+        };
+        if (!cancelled) {
+          if (!item.metadata.link_image && data.image) setLinkImage(data.image);
+          if (!item.metadata.link_description && data.description) setLinkDescription(data.description);
+        }
+      } catch {}
+    }
+    void loadLinkPreview();
+    return () => { cancelled = true; };
+  }, [open, url, item.metadata.link_image, item.metadata.link_description]);
 
   useEffect(() => {
     if (!open || !item.file_url) return;
@@ -128,36 +152,40 @@ export function ItemDetail({
 
   return (
     <AppModal open={open} onOpenChange={onOpenChange} size="fixed">
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <span className="text-xs text-zinc-400 pt-2 whitespace-nowrap">
+      <div className="mb-4 flex flex-col items-end gap-2">
+        <span className="text-xs text-zinc-400 whitespace-nowrap">
           {format(new Date(item.created_at), "d 'de' MMMM yyyy 'a las' H:mm", { locale: es })}
         </span>
-        <button
-          type="button"
-          onClick={() => setMode(m => m === "view" ? "edit" : "view")}
-          className="action-ghost min-h-10 px-3 text-sm shrink-0 mr-1"
-        >
-          {mode === "view" ? "Editar" : "Ver"}
-        </button>
+        <div className="flex items-center gap-2">
+          {mode === "edit" && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setMode(m => m === "view" ? "edit" : "view")}
+            className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+        </div>
       </div>
-      <div className="mb-4 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={handleDelete}
-          className="action-accent min-h-10 px-3 text-sm"
-        >
-          Eliminar
-        </button>
-        {classificationType ? (
+
+      {classificationType ? (
+        <div className="mb-4">
           <Badge className={cn("w-fit", classificationColor(classificationType))}>
             {classificationLabel(classificationType)}
           </Badge>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       {mode === "view" ? (
         <div className="flex min-h-0 flex-1 flex-col gap-3">
-          <h1 className="text-xl font-bold text-zinc-100 shrink-0">{item.title || "Sin título"}</h1>
           {url ? (
             <div className="flex min-h-0 flex-1 flex-col gap-3">
               <a
@@ -170,7 +198,7 @@ export function ItemDetail({
                   const videoId = getYouTubeId(url);
                   const thumbUrl = videoId
                     ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
-                    : item.metadata.link_image || null;
+                    : linkImage || null;
                   return (
                     <>
                       {thumbUrl ? (
@@ -204,10 +232,10 @@ export function ItemDetail({
                   );
                 })()}
               </a>
-              {item.metadata.link_description && (
+              {linkDescription && (
                 <div className="overflow-hidden rounded-xl bg-zinc-900/30 p-3 shrink-0">
                   <p className="whitespace-pre-wrap text-sm text-zinc-400">
-                    {item.metadata.link_description}
+                    {linkDescription}
                   </p>
                 </div>
               )}
