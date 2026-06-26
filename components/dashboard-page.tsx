@@ -36,9 +36,9 @@ function SectionWrapper({ children }: { children: React.ReactNode }) {
 
 function ImageThumb({ url, onClick }: { url: string | null; onClick?: () => void }) {
   const inner = url ? (
-    <img src={url} alt="" className="max-w-full max-h-[200px] rounded-xl" />
+    <img src={url} alt="" className="max-w-full max-h-[200px] rounded-lg" />
   ) : (
-    <div className="flex aspect-square w-full items-center justify-center rounded-xl bg-zinc-900">
+    <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-zinc-900">
       <Loader2 className="h-4 w-4 animate-spin text-zinc-600" />
     </div>
   );

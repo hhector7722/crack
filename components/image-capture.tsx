@@ -104,7 +104,7 @@ export function ImageCapture({ onSaved, onError }: ImageCaptureProps) {
         <img
           src={preview}
           alt="Vista previa"
-          className="max-w-full max-h-[300px] rounded-xl"
+          className="max-w-full max-h-[300px] rounded-lg"
         />
       ) : (
         <div className="grid gap-2">

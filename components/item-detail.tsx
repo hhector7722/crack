@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Play, Link2, Pencil, Trash2, Share2, Sparkles, ExternalLink } from "lucide-react";
+import { Play, Link2, Pencil, Trash2, Share2, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { AppModal } from "@/components/app-modal";
@@ -234,7 +234,7 @@ export function ItemDetail({
         </div>
       </div>
 
-      {classificationType ? (
+      {classificationType && !url ? (
         <div className="mb-4">
           <Badge className={cn("w-fit", classificationColor(classificationType))}>
             {classificationLabel(classificationType)}
@@ -254,22 +254,25 @@ export function ItemDetail({
                 return (
                   <>
                     {thumbUrl ? (
-                      <div className="relative">
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative mx-auto block"
+                      >
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="max-w-full max-h-[160px] rounded-xl"
+                          className="max-w-full max-h-[160px] rounded-lg"
                         />
-                        {videoId && (
-                          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
-                              <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
-                            </div>
+                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition-transform hover:scale-110">
+                            <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      </a>
                     ) : (
-                      <div className="flex aspect-video items-center justify-center rounded-xl bg-zinc-900">
+                      <div className="mx-auto flex aspect-video w-full max-w-lg items-center justify-center rounded-lg bg-zinc-900">
                         <Link2 className="h-10 w-10 text-zinc-600" />
                       </div>
                     )}
@@ -286,15 +289,6 @@ export function ItemDetail({
                   </>
                 );
               })()}
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                Abrir enlace
-              </a>
             </div>
           ) : item.type === "image" ? (
             <div className="flex min-h-0 flex-1 items-center justify-center">
@@ -305,7 +299,7 @@ export function ItemDetail({
                 <img
                   src={mediaUrl}
                   alt={item.title || "Imagen"}
-                  className="max-h-full max-w-full rounded-xl object-contain"
+                  className="max-h-full max-w-full rounded-lg object-contain"
                 />
               ) : (
                 <p className="text-sm text-red-400">No se pudo cargar la imagen</p>
@@ -352,37 +346,31 @@ export function ItemDetail({
                 return (
                   <>
                     {thumbUrl ? (
-                      <div className="relative">
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative mx-auto block"
+                      >
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="max-w-full max-h-[160px] rounded-xl"
+                          className="max-w-full max-h-[160px] rounded-lg"
                         />
-                        {videoId && (
-                          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
-                              <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
-                            </div>
+                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm transition-transform hover:scale-110">
+                            <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      </a>
                     ) : (
-                      <div className="flex aspect-video items-center justify-center rounded-xl bg-zinc-900">
+                      <div className="mx-auto flex aspect-video w-full max-w-lg items-center justify-center rounded-lg bg-zinc-900">
                         <Link2 className="h-10 w-10 text-zinc-600" />
                       </div>
                     )}
                   </>
                 );
               })()}
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                Abrir enlace
-              </a>
             </div>
           ) : item.type === "image" ? (
             <div className="flex min-h-0 flex-1 items-center justify-center">
@@ -393,7 +381,7 @@ export function ItemDetail({
                 <img
                   src={mediaUrl}
                   alt={title}
-                  className="max-h-full max-w-full rounded-xl object-contain"
+                  className="max-h-full max-w-full rounded-lg object-contain"
                 />
               ) : (
                 <p className="text-sm text-red-400">No se pudo cargar la imagen</p>

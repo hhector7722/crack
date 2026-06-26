@@ -118,18 +118,18 @@ export function CompactLinkItem({ item, onClick }: { item: Item; onClick?: () =>
   const inner = (
     <>
       {loading ? (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-900">
           <Loader2 className="h-3 w-3 animate-spin text-zinc-600" />
         </div>
       ) : image && !imgError ? (
         <img
           src={image}
           alt=""
-          className="max-h-10 max-w-10 rounded-xl"
+          className="max-h-10 max-w-10 rounded-lg"
           onError={() => setImgError(true)}
         />
       ) : (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-zinc-900">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-900">
           <Link2 className="h-4 w-4 text-zinc-600" />
         </div>
       )}
