@@ -2,14 +2,11 @@
 
 import { cn } from "@/lib/utils";
 import { useAppShell } from "@/components/app-shell-context";
-import {
-  PAGER_DOT_INDICES,
-  PAGER_PATHS,
-  pagerIndexToDotIndex,
-} from "@/lib/pager-routes";
+import { pagerIndexToDotIndex } from "@/lib/pager-routes";
 
 export function PagerDots() {
   const { pagerIndex, navigateToPage } = useAppShell();
+  const dotPages = [0, 2, 4];
 
   return (
     <div
@@ -17,17 +14,17 @@ export function PagerDots() {
       role="tablist"
       aria-label="Paginas"
     >
-      {PAGER_PATHS.map((path, dotIndex) => {
-        const active = pagerIndex === dotIndex;
+      {dotPages.map((pageIndex, dotIndex) => {
+        const active = pagerIndexToDotIndex(pagerIndex) === dotIndex;
 
         return (
           <button
-            key={path}
+            key={pageIndex}
             type="button"
             role="tab"
             aria-selected={active}
             aria-label={`Pagina ${dotIndex + 1}`}
-            onClick={() => navigateToPage(dotIndex)}
+            onClick={() => navigateToPage(pageIndex)}
             className={cn(
               "h-1.5 shrink-0 rounded-full bg-white transition-all duration-300",
               active ? "w-4 opacity-100" : "w-1.5 opacity-50"

@@ -8,7 +8,7 @@ export const ALL_PAGER_PATHS = [
 ] as const;
 
 export const PAGER_PATHS = ALL_PAGER_PATHS;
-export const PAGER_DOT_INDICES = [0, 1, 2, 3, 4] as const;
+export const PAGER_DOT_INDICES = [0, 1, 2] as const;
 
 export const PAGE_COUNT = ALL_PAGER_PATHS.length;
 
@@ -21,5 +21,7 @@ export function pathnameToIndex(pathname: string): number {
 }
 
 export function pagerIndexToDotIndex(pagerIndex: number): number {
-  return pagerIndex;
+  if (pagerIndex === 0 || pagerIndex === 1) return 0;
+  if (pagerIndex === 3 || pagerIndex === 4) return 2;
+  return 1;
 }

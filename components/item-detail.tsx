@@ -258,7 +258,7 @@ export function ItemDetail({
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="w-full max-h-[160px] rounded-xl object-contain"
+                          className="max-w-full max-h-[160px] rounded-xl"
                         />
                         {videoId && (
                           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -356,7 +356,7 @@ export function ItemDetail({
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="w-full max-h-[160px] rounded-xl object-contain"
+                          className="max-w-full max-h-[160px] rounded-xl"
                         />
                         {videoId && (
                           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
