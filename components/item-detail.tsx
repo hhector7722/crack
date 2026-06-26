@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { Play, Link2, Pencil, Trash2, Share2, Sparkles, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { AppModal } from "@/components/app-modal";
@@ -172,13 +171,51 @@ export function ItemDetail({
         </span>
         <div className="flex items-center gap-2">
           {mode === "edit" && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const text = [title, content].filter(Boolean).join("\n");
+                  if (!text.trim()) return;
+                  try {
+                    const res = await fetch("/api/classify", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ transcript: text }),
+                    });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    if (data.title) setTitle(data.title);
+                    if (data.type) setClassificationType(data.type);
+                    if (data.tags) setTags(data.tags);
+                    if (data.priority) setPriority(data.priority);
+                  } catch {}
+                }}
+                className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                title="Reclasificar con IA"
+              >
+                <Sparkles className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving}
+                className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-40"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+              </button>
+            </>
           )}
           <button
             type="button"
@@ -221,7 +258,7 @@ export function ItemDetail({
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="w-full max-h-[160px] rounded-xl object-contain bg-zinc-950"
+                          className="w-full max-h-[160px] rounded-xl object-contain"
                         />
                         {videoId && (
                           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -303,35 +340,160 @@ export function ItemDetail({
           )}
         </div>
       ) : (
-        <div className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm text-zinc-400">Título</label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="input-float"
-            />
-          </div>
-
-          {item.type === "audio" ? (
-            <>
+        <div className="flex min-h-0 flex-1 flex-col gap-3">
+          {/* Media preview — same as view mode */}
+          {url ? (
+            <div className="flex flex-col gap-2">
+              {(() => {
+                const videoId = getYouTubeId(url);
+                const thumbUrl = videoId
+                  ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                  : linkImage || null;
+                return (
+                  <>
+                    {thumbUrl ? (
+                      <div className="relative overflow-hidden rounded-xl">
+                        <img
+                          src={thumbUrl}
+                          alt={item.title || ""}
+                          className="w-full max-h-[160px] rounded-xl object-contain"
+                        />
+                        {videoId && (
+                          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
+                              <Play className="ml-0.5 h-6 w-6 fill-white text-white" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex aspect-video items-center justify-center rounded-xl bg-zinc-900">
+                        <Link2 className="h-10 w-10 text-zinc-600" />
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-300"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                Abrir enlace
+              </a>
+            </div>
+          ) : item.type === "image" ? (
+            <div className="flex min-h-0 flex-1 items-center justify-center">
               {loadingMedia ? (
-                <p className="py-2 text-sm text-zinc-500">Cargando audio...</p>
+                <p className="text-sm text-zinc-500">Cargando imagen...</p>
+              ) : mediaUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={mediaUrl}
+                  alt={title}
+                  className="max-h-full max-w-full rounded-xl object-contain"
+                />
+              ) : (
+                <p className="text-sm text-red-400">No se pudo cargar la imagen</p>
+              )}
+            </div>
+          ) : item.type === "audio" ? (
+            <div className="flex flex-col gap-3 shrink-0">
+              {loadingMedia ? (
+                <p className="text-sm text-zinc-500">Cargando audio...</p>
               ) : mediaUrl ? (
                 <audio controls src={mediaUrl} className="w-full" />
               ) : null}
+            </div>
+          ) : null}
 
+          {/* Edit fields */}
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm text-zinc-400">Título</label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="input-float"
+              />
+            </div>
+
+            {item.type === "audio" ? (
+              <>
+                <div>
+                  <label className="mb-1 block text-sm text-zinc-400">
+                    Transcripción
+                  </label>
+                  <Textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    rows={6}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-sm text-zinc-400">Tipo IA</label>
+                    <select
+                      value={classificationType ?? "note"}
+                      onChange={(e) =>
+                        setClassificationType(e.target.value as ClassificationType)
+                      }
+                      className="select-float"
+                    >
+                      <option value="note">Nota</option>
+                      <option value="reminder">Recordatorio</option>
+                      <option value="important">Importante</option>
+                      <option value="info">Info</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm text-zinc-400">
+                      Prioridad
+                    </label>
+                    <select
+                      value={priority ?? "medium"}
+                      onChange={(e) => setPriority(e.target.value as Priority)}
+                      className="select-float"
+                    >
+                      <option value="high">Alta</option>
+                      <option value="medium">Media</option>
+                      <option value="low">Baja</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-sm text-zinc-400">Tags</label>
+                  <input
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
+                    className="input-float"
+                  />
+                </div>
+
+                {item.metadata.duration_seconds ? (
+                  <p className="text-sm text-zinc-500">
+                    Duración: {displayValue(item.metadata.duration_seconds)}s
+                  </p>
+                ) : null}
+              </>
+            ) : null}
+
+            {item.type === "note" ? (
               <div>
-                <label className="mb-1 block text-sm text-zinc-400">
-                  Transcripción
-                </label>
+                <label className="mb-1 block text-sm text-zinc-400">Contenido</label>
                 <Textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
-                  rows={6}
+                  rows={8}
                 />
               </div>
+            ) : null}
 
+            {item.type === "image" || url ? (
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm text-zinc-400">Tipo IA</label>
@@ -363,7 +525,9 @@ export function ItemDetail({
                   </select>
                 </div>
               </div>
+            ) : null}
 
+            {item.type !== "audio" ? (
               <div>
                 <label className="mb-1 block text-sm text-zinc-400">Tags</label>
                 <input
@@ -372,70 +536,7 @@ export function ItemDetail({
                   className="input-float"
                 />
               </div>
-
-              {item.metadata.duration_seconds ? (
-                <p className="text-sm text-zinc-500">
-                  Duración: {displayValue(item.metadata.duration_seconds)}s
-                </p>
-              ) : null}
-            </>
-          ) : null}
-
-          {item.type === "note" ? (
-            <div>
-              <label className="mb-1 block text-sm text-zinc-400">Contenido</label>
-              <Textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                rows={8}
-              />
-            </div>
-          ) : null}
-
-          {item.type === "image" ? (
-            <>
-              {loadingMedia ? (
-                <p className="py-4 text-sm text-zinc-500">Cargando imagen...</p>
-              ) : mediaUrl ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={mediaUrl}
-                  alt={title}
-                  className="max-h-[min(50dvh,calc(var(--tm-vv-height,100dvh)*0.5))] w-full object-contain"
-                />
-              ) : (
-                <p className="text-sm text-red-400">No se pudo cargar la imagen</p>
-              )}
-            </>
-          ) : null}
-
-          <div className="flex items-center gap-2">
-            <Button onClick={handleSave} disabled={saving} className="flex-1">
-              {saving ? "Guardando..." : "Guardar cambios"}
-            </Button>
-            <button
-              onClick={async () => {
-                const text = [title, content].filter(Boolean).join("\n");
-                if (!text.trim()) return;
-                try {
-                  const res = await fetch("/api/classify", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ transcript: text }),
-                  });
-                  if (!res.ok) return;
-                  const data = await res.json();
-                  if (data.title) setTitle(data.title);
-                  if (data.type) setClassificationType(data.type);
-                  if (data.tags) setTags(data.tags);
-                  if (data.priority) setPriority(data.priority);
-                } catch {}
-              }}
-              className="btn-icon"
-              title="Reclasificar con IA"
-            >
-              <Sparkles className="h-4 w-4" />
-            </button>
+            ) : null}
           </div>
         </div>
       )}

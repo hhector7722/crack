@@ -125,7 +125,7 @@ export function CompactLinkItem({ item, onClick }: { item: Item; onClick?: () =>
         <img
           src={image}
           alt=""
-          className="h-10 w-10 shrink-0 rounded-xl object-cover"
+          className="h-10 w-10 shrink-0 rounded-xl object-contain"
           onError={() => setImgError(true)}
         />
       ) : (
