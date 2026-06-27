@@ -264,9 +264,9 @@ export function ItemDetail({
       ) : null}
 
       {mode === "view" ? (
-        <div className="flex min-h-0 flex-1 flex-col gap-3">
+        <div className="flex min-h-0 flex-1 flex-col">
           {url ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex min-h-0 flex-1 flex-col justify-evenly text-center gap-3 pb-2">
               {(() => {
                 const videoId = getYouTubeId(url);
                 const thumbUrl = videoId
@@ -279,12 +279,12 @@ export function ItemDetail({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="relative mx-auto block"
+                        className="relative mx-auto flex min-h-0 flex-1 items-center justify-center w-full"
                       >
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="max-w-full rounded-lg"
+                          className="max-h-full max-w-full rounded-lg object-contain"
                         />
                         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                           <svg width="68" height="48" viewBox="0 0 68 48" className="drop-shadow-lg">
@@ -294,20 +294,22 @@ export function ItemDetail({
                         </div>
                       </a>
                     ) : (
-                      <div className="mx-auto flex aspect-video w-full max-w-lg items-center justify-center rounded-lg bg-zinc-900">
+                      <div className="mx-auto flex min-h-0 flex-1 aspect-video w-full max-w-lg items-center justify-center rounded-lg bg-zinc-900">
                         <Link2 className="h-10 w-10 text-zinc-600" />
                       </div>
                     )}
-                    {item.title && (
-                      <p className="text-sm font-semibold text-zinc-100">
-                        {item.title}
-                      </p>
-                    )}
-                    {linkDescription && (
-                      <p className="whitespace-pre-wrap text-sm text-zinc-400">
-                        {linkDescription}
-                      </p>
-                    )}
+                    <div className="flex flex-col gap-1 shrink-0">
+                      {item.title && (
+                        <p className="text-sm font-semibold text-zinc-100">
+                          {item.title}
+                        </p>
+                      )}
+                      {linkDescription && (
+                        <p className="whitespace-pre-wrap text-sm text-zinc-400">
+                          {linkDescription}
+                        </p>
+                      )}
+                    </div>
                   </>
                 );
               })()}
@@ -356,10 +358,10 @@ export function ItemDetail({
           )}
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col gap-3">
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pb-2">
           {/* Media preview — same as view mode */}
           {url ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex min-h-0 flex-col shrink-0 gap-2 h-40">
               {(() => {
                 const videoId = getYouTubeId(url);
                 const thumbUrl = videoId
@@ -372,12 +374,12 @@ export function ItemDetail({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="relative mx-auto block"
+                        className="relative mx-auto flex min-h-0 flex-1 items-center justify-center w-full"
                       >
                         <img
                           src={thumbUrl}
                           alt={item.title || ""}
-                          className="max-w-full rounded-lg"
+                          className="max-h-full max-w-full rounded-lg object-contain"
                         />
                         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                           <svg width="68" height="48" viewBox="0 0 68 48" className="drop-shadow-lg">
@@ -387,7 +389,7 @@ export function ItemDetail({
                         </div>
                       </a>
                     ) : (
-                      <div className="mx-auto flex aspect-video w-full max-w-lg items-center justify-center rounded-lg bg-zinc-900">
+                      <div className="mx-auto flex min-h-0 flex-1 aspect-video w-full max-w-lg items-center justify-center rounded-lg bg-zinc-900">
                         <Link2 className="h-10 w-10 text-zinc-600" />
                       </div>
                     )}
