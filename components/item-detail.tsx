@@ -14,52 +14,105 @@ import {
   classificationColor,
   classificationLabel,
   displayValue,
-  formatRelative,
   getNoteUrl,
   cn,
 } from "@/lib/utils";
 import type { Item, ClassificationType, Priority } from "@/lib/types";
+import { CarouselSwipeDots, useCarouselSlide } from "@/lib/ui/use-carousel-slide";
 
 interface ItemDetailProps {
   item: Item;
+  carouselItems?: Item[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdated: (item: Item) => void;
   onDeleted: () => void;
 }
 
-function getYouTubeId(url: string): string | null {
-  try {
-    const u = new URL(url);
-    if (u.hostname.includes("youtube.com") || u.hostname.includes("youtu.be")) {
-      return u.hostname.includes("youtu.be") ? u.pathname.slice(1) : u.searchParams.get("v");
-    }
-  } catch {}
-  return null;
-}
-
 export function ItemDetail({
-  item,
+  item: initialItem,
+  carouselItems,
   open,
   onOpenChange,
   onUpdated,
   onDeleted,
 }: ItemDetailProps) {
+  const {
+    activeIndex,
+    activeItem,
+    canSwipe,
+    startSlide,
+    buildCarouselPanelSlide,
+  } = useCarouselSlide({
+    items: carouselItems ?? [initialItem],
+    open,
+    initialItemKey: initialItem.id,
+    getItemKey: (i) => i.id,
+    enabled: Boolean(carouselItems && carouselItems.length > 1),
+    canSlide: true,
+  });
+
+  const currentItem = activeItem ?? initialItem;
+
+  const panelSlide = buildCarouselPanelSlide((slideItem) => (
+    <ItemDetailPanel
+      key={slideItem.id}
+      item={slideItem}
+      open={open}
+      onOpenChange={onOpenChange}
+      onUpdated={onUpdated}
+      onDeleted={onDeleted}
+    />
+  ));
+
+  return (
+    <AppModal
+      open={open}
+      onOpenChange={onOpenChange}
+      size="fixed"
+      onSwipeLeft={canSwipe && !panelSlide ? () => startSlide(1) : undefined}
+      onSwipeRight={canSwipe && !panelSlide ? () => startSlide(-1) : undefined}
+      panelSlide={panelSlide}
+      belowPanel={
+        canSwipe ? (
+          <CarouselSwipeDots activeIndex={activeIndex} total={carouselItems?.length ?? 0} />
+        ) : undefined
+      }
+    >
+      <ItemDetailPanel
+        key={currentItem.id}
+        item={currentItem}
+        open={open}
+        onOpenChange={onOpenChange}
+        onUpdated={onUpdated}
+        onDeleted={onDeleted}
+      />
+    </AppModal>
+  );
+}
+
+function ItemDetailPanel({
+  item,
+  open,
+  onOpenChange,
+  onUpdated,
+  onDeleted,
+}: Omit<ItemDetailProps, "carouselItems">) {
   const [title, setTitle] = useState(item.title ?? "");
   const [content, setContent] = useState(item.content ?? "");
   const [tags, setTags] = useState(item.metadata.tags?.join(", ") ?? "");
-  const [classificationType, setClassificationType] = useState<
-    ClassificationType | undefined
-  >(item.metadata.classification_type);
-  const [priority, setPriority] = useState<Priority | undefined>(
-    item.metadata.priority
+  const [classificationType, setClassificationType] = useState<ClassificationType | undefined>(
+    item.metadata.classification_type
   );
+  const [priority, setPriority] = useState<Priority | undefined>(item.metadata.priority);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loadingMedia, setLoadingMedia] = useState(false);
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [linkImage, setLinkImage] = useState<string | null>(item.metadata.link_image ?? null);
-  const [linkDescription, setLinkDescription] = useState<string | null>(item.metadata.link_description ?? null);
+  const [linkDescription, setLinkDescription] = useState<string | null>(
+    item.metadata.link_description ?? null
+  );
 
   const url = getNoteUrl(item);
 
@@ -82,7 +135,9 @@ export function ItemDetail({
       } catch {}
     }
     void loadLinkPreview();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [open, url, item.metadata.link_image, item.metadata.link_description]);
 
   useEffect(() => {
@@ -108,6 +163,16 @@ export function ItemDetail({
       cancelled = true;
     };
   }, [open, item.file_url]);
+
+  function getYouTubeId(url: string): string | null {
+    try {
+      const u = new URL(url);
+      if (u.hostname.includes("youtube.com") || u.hostname.includes("youtu.be")) {
+        return u.hostname.includes("youtu.be") ? u.pathname.slice(1) : u.searchParams.get("v");
+      }
+    } catch {}
+    return null;
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -185,7 +250,7 @@ export function ItemDetail({
   }
 
   return (
-    <AppModal open={open} onOpenChange={onOpenChange} size="fixed">
+    <>
       <div className="mb-4 flex flex-col items-end gap-2">
         <span className="text-xs text-zinc-400 whitespace-nowrap">
           {format(new Date(item.created_at), "d 'de' MMMM yyyy 'a las' H:mm", { locale: es })}
@@ -266,7 +331,7 @@ export function ItemDetail({
       {mode === "view" ? (
         <div className="flex min-h-0 flex-1 flex-col">
           {url ? (
-            <div className="flex min-h-0 flex-1 flex-col justify-evenly text-center gap-3 pb-2">
+            <div className="flex min-h-0 flex-1 flex-col justify-evenly text-left gap-3 pb-2">
               {(() => {
                 const videoId = getYouTubeId(url);
                 const thumbUrl = videoId
@@ -286,17 +351,16 @@ export function ItemDetail({
                           alt={item.title || ""}
                           className="max-h-full max-w-full rounded-lg object-contain"
                         />
-                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                          <svg width="68" height="48" viewBox="0 0 68 48" className="drop-shadow-lg">
-                            <rect width="68" height="48" rx="6" fill="red" />
-                            <polygon points="27,12 27,36 52,24" fill="white" />
-                          </svg>
-                        </div>
                       </a>
                     ) : (
-                      <div className="mx-auto flex min-h-0 flex-1 aspect-video w-full max-w-lg items-center justify-center rounded-lg bg-zinc-900">
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mx-auto flex min-h-0 flex-1 aspect-video w-full max-w-lg items-center justify-center rounded-lg bg-zinc-900"
+                      >
                         <Link2 className="h-10 w-10 text-zinc-600" />
-                      </div>
+                      </a>
                     )}
                     <div className="flex flex-col gap-1 shrink-0">
                       {item.title && (
@@ -381,17 +445,16 @@ export function ItemDetail({
                           alt={item.title || ""}
                           className="max-h-full max-w-full rounded-lg object-contain"
                         />
-                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                          <svg width="68" height="48" viewBox="0 0 68 48" className="drop-shadow-lg">
-                            <rect width="68" height="48" rx="6" fill="red" />
-                            <polygon points="27,12 27,36 52,24" fill="white" />
-                          </svg>
-                        </div>
                       </a>
                     ) : (
-                      <div className="mx-auto flex min-h-0 flex-1 aspect-video w-full max-w-lg items-center justify-center rounded-lg bg-zinc-900">
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mx-auto flex min-h-0 flex-1 aspect-video w-full max-w-lg items-center justify-center rounded-lg bg-zinc-900"
+                      >
                         <Link2 className="h-10 w-10 text-zinc-600" />
-                      </div>
+                      </a>
                     )}
                   </>
                 );
@@ -558,6 +621,6 @@ export function ItemDetail({
           </div>
         </div>
       )}
-    </AppModal>
+    </>
   );
 }
