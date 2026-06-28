@@ -9,7 +9,7 @@ import { usePager } from "@/components/app-shell-context";
 import { resolveLinkTitle, titleFromUrl } from "@/lib/link-preview";
 import { displayValue, getNoteUrl, cn } from "@/lib/utils";
 import type { Item } from "@/lib/types";
-import { CompactAudioItem, CompactLinkItem, CompactNoteItem } from "@/components/compact-items";
+import { CompactAudioItem, CompactLinkItem, CompactNoteItem, CompactFileItem } from "@/components/compact-items";
 import { ItemDetail } from "@/components/item-detail";
 import { AppModal } from "@/components/app-modal";
 
@@ -22,12 +22,13 @@ type Categorized = {
   images: Item[];
   notes: Item[];
   links: Item[];
+  files: Item[];
 };
 
-function SectionWrapper({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
+function SectionWrapper({ children, onClick, className }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
   return (
     <section 
-      className={cn("rounded-2xl bg-[#1c1c1e] p-5", onClick ? "cursor-pointer" : "")}
+      className={cn("rounded-2xl bg-[#1c1c1e] p-5", onClick ? "cursor-pointer" : "", className)}
       onClick={(e) => {
         if (e.target === e.currentTarget && onClick) onClick();
       }}
@@ -39,18 +40,18 @@ function SectionWrapper({ children, onClick }: { children: React.ReactNode; onCl
 
 
 
-function ImageThumb({ url, onClick }: { url: string | null; onClick?: () => void }) {
+function ImageThumb({ url, onClick, className }: { url: string | null; onClick?: () => void; className?: string }) {
   const inner = url ? (
-    <img src={url} alt="" className="max-w-full max-h-[200px] rounded-lg" />
+    <img src={url} alt="" className={cn("object-cover rounded-lg w-full h-full", className)} />
   ) : (
-    <div className="flex aspect-square w-full items-center justify-center rounded-lg bg-zinc-900">
+    <div className={cn("flex items-center justify-center rounded-lg bg-zinc-900 w-full h-full", className)}>
       <Loader2 className="h-4 w-4 animate-spin text-zinc-600" />
     </div>
   );
 
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className="w-full h-full text-left active:opacity-80">
+      <button type="button" onClick={onClick} className={cn("w-full h-full text-left active:opacity-80 block", className)}>
         {inner}
       </button>
     );
@@ -76,16 +77,17 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
     try {
       const supabase = createClient();
 
-      const [audios, images, notes] = await Promise.all([
+      const [audios, images, notes, files] = await Promise.all([
         fetchItems(supabase, "audio", { limit: 20 }),
         fetchItems(supabase, "image", { limit: 20 }),
         fetchItems(supabase, "note", { limit: 40 }),
+        fetchItems(supabase, "file", { limit: 20 }),
       ]);
 
       const noteItems = notes.filter((i) => !getNoteUrl(i));
       const linkItems = notes.filter((i) => getNoteUrl(i));
 
-      setCategorized({ audios, images, notes: noteItems, links: linkItems });
+      setCategorized({ audios, images, notes: noteItems, links: linkItems, files });
 
       const imgPaths = [...new Set(images.filter((i) => i.file_url).map((i) => i.file_url!))];
       const audioPaths = [...new Set(audios.filter((i) => i.file_url).map((i) => i.file_url!))];
@@ -130,8 +132,8 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
         </SectionWrapper>
       )}
       {categorized.audios.length > 0 && (
-      <SectionWrapper onClick={() => setSelectedCategory("audios")}>
-        <div className="grid grid-cols-2 gap-4 pointer-events-none">
+      <SectionWrapper className="h-[140px]" onClick={() => setSelectedCategory("audios")}>
+        <div className="grid grid-cols-2 gap-4 pointer-events-none h-full overflow-hidden">
           {categorized.audios.slice(0, 4).map((item) => (
             <div key={item.id} className="pointer-events-auto">
               <CompactAudioItem item={item} onClick={() => setSelectedItem({ item, category: "audios" })} />
@@ -142,10 +144,10 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
     )}
 
     {categorized.images.length > 0 && (
-      <SectionWrapper onClick={() => setSelectedCategory("images")}>
-        <div className="grid grid-cols-4 gap-2 pointer-events-none">
-          {categorized.images.slice(0, 8).map((item) => (
-            <div key={item.id} className="pointer-events-auto">
+      <SectionWrapper className="h-[140px]" onClick={() => setSelectedCategory("images")}>
+        <div className="flex overflow-x-auto gap-3 pointer-events-none no-scrollbar h-full items-center">
+          {categorized.images.map((item) => (
+            <div key={item.id} className="pointer-events-auto h-full shrink-0 aspect-square">
               <ImageThumb
                 url={item.file_url ? imageUrls[item.file_url] ?? null : null}
                 onClick={() => setSelectedItem({ item, category: "images" })}
@@ -156,17 +158,35 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
       </SectionWrapper>
     )}
 
-    {categorized.notes.length > 0 && (
-      <SectionWrapper onClick={() => setSelectedCategory("notes")}>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3 pointer-events-none">
-          {categorized.notes.slice(0, 6).map((item) => (
-            <div key={item.id} className="pointer-events-auto">
-              <CompactNoteItem item={item} onClick={() => setSelectedItem({ item, category: "notes" })} />
+    <div className="grid grid-cols-2 gap-5">
+      {categorized.notes.length > 0 ? (
+        <SectionWrapper className="h-[180px]" onClick={() => setSelectedCategory("notes")}>
+          <div className="flex flex-col gap-3 pointer-events-none overflow-hidden h-full">
+            {categorized.notes.slice(0, 3).map((item) => (
+              <div key={item.id} className="pointer-events-auto shrink-0">
+                <CompactNoteItem item={item} onClick={() => setSelectedItem({ item, category: "notes" })} />
+              </div>
+            ))}
+          </div>
+        </SectionWrapper>
+      ) : <div />}
+
+      <SectionWrapper className="h-[180px]" onClick={() => setSelectedCategory("files")}>
+        <div className="flex flex-col gap-3 pointer-events-none overflow-hidden h-full">
+          {categorized.files && categorized.files.length > 0 ? (
+            categorized.files.slice(0, 3).map((item) => (
+              <div key={item.id} className="pointer-events-auto shrink-0">
+                <CompactFileItem item={item} onClick={() => setSelectedItem({ item, category: "files" })} />
+              </div>
+            ))
+          ) : (
+            <div className="flex items-center justify-center h-full text-zinc-500 text-sm">
+              No hay archivos
             </div>
-          ))}
+          )}
         </div>
       </SectionWrapper>
-    )}
+    </div>
 
     {categorized.links.length > 0 && (
       <SectionWrapper onClick={() => setSelectedCategory("links")}>
@@ -214,7 +234,8 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
           title={
             selectedCategory === "audios" ? "Audios" :
             selectedCategory === "images" ? "Imágenes" :
-            selectedCategory === "notes" ? "Notas" : "Enlaces"
+            selectedCategory === "notes" ? "Notas" :
+            selectedCategory === "files" ? "Archivos" : "Enlaces"
           }
         >
           <div className="flex-1 overflow-y-auto min-h-0 pb-4">
@@ -247,6 +268,13 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
               <div className="grid grid-cols-1 gap-3">
                 {categorized.links.map(item => (
                   <CompactLinkItem key={item.id} item={item} onClick={() => setSelectedItem({ item, category: "links" })} />
+                ))}
+              </div>
+            )}
+            {selectedCategory === "files" && categorized.files && (
+              <div className="grid grid-cols-1 gap-3">
+                {categorized.files.map(item => (
+                  <CompactFileItem key={item.id} item={item} onClick={() => setSelectedItem({ item, category: "files" })} />
                 ))}
               </div>
             )}

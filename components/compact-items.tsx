@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import { Loader2, Link2 } from "lucide-react";
+import { Loader2, Link2, FileText } from "lucide-react";
 import { AudioWaveform } from "@/components/audio-item-row";
 import { resolveLinkTitle, titleFromUrl } from "@/lib/link-preview";
 import { displayValue, getNoteUrl } from "@/lib/utils";
@@ -173,6 +173,34 @@ export function CompactNoteItem({ item, onClick }: { item: Item; onClick?: () =>
       <p className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-zinc-400">
         {item.metadata.summary ?? item.content ?? ""}
       </p>
+    </div>
+  );
+
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className="w-full text-left active:opacity-70 py-1">
+        {inner}
+      </button>
+    );
+  }
+
+  return <div className="py-1">{inner}</div>;
+}
+
+export function CompactFileItem({ item, onClick }: { item: Item; onClick?: () => void }) {
+  const inner = (
+    <div className="flex items-center gap-3 w-full text-left">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-900">
+        <FileText className="h-4 w-4 text-zinc-400" />
+      </div>
+      <div className="flex min-w-0 flex-col">
+        <p className="line-clamp-1 text-[11px] font-semibold text-zinc-100">
+          {displayValue(item.title) || "Documento"}
+        </p>
+        <p className="mt-0.5 line-clamp-1 text-[10px] text-zinc-400">
+          {item.metadata.summary ?? "Archivo"}
+        </p>
+      </div>
     </div>
   );
 
