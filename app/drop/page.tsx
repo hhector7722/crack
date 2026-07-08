@@ -14,7 +14,7 @@ export default async function DropPage() {
 
   const { data, error } = await supabase
     .from("drops")
-    .select("id, content, file_url, user_id, created_at, expires_at")
+    .select("id, content, file_url, content_type, user_id, created_at, expires_at")
     .eq("user_id", user.id)
     .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false });

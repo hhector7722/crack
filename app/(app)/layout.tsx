@@ -11,12 +11,12 @@ import {
   useCallback,
 } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Settings, X } from "lucide-react";
+import { Mic, FileEdit, Image, Zap, Search, Settings, X } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
 
 import { AppPager } from "@/components/app-pager";
 import { ProfileView } from "@/components/profile-view";
-import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
+import { AppShellProvider, useAppShell, type CaptureMode } from "@/components/app-shell-context";
 import { SearchProvider, useSearch } from "@/components/search-context";
 import { uploadImageFromFile } from "@/lib/image-upload";
 
@@ -48,6 +48,57 @@ function KeyboardShortcuts() {
   }, [toggleSearch]);
 
   return null;
+}
+
+function HeaderActions() {
+  const { openCapture, openGallery } = useAppShell();
+  const { toggleSearch } = useSearch();
+  const router = useRouter();
+
+  return (
+    <div className="absolute right-2 flex items-center gap-0">
+      <button
+        type="button"
+        onClick={toggleSearch}
+        aria-label="Buscar"
+        className="flex h-8 w-8 items-center justify-center text-zinc-400 transition-colors active:text-zinc-100"
+      >
+        <Search className="h-[1.1rem] w-[1.1rem]" strokeWidth={2} />
+      </button>
+      <button
+        type="button"
+        onClick={() => openCapture("voice")}
+        aria-label="Grabar audio"
+        className="flex h-8 w-8 items-center justify-center text-zinc-400 transition-colors active:text-zinc-100"
+      >
+        <Mic className="h-[1.1rem] w-[1.1rem]" strokeWidth={2} />
+      </button>
+      <button
+        type="button"
+        onClick={() => openCapture("note")}
+        aria-label="Nueva nota"
+        className="flex h-8 w-8 items-center justify-center text-zinc-400 transition-colors active:text-zinc-100"
+      >
+        <FileEdit className="h-[1.1rem] w-[1.1rem]" strokeWidth={2} />
+      </button>
+      <button
+        type="button"
+        onClick={openGallery}
+        aria-label="Añadir imagen"
+        className="flex h-8 w-8 items-center justify-center text-zinc-400 transition-colors active:text-zinc-100"
+      >
+        <Image className="h-[1.1rem] w-[1.1rem]" strokeWidth={2} />
+      </button>
+      <button
+        type="button"
+        onClick={() => router.push("/drop")}
+        aria-label="Drop (efímero)"
+        className="flex h-8 w-8 items-center justify-center text-amber-400 transition-colors active:text-amber-200"
+      >
+        <Zap className="h-[1.1rem] w-[1.1rem]" strokeWidth={2} />
+      </button>
+    </div>
+  );
 }
 
 export default function AppLayout({
@@ -128,18 +179,10 @@ export default function AppLayout({
               aria-hidden
             />
 
-              <header className="tm-app-header tm-app-header-fixed fixed top-0 right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-12">
+            <header className="tm-app-header tm-app-header-fixed fixed top-0 right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-12">
               <div className="relative flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-center px-2">
                 <h1 className="text-lg font-bold tracking-tight">Crack</h1>
-                <div className="absolute right-2 flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={openCaptureMenu}
-                    aria-label="Crear"
-                    className="flex h-8 w-8 items-center justify-center text-zinc-400 transition-colors active:text-zinc-100"
-                  >
-                    <Plus className="h-5 w-5" />
-                  </button>
+                <div className="absolute left-2">
                   <button
                     type="button"
                     onClick={() => setShowProfile((v) => !v)}
@@ -149,6 +192,7 @@ export default function AppLayout({
                     {showProfile ? <X className="h-5 w-5" /> : <Settings className="h-5 w-5" />}
                   </button>
                 </div>
+                <HeaderActions />
               </div>
             </header>
 
