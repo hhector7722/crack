@@ -19,7 +19,7 @@ import {
   Send,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { getSignedUrl } from "@/lib/storage";
+import { getSignedUrl, uploadFile } from "@/lib/storage";
 
 export type ContentType = "text" | "image" | "audio" | "video" | "file";
 
@@ -472,28 +472,29 @@ export function DropClient({
       }
 
       if (pendingFile) {
-        // multipart upload
-        const form = new FormData();
-        form.append("file", pendingFile);
-        if (trimmed) form.append("content", trimmed);
+        // Upload directo con el cliente de sesión — sin pasar por /api/drop
+        // que solo acepta Bearer token (para el Shortcut de iOS).
+        const ct = contentTypeFromFile(pendingFile);
+        const ext = pendingFile.name.split(".").pop()?.toLowerCase() ?? "bin";
+        const supabase = createClient();
 
-        const res = await fetch("/api/drop", {
-          method: "POST",
-          // no Content-Type header — browser sets multipart boundary automatically
-          body: form,
-          credentials: "include",
-        });
+        const filePath = await uploadFile(supabase, userId, "drops", pendingFile, ext);
 
-        if (!res.ok) {
-          const json = (await res.json()) as { error?: string };
-          throw new Error(json.error ?? `HTTP ${res.status}`);
-        }
+        const { data, error: insertError } = await supabase
+          .from("drops")
+          .insert({
+            file_url: filePath,
+            content_type: ct,
+            content: trimmed || null,
+            user_id: userId,
+          })
+          .select(
+            "id, content, file_url, content_type, user_id, created_at, expires_at"
+          )
+          .single();
 
-        // The realtime subscription will add the drop; no manual upsert needed.
-        // But as fallback (e.g. realtime lag) we upsert from the response:
-        const json = (await res.json()) as { drop?: Drop };
-        if (json.drop) upsertDrop(json.drop);
-
+        if (insertError) throw insertError;
+        upsertDrop(data as Drop);
         setPendingFile(null);
       } else {
         // plain text via supabase client (same as before)
