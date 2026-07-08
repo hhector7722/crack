@@ -107,3 +107,24 @@ export function triggerEmbed(itemId: string): void {
     body: JSON.stringify({ item_id: itemId }),
   }).catch(() => {});
 }
+
+export function triggerClassify(itemId: string, transcript: string): void {
+  fetch("/api/classify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ item_id: itemId, transcript }),
+  }).catch(() => {});
+}
+
+export function triggerTranscribeAudio(itemId: string, blob: Blob): void {
+  const mime = blob.type || "audio/webm";
+  const ext = mime.includes("mp4") || mime.includes("aac") ? "m4a" : "webm";
+  const formData = new FormData();
+  formData.append("file", new File([blob], `recording.${ext}`, { type: mime }));
+  formData.append("item_id", itemId);
+
+  fetch("/api/transcribe", {
+    method: "POST",
+    body: formData,
+  }).catch(() => {});
+}

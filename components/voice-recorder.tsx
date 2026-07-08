@@ -2,26 +2,17 @@
 
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Mic, Square, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
-import { createItem, triggerEmbed } from "@/lib/items";
+import { createItem, triggerEmbed, triggerTranscribeAudio } from "@/lib/items";
 import { uploadFile } from "@/lib/storage";
-import {
-  classificationColor,
-  classificationLabel,
-  formatDuration,
-  cn,
-} from "@/lib/utils";
-import type { ClassificationResult } from "@/lib/types";
+import { formatDuration } from "@/lib/utils";
 
 interface VoiceRecorderProps {
   onSaved: () => void;
   onError: (msg: string) => void;
 }
 
-type Step = "idle" | "recording" | "processing" | "preview";
+type Step = "idle" | "recording" | "processing";
 
 function getSupportedMimeType(): string {
   const isIOS =
@@ -48,15 +39,10 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
   const [step, setStep] = useState<Step>("idle");
   const [duration, setDuration] = useState(0);
   const [amplitude, setAmplitude] = useState(0);
-  const [transcript, setTranscript] = useState("");
-  const [classification, setClassification] = useState<ClassificationResult | null>(null);
-  const [title, setTitle] = useState("");
-  const [tags, setTags] = useState("");
   const [saving, setSaving] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
-  const audioBlobRef = useRef<Blob | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animFrameRef = useRef<number | null>(null);
@@ -108,8 +94,7 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
         const blob = new Blob(chunksRef.current, {
           type: mimeType || "audio/webm",
         });
-        audioBlobRef.current = blob;
-        processRecording(blob);
+        void processRecording(blob);
       };
 
       mediaRecorderRef.current = recorder;
@@ -134,50 +119,7 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
   }
 
   async function processRecording(blob: Blob) {
-    try {
-      const mime = blob.type || "audio/webm";
-      const ext = mime.includes("mp4") || mime.includes("aac") ? "m4a" : "webm";
-      const formData = new FormData();
-      const uploadBlob = new File([blob], `recording.${ext}`, { type: mime });
-      formData.append("file", uploadBlob);
-
-      const transcribeRes = await fetch("/api/transcribe", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!transcribeRes.ok) {
-        const err = await transcribeRes.json();
-        throw new Error(err.error ?? "Error transcribiendo");
-      }
-
-      const { transcript: text } = await transcribeRes.json();
-      setTranscript(text);
-
-      const classifyRes = await fetch("/api/classify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transcript: text }),
-      });
-
-      if (!classifyRes.ok) {
-        const err = await classifyRes.json();
-        throw new Error(err.error ?? "Error clasificando");
-      }
-
-      const result: ClassificationResult = await classifyRes.json();
-      setClassification(result);
-      setTitle(result.title);
-      setTags(result.tags.join(", "));
-      setStep("preview");
-    } catch (err) {
-      onError(err instanceof Error ? err.message : "Error procesando audio");
-      setStep("idle");
-    }
-  }
-
-  async function handleSave() {
-    if (!audioBlobRef.current || !classification) return;
+    if (saving) return;
     setSaving(true);
 
     try {
@@ -187,55 +129,28 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("No autenticado");
 
-      const ext = audioBlobRef.current.type.includes("mp4") ? "m4a" : "webm";
-      const path = await uploadFile(
-        supabase,
-        user.id,
-        "audio",
-        audioBlobRef.current,
-        ext
-      );
+      const mime = blob.type || "audio/webm";
+      const ext = mime.includes("mp4") || mime.includes("aac") ? "m4a" : "webm";
+      const path = await uploadFile(supabase, user.id, "audio", blob, ext);
 
-      const audioItem = await createItem(supabase, {
+      const item = await createItem(supabase, {
         type: "audio",
-        title,
-        content: transcript,
+        title: "Audio sin transcribir",
+        content: "",
         file_url: path,
         user_id: user.id,
         metadata: {
-          themes: classification.themes || [],
-          tags: tags
-            .split(",")
-            .map((t) => t.trim().toLowerCase())
-            .filter(Boolean),
-          priority: classification.priority,
-          reminder_date: classification.reminder_date,
-          classification_type: classification.type,
-          summary: classification.summary,
-          raw_transcript: transcript,
           duration_seconds: duration,
+          classification_status: "pending",
         },
       });
-      triggerEmbed(audioItem.id);
 
-      if (classification.create_note_from_audio) {
-        const noteItem = await createItem(supabase, {
-          type: "note",
-          title,
-          content: transcript,
-          user_id: user.id,
-          metadata: {
-            themes: classification.themes || [],
-            classification_type: "note",
-            summary: classification.summary,
-          },
-        });
-        triggerEmbed(noteItem.id);
-      }
-
+      triggerEmbed(item.id);
+      triggerTranscribeAudio(item.id, blob);
       onSaved();
     } catch (err) {
-      onError(err instanceof Error ? err.message : "Error guardando");
+      onError(err instanceof Error ? err.message : "Error guardando audio");
+      setStep("idle");
     } finally {
       setSaving(false);
     }
@@ -285,60 +200,10 @@ export function VoiceRecorder({ onSaved, onError }: VoiceRecorderProps) {
     );
   }
 
-  if (step === "processing") {
-    return (
-      <div className="flex flex-col items-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
-        <p className="mt-4 text-sm text-zinc-400">
-          Transcribiendo y clasificando...
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4 py-2">
-      {classification && (
-        <Badge className={cn(classificationColor(classification.type))}>
-          {classificationLabel(classification.type)}
-        </Badge>
-      )}
-
-      <div>
-        <label className="mb-1 block text-sm text-zinc-400">Título</label>
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="input-float"
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm text-zinc-400">Tags</label>
-        <input
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-          placeholder="separados por coma"
-          className="input-float"
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-sm text-zinc-400">Transcripción</label>
-        <Textarea
-          value={transcript}
-          onChange={(e) => setTranscript(e.target.value)}
-          rows={4}
-        />
-      </div>
-
-      <Button
-        onClick={handleSave}
-        disabled={saving || !title.trim()}
-        className="w-full"
-      >
-        {saving ? "Guardando..." : "Guardar"}
-      </Button>
+    <div className="flex flex-col items-center py-12">
+      <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+      <p className="mt-4 text-sm text-zinc-400">Guardando audio...</p>
     </div>
   );
 }

@@ -3,7 +3,8 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
-import { createItem, updateItem, triggerEmbed } from "@/lib/items";
+import { createItem, updateItem, triggerClassify, triggerEmbed } from "@/lib/items";
+import type { ItemMetadata } from "@/lib/types";
 
 export interface NoteCaptureHandle {
   saveIfNeeded: () => Promise<boolean>;
@@ -23,7 +24,8 @@ export const NoteCapture = forwardRef<NoteCaptureHandle, NoteCaptureProps>(
     const savingRef = useRef(false);
 
     async function saveNote(notify = true): Promise<boolean> {
-      if (savingRef.current || !content.trim()) return false;
+      const trimmedContent = content.trim();
+      if (savingRef.current || !trimmedContent) return false;
       savingRef.current = true;
       setIsSaving(true);
 
@@ -34,50 +36,29 @@ export const NoteCapture = forwardRef<NoteCaptureHandle, NoteCaptureProps>(
         } = await supabase.auth.getUser();
         if (!user) throw new Error("No autenticado");
 
-        let title = content.trim().split("\n")[0].slice(0, 80) || "Nota sin título";
-        let metadata: Record<string, unknown> = {
-          classification_type: "note",
-          summary: content.trim().slice(0, 120),
-        };
-
-        if (!itemId) {
-          try {
-            const classifyRes = await fetch("/api/classify", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ transcript: content.trim() }),
-            });
-            if (classifyRes.ok) {
-              const result = await classifyRes.json();
-              if (result.title) title = result.title;
-              metadata = {
-                themes: result.themes || [],
-                tags: result.tags || [],
-                priority: result.priority,
-                classification_type: result.type || "note",
-                summary: result.summary || metadata.summary,
-              };
-            }
-          } catch (e) {
-            console.error("Error clasificando nota", e);
-          }
-        }
+        const title = trimmedContent.split("\n")[0].slice(0, 80) || "Nota sin título";
 
         if (itemId) {
           await updateItem(supabase, itemId, {
             title,
-            content: content.trim(),
+            content: trimmedContent,
           });
         } else {
+          const metadata: ItemMetadata = {
+            summary: trimmedContent.slice(0, 120),
+            classification_status: "pending",
+          };
+
           const item = await createItem(supabase, {
             type: "note",
             title,
-            content: content.trim(),
+            content: trimmedContent,
             user_id: user.id,
             metadata,
           });
           setItemId(item.id);
           triggerEmbed(item.id);
+          triggerClassify(item.id, trimmedContent);
         }
 
         if (notify) onSaved();
@@ -118,7 +99,7 @@ export const NoteCapture = forwardRef<NoteCaptureHandle, NoteCaptureProps>(
           disabled={!content.trim() || isSaving}
           className="mt-4 h-12 w-full rounded-xl bg-zinc-100 font-semibold text-zinc-950 disabled:opacity-50"
         >
-          {isSaving ? "Guardando y clasificando..." : "Guardar ahora"}
+          {isSaving ? "Guardando..." : "Guardar ahora"}
         </button>
       </div>
     );

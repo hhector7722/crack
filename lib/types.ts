@@ -15,6 +15,8 @@ export interface ItemMetadata {
   link_image?: string;
   link_title?: string;
   link_description?: string;
+  classification_status?: "pending" | "transcribed" | "classified" | "failed";
+  classification_error?: string;
 }
 
 export interface Item {

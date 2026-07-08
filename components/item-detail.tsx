@@ -113,6 +113,8 @@ function ItemDetailPanel({
   const [linkDescription, setLinkDescription] = useState<string | null>(
     item.metadata.link_description ?? null
   );
+  const isUnclassified =
+    !item.metadata.classification_type && item.metadata.classification_status === "failed";
 
   const url = getNoteUrl(item);
 
@@ -320,11 +322,17 @@ function ItemDetailPanel({
         </div>
       </div>
 
-      {classificationType && !url ? (
+      {!url && (classificationType || isUnclassified) ? (
         <div className="mb-4">
-          <Badge className={cn("w-fit", classificationColor(classificationType))}>
-            {classificationLabel(classificationType)}
-          </Badge>
+          {classificationType ? (
+            <Badge className={cn("w-fit", classificationColor(classificationType))}>
+              {classificationLabel(classificationType)}
+            </Badge>
+          ) : (
+            <Badge className="w-fit border-zinc-600 bg-zinc-800/80 text-zinc-300">
+              Sin clasificar
+            </Badge>
+          )}
         </div>
       ) : null}
 
@@ -399,6 +407,11 @@ function ItemDetailPanel({
                 <div className="prose prose-invert max-w-none">
                   <p className="whitespace-pre-wrap text-zinc-300">{item.content}</p>
                 </div>
+              ) : (
+                <p className="text-sm text-zinc-500">Transcripción pendiente</p>
+              )}
+              {isUnclassified ? (
+                <p className="text-sm text-zinc-500">Sin clasificar</p>
               ) : null}
               {loadingMedia ? (
                 <p className="text-sm text-zinc-500">Cargando audio...</p>
