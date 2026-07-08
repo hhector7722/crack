@@ -40,7 +40,6 @@ export function ProfileView() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line
     void loadStatus();
   }, [loadStatus]);
 
@@ -85,17 +84,17 @@ export function ProfileView() {
     }
   }
 
-  const apiUrl = `${getSiteUrl()}/api/share-link`;
+  const apiUrl = `${getSiteUrl()}/api/drop`;
 
   return (
     <div className="content-list">
       <section className="py-4">
         <h2 className="text-sm font-semibold text-zinc-100">
-          Compartir a Crack (Atajos iOS)
+          Enviar a Drop (Atajos iOS)
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-          Genera un token y configura un Atajo en iPhone para guardar enlaces
-          desde YouTube, Safari, Instagram, etc.
+          Genera un token y configura un Atajo en iPhone para enviar texto
+          temporal a Drop. Vive 48h y no se guarda en items.
         </p>
 
         {loading ? (
@@ -183,31 +182,29 @@ export function ProfileView() {
 
             <details className="pt-2 text-sm text-zinc-400">
               <summary className="cursor-pointer font-medium text-zinc-300">
-                Atajo iPhone (GET — sin POST ni cabeceras)
+                Atajo iPhone (POST con JSON)
               </summary>
               <p className="mt-3 text-xs leading-relaxed text-emerald-300/90">
-                Compartir → Copiar enlace → ejecutar atajo. Evita el error
-                «No se ha especificado ninguna URL».
+                Compartir → Obtener texto de entrada → enviar a Drop.
               </p>
               <ol className="mt-3 list-decimal space-y-2 pl-5 text-xs leading-relaxed">
-                <li>Obtener portapapeles</li>
-                <li>Obtener direcciones URL de Portapapeles</li>
-                <li>Codificar con URL → entrada: Direcciones URL</li>
+                <li>Activa Mostrar en la hoja para compartir.</li>
+                <li>Configura la entrada para recibir Texto y URLs.</li>
+                <li>Obtener texto de entrada.</li>
+                <li>Diccionario → content: variable del texto.</li>
                 <li>
-                  Texto:{" "}
+                  Obtener contenido de URL →{" "}
                   <span className="text-zinc-300">
-                    {apiUrl}?token=
-                    {plainToken ?? "TU_TOKEN"}&amp;url=
+                    POST {apiUrl}
                   </span>
                 </li>
-                <li>Combinar texto → Texto + Texto codificado</li>
-                <li>
-                  Obtener contenido de URL → variable Texto combinado (GET)
-                </li>
-                <li>ⓘ → Añadir a pantalla de inicio</li>
+                <li>Cabecera Authorization: Bearer {plainToken ?? "TU_TOKEN"}.</li>
+                <li>Cabecera Content-Type: application/json.</li>
+                <li>Cuerpo de solicitud: JSON → diccionario.</li>
+                <li>Si ok es true, mostrar confirmación: Drop enviado.</li>
               </ol>
               <p className="mt-3 text-xs text-zinc-500">
-                Guía completa: docs/ios-shortcuts.md
+                No uses GET ni query params. Guía completa: docs/ios-shortcuts.md
               </p>
             </details>
           </div>
