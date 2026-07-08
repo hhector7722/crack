@@ -1,216 +1,84 @@
-# Atajo iOS — Guardar enlaces e imágenes en Crack
+# Atajo iOS - Enviar a Drop
 
 Dominio: `https://crackdecracks.vercel.app`  
-Token: `ArJec1N0IytJlhviMNWjyWmuxkeHqcPDIobgdOcBhlg`
+Endpoint: `https://crackdecracks.vercel.app/api/drop`  
+Metodo: `POST`  
+Auth: `Authorization: Bearer TU_TOKEN`
 
-> Si compartes este archivo o lo subes a un repo público, **revoca y regenera** el token en Perfil.
+> Si compartes este archivo o lo subes a un repo publico, revoca y regenera el token en Perfil.
 
----
+## Objetivo
 
-## Uso diario
+El atajo envia texto temporal a Drop. Drop vive 48h por defecto y no escribe en `items`.
 
-### Enlaces
-1. En Safari, YouTube, etc. → **Compartir** → **Copiar enlace**
-2. Ejecutar el atajo **Guardar en Crack**
-3. Abrir Crack → el enlace aparece en Notas
+## Atajo: Enviar texto a Drop
 
-### Imágenes desde la web
-1. Safari, Chrome, etc. → mantén pulsada una imagen → **Compartir imagen** → **Copiar enlace**
-2. Ejecutar el atajo **Guardar imagen en Crack** (versión con `imageUrl`)
-3. La imagen aparece en la sección Multimedia
-
-### Fotos desde el carrete
-1. Abre Fotos → selecciona una foto → Compartir → **Guardar foto en Crack** (atajo POST)
-2. O desde el atajo: toca el botón → selecciona una foto manualmente
-
----
-
-## Atajo 1: Guardar enlaces (GET)
-
-No uses POST ni JSON. Son 6 acciones en la app **Atajos**.
-
-### Paso a paso
-
-#### 1. Configurar Hoja para compartir (Opcional pero recomendado)
-
-Para no tener que copiar el enlace cada vez, puedes ejecutar el atajo directamente desde el menú de compartir de cualquier app (Safari, X, YouTube):
-
-1. Abre las opciones del atajo (icono `i` abajo o arriba).
+1. Abre Atajos y crea un atajo nuevo.
 2. Activa **Mostrar en la hoja para compartir**.
-3. Aparecerá un bloque arriba del todo: `Recibir [Cualquier entrada] de la hoja para compartir`.
+3. Configura la entrada para recibir **Texto** y **URLs**.
+4. Anade **Obtener texto de entrada**.
+5. Anade **Diccionario** con esta clave:
 
----
+| Clave | Tipo | Valor |
+| --- | --- | --- |
+| `content` | Texto | variable del paso 4 |
 
-#### 2. Obtener portapapeles o entrada
+6. Anade **Obtener contenido de URL**.
+7. Configura:
 
-Si no usas la hoja para compartir, añade **Obtener portapapeles**.
+| Campo | Valor |
+| --- | --- |
+| URL | `https://crackdecracks.vercel.app/api/drop` |
+| Metodo | `POST` |
+| Cabecera `Authorization` | `Bearer TU_TOKEN` |
+| Cabecera `Content-Type` | `application/json` |
+| Cuerpo de solicitud | `JSON` |
+| JSON | diccionario del paso 5 |
 
----
+8. Anade **Obtener diccionario de entrada** usando la respuesta del paso 6.
+9. Anade **Si** `ok` es `true`.
+10. En el bloque verdadero, anade **Mostrar confirmacion** con: `Drop enviado`.
+11. En el bloque falso, anade **Mostrar resultado** con la respuesta completa.
 
-#### 3. Obtener direcciones URL de
+## Ejemplo de body
 
-Busca **Obtener direcciones URL de la entrada** (o «Obtener direcciones URL de»).
-
-- Toca el hueco de entrada → **Seleccionar variable**
-- Elige **Entrada del atajo** (si has activado el paso 1) o **Portapapeles**.
-
-*(Consejo Pro: si usas una condición "Si [Entrada del atajo] tiene un valor", puedes hacer que lea la entrada y, si está vacía, lea el portapapeles).*
-
----
-
-#### 4. Codificar con URL
-
-Busca **Codificar con URL**.
-
-- Entrada: **Direcciones URL** (variable del paso 3)
-
----
-
-#### 5. Texto
-
-Busca **Texto** y pega la siguiente URL (que ya incluye tu token).
-**Muy importante:** Justo después de `&url=`, inserta la variable **Texto codificado con URL** (o Direcciones URL con codificación URL).
-Para hacerlo, toca donde dice `&url=`, elige "Seleccionar variable" sobre el teclado y toca la pastilla azul del paso anterior.
-
-```
-https://crackdecracks.vercel.app/api/share-link?token=ArJec1N0IytJlhviMNWjyWmuxkeHqcPDIobgdOcBhlg&url=[Selecciona la variable aquí]
+```json
+{
+  "content": "Texto temporal enviado desde iOS"
+}
 ```
 
-No añadas espacios ni saltos de línea.
+## Importante
 
----
+No uses `GET` ni query params. El token va siempre en la cabecera `Authorization` y el contenido va en el body JSON.
 
-#### 6. Obtener contenido de URL
+## Respuesta esperada
 
-Busca **Obtener contenido de URL**.
-
-- Toca el **hueco vacío** junto a «Obtener contenido de» (no el campo de abajo suelto)
-- **Seleccionar variable** → **Texto** (el bloque del paso 5)
-- Método: **GET** (viene por defecto; no cambies a POST)
-
-Si ves el error *«No se ha especificado ninguna URL»*, es porque este hueco sigue vacío. Debe mostrar la variable **Texto**, no una URL escrita aparte.
-
----
-
-## Atajo 2: Guardar imágenes desde la web (GET con imageUrl)
-
-Copia el atajo anterior y modifícalo para enviar también la URL de la imagen al servidor.
-
-### Cambios respecto al Atajo 1
-
-#### En el paso 4, usa este Texto en su lugar:
-
+```json
+{
+  "ok": true,
+  "drop": {
+    "id": "...",
+    "content": "...",
+    "file_url": null,
+    "user_id": "...",
+    "created_at": "...",
+    "expires_at": "..."
+  }
+}
 ```
-https://crackdecracks.vercel.app/api/share-link?token=ArJec1N0IytJlhviMNWjyWmuxkeHqcPDIobgdOcBhlg&imageUrl=
-```
-
-La URL de la imagen irá después de `&imageUrl=` (codificada).
-
-#### Flujo completo del atajo:
-1. **Obtener portapapeles** (debes copiar antes el enlace de la imagen)
-2. **Obtener direcciones URL de** la entrada → Portapapeles
-3. **Codificar con URL** la URL obtenida
-4. **Texto** con la URL base y la variable incrustada al final: `...&imageUrl=[Variable]`
-5. **Obtener contenido de URL** usando el Texto como entrada
-
-Resultado:
-```
-https://crackdecracks.vercel.app/api/share-link?token=...&imageUrl=https%3A%2F%2Fejemplo.com%2Ffoto.jpg
-```
-
-El servidor descarga la imagen, la clasifica con IA y la guarda en Multimedia.
-
----
-
-## Atajo 3: Guardar fotos desde el carrete (POST)
-
-Para enviar una foto directamente desde el carrete (sin URL pública):
-
-### Paso a paso
-
-#### 1. Seleccionar foto
-
-Busca **Seleccionar fotos** o **Obtener la última foto**.
-
-- **Seleccionar fotos**: permite escoger una foto manualmente
-- **Obtener la última foto**: usa la más reciente automáticamente
-
-#### 2. Obtener contenido de la imagen (opcional pero recomendado)
-
-Busca **Obtener contenido de** y selecciona como entrada la foto del paso 1.
-Esto convierte la imagen en datos binarios para enviar.
-
-#### 3. Obtener contenido de URL — configurar POST
-
-Busca **Obtener contenido de URL** y configura:
-
-- **URL**: `https://crackdecracks.vercel.app/api/share-link`
-- **Método**: `POST`
-- **Cabeceras**: añade una cabecera:
-  - Clave: `Authorization`
-  - Valor: `Bearer ArJec1N0IytJlhviMNWjyWmuxkeHqcPDIobgdOcBhlg`
-- **Cuerpo (solicitud)**: `Archivo` → selecciona la imagen (o los datos del paso 2)
-- **Tipo de contenido**: `Automático`
-
-> En la app Atajos, para poner el cuerpo como archivo: toca «Cuerpo» → cambiar a «Archivo» → seleccionar la variable de la foto.
-
-#### 4. Mostrar resultado (opcional)
-
-Añade **Mostrar alerta** o **Mostrar resultado del atajo** con el contenido obtenido.
-Deberías ver `{"ok":true,"id":"..."}` si todo funciona.
-
----
-
-## Atajo combinado: texto o imagen según entrada (avanzado)
-
-Puedes hacer un solo atajo que detecte si has copiado un enlace normal o una imagen:
-
-1. **Obtener portapapeles**
-2. **Si** el portapapeles contiene una URL que termina en `.jpg`, `.png`, `.gif`, `.webp`, etc.
-   - → Usar flujo de `imageUrl` (Atajo 2)
-3. **Si no** (enlace normal o texto)
-   - → Usar flujo de enlace normal (Atajo 1)
-
-Para esto necesitas usar **Si** → **Condición** en la app Atajos.
-
----
-
-## Cómo queda la URL al ejecutar (enlaces)
-
-```
-https://crackdecracks.vercel.app/api/share-link?token=ArJec1N0IytJlhviMNWjyWmuxkeHqcPDIobgdOcBhlg&url=https%3A%2F%2Fyoutube.com%2Fwatch%3Fv%3D...
-```
-
-Crack recibe la petición GET, valida el token y guarda el enlace.
-
----
-
-## Probar sin copiar enlace
-
-Abre Safari, copia manualmente `https://youtube.com/watch?v=dQw4w9WgXcQ`, ejecuta el atajo. Deberías ver `{"ok":true,"id":"..."}` o similar en la respuesta.
-
----
 
 ## Errores frecuentes
 
-| Mensaje | Qué hacer |
-|---------|-----------|
-| No se ha especificado ninguna URL | Paso 6: el hueco principal debe ser la variable **Texto** |
-| Token inválido | Regenera token en Perfil y actualiza el paso 4 |
-| No se encontró ninguna URL válida | Copia un enlace real antes de ejecutar el atajo |
-| 503 | Falta `SUPABASE_SERVICE_ROLE_KEY` en Vercel |
-| 404 / HTML en vez de JSON | Despliega la última versión en Vercel (endpoint GET aún no publicado) |
-
----
-
-## Android
-
-PWA instalada → Compartir → **Crack** (usa `/share`, no necesita atajo).
-
----
+| Mensaje | Que hacer |
+| --- | --- |
+| `Token requerido` | Falta la cabecera `Authorization: Bearer TU_TOKEN`. |
+| `Token invalido` | Regenera token en Perfil y actualiza el atajo. |
+| `content o file_url requerido` | El body JSON no incluye `content`. |
+| `503` | Falta `SUPABASE_SERVICE_ROLE_KEY` en Vercel. |
 
 ## Requisitos en servidor
 
-- Migración `supabase/migrations/002_share_tokens.sql` aplicada
-- Variable `SUPABASE_SERVICE_ROLE_KEY` en Vercel
-- Token generado en Perfil (el de arriba debe coincidir con el activo en tu cuenta)
+- Migracion de `drops` aplicada.
+- Variable `SUPABASE_SERVICE_ROLE_KEY` configurada.
+- Token generado en Perfil.

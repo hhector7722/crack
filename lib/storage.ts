@@ -5,7 +5,7 @@ const BUCKET = "crack-files";
 export async function uploadFile(
   supabase: SupabaseClient,
   userId: string,
-  folder: "images" | "audio",
+  folder: "images" | "audio" | "drops",
   file: File | Blob,
   extension: string
 ): Promise<string> {
