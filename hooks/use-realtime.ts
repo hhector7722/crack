@@ -17,8 +17,9 @@ export function useRealtimeSubscription(
 
   useEffect(() => {
     const supabase = createClient();
+    const channelName = `realtime-${table}${filter ? `-${filter}` : ""}`;
     const channel = supabase
-      .channel("realtime-items")
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table, filter },
