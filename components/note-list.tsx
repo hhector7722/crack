@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, RefreshCw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchItems, deleteItem } from "@/lib/items";
@@ -10,6 +10,7 @@ import { ItemDetail } from "@/components/item-detail";
 import { CompactLinkItem, CompactNoteItem } from "@/components/compact-items";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useItemShare } from "@/hooks/use-item-share";
+import { useRealtimeSubscription } from "@/hooks/use-realtime";
 import { displayValue, getNoteUrl, cn } from "@/lib/utils";
 import { themeColor, themeLabel, type Item, type Theme } from "@/lib/types";
 
@@ -104,6 +105,27 @@ export function NoteList({ refreshKey = 0, compact, onSelect, filterType }: Note
     // eslint-disable-next-line
     void loadItems(items.length > 0);
   }, [loadItems, refreshKey]);
+
+  useRealtimeSubscription(
+    "items",
+    (payload) => {
+      if (payload.eventType === "INSERT") {
+        const newItem = payload.new as unknown as Item;
+        if (newItem.type === "note" || newItem.type === "file") {
+          setItems((prev) => [newItem, ...prev]);
+        }
+      } else if (payload.eventType === "UPDATE") {
+        const updated = payload.new as unknown as Item;
+        setItems((prev) =>
+          prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i))
+        );
+      } else if (payload.eventType === "DELETE") {
+        const deleted = payload.old as unknown as Item;
+        setItems((prev) => prev.filter((i) => i.id !== deleted.id));
+      }
+    },
+    "type=eq.note"
+  );
 
   async function handleDelete(item: Item) {
     try {

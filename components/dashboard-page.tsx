@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Mic, ImageIcon, FileText, Link2, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchItems } from "@/lib/items";
@@ -8,6 +8,7 @@ import { getSignedUrl } from "@/lib/storage";
 import { usePager } from "@/components/app-shell-context";
 import { resolveLinkTitle, titleFromUrl } from "@/lib/link-preview";
 import { displayValue, getNoteUrl, cn } from "@/lib/utils";
+import { useRealtimeSubscription } from "@/hooks/use-realtime";
 import type { Item } from "@/lib/types";
 import { CompactAudioItem, CompactLinkItem, CompactNoteItem, CompactFileItem } from "@/components/compact-items";
 import { ItemDetail } from "@/components/item-detail";
@@ -110,6 +111,19 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   useEffect(() => {
     void load(categorized !== null);
   }, [load, refreshKey]);
+
+  useRealtimeSubscription(
+    "items",
+    (payload) => {
+      if (payload.eventType === "INSERT") {
+        void load(true);
+      } else if (payload.eventType === "UPDATE") {
+        void load(true);
+      } else if (payload.eventType === "DELETE") {
+        void load(true);
+      }
+    }
+  );
 
   if (loading) {
     return (

@@ -11,6 +11,7 @@ import { SwipeToDelete } from "@/components/swipe-to-delete";
 import { ItemDetail } from "@/components/item-detail";
 import { useLongPress } from "@/hooks/use-long-press";
 import { useItemShare } from "@/hooks/use-item-share";
+import { useRealtimeSubscription } from "@/hooks/use-realtime";
 import type { Item } from "@/lib/types";
 
 interface AudioFeedProps {
@@ -112,6 +113,27 @@ export function AudioFeed({ refreshKey = 0, compact, onSelect }: AudioFeedProps)
   useEffect(() => {
     void loadItems(items.length > 0);
   }, [loadItems, refreshKey]);
+
+  useRealtimeSubscription(
+    "items",
+    (payload) => {
+      if (payload.eventType === "INSERT") {
+        const newItem = payload.new as unknown as Item;
+        if (newItem.type === "audio") {
+          setItems((prev) => [newItem, ...prev]);
+        }
+      } else if (payload.eventType === "UPDATE") {
+        const updated = payload.new as unknown as Item;
+        setItems((prev) =>
+          prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i))
+        );
+      } else if (payload.eventType === "DELETE") {
+        const deleted = payload.old as unknown as Item;
+        setItems((prev) => prev.filter((i) => i.id !== deleted.id));
+      }
+    },
+    "type=eq.audio"
+  );
 
   useEffect(() => {
     return () => {

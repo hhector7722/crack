@@ -80,11 +80,19 @@ export const NoteCapture = forwardRef<NoteCaptureHandle, NoteCaptureProps>(
       },
     }));
 
+    function handleKeyDown(e: React.KeyboardEvent) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        void saveNote(true);
+      }
+    }
+
     return (
       <div className="py-2">
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Escribe tu nota..."
           rows={8}
           autoFocus

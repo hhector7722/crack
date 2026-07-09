@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, RefreshCw } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchItems, deleteItem } from "@/lib/items";
@@ -8,6 +8,7 @@ import { deleteFile } from "@/lib/storage";
 import { ItemCard } from "@/components/item-card";
 import { SwipeToDelete } from "@/components/swipe-to-delete";
 import { ItemDetail } from "@/components/item-detail";
+import { useRealtimeSubscription } from "@/hooks/use-realtime";
 import type { Item, ItemType } from "@/lib/types";
 
 interface ItemFeedProps {
@@ -59,6 +60,29 @@ export function ItemFeed({ filter, refreshKey = 0 }: ItemFeedProps) {
       cancelled = true;
     };
   }, [filter, refreshKey]);
+
+  const realtimeFilter = filter ? `type=eq.${filter}` : undefined;
+
+  useRealtimeSubscription(
+    "items",
+    (payload) => {
+      if (payload.eventType === "INSERT") {
+        const newItem = payload.new as unknown as Item;
+        if (!filter || newItem.type === filter) {
+          setItems((prev) => [newItem, ...prev]);
+        }
+      } else if (payload.eventType === "UPDATE") {
+        const updated = payload.new as unknown as Item;
+        setItems((prev) =>
+          prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i))
+        );
+      } else if (payload.eventType === "DELETE") {
+        const deleted = payload.old as unknown as Item;
+        setItems((prev) => prev.filter((i) => i.id !== deleted.id));
+      }
+    },
+    realtimeFilter
+  );
 
   async function handleDelete(item: Item) {
     try {
