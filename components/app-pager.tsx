@@ -12,7 +12,6 @@ import { SearchModal } from "@/components/search-modal";
 import { useSearch } from "@/components/search-context";
 import { usePager } from "@/components/app-shell-context";
 import { useBumpRefresh } from "@/app/(app)/layout";
-import { PagerDots } from "@/components/layout/PagerDots";
 import type { Item, SearchResultItem } from "@/lib/types";
 
 interface AppPagerProps {
@@ -112,9 +111,6 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
             </div>
           </PagerPanel>
         </SwipePager>
-        <div className="flex shrink-0 items-center justify-center py-2">
-          <PagerDots />
-        </div>
       </div>
 
       {itemDetail}
