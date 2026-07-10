@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Search, Mic, FileEdit, Image, Zap, Plus } from "lucide-react";
-import { TabBar } from "@/components/layout/TabBar";
 import { PagerDots } from "@/components/layout/PagerDots";
 import { useSearch } from "@/components/search-context";
 import { useAppShell } from "@/components/app-shell-context";
@@ -68,7 +67,6 @@ export function BottomChrome() {
       <div className="relative top-3 z-10">
         <PagerDots />
       </div>
-      <TabBar />
     </div>
   );
 }
