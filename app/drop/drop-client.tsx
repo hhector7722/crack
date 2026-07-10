@@ -625,6 +625,20 @@ export function DropClient({
                 void handleSend(e);
               }
             }}
+            onPaste={(e) => {
+              const items = e.clipboardData.items;
+              for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (item.kind === "file" && item.type.startsWith("image/")) {
+                  const file = item.getAsFile();
+                  if (file) {
+                    e.preventDefault();
+                    setPendingFile(file);
+                    return;
+                  }
+                }
+              }
+            }}
             placeholder={pendingFile ? "Añade un texto (opcional)…" : "Suelta algo temporal…"}
             rows={1}
             className="min-h-[2.5rem] flex-1 resize-none rounded-2xl border border-zinc-700/60 bg-zinc-800/60 px-3.5 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/30"
