@@ -15,9 +15,12 @@ export function useRealtimeSubscription(
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
+  // Unique ID per hook instance so channels never collide in the singleton client
+  const instanceId = useRef(`${Math.random().toString(36).slice(2)}`);
+
   useEffect(() => {
     const supabase = createClient();
-    const channelName = `realtime-${table}${filter ? `-${filter}` : ""}`;
+    const channelName = `realtime-${table}-${instanceId.current}${filter ? `-${filter}` : ""}`;
     const channel = supabase
       .channel(channelName)
       .on(
