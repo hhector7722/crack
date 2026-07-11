@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Link2, Pencil, Trash2, Share2, Sparkles } from "lucide-react";
+import { Link2, Pencil, Trash2, Share2, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { AppModal } from "@/components/app-modal";
@@ -420,25 +420,21 @@ function ItemDetailPanel({
               ) : null}
             </div>
           ) : item.type === "file" ? (
-            <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4">
+            <div className="flex min-h-0 flex-1 flex-col">
               {loadingMedia ? (
-                <p className="text-sm text-zinc-500">Cargando...</p>
+                <div className="flex flex-1 items-center justify-center">
+                  <p className="text-sm text-zinc-500">Cargando...</p>
+                </div>
               ) : mediaUrl ? (
-                <a
-                  href={mediaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-4"
-                >
-                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-zinc-800 transition-colors hover:bg-zinc-700">
-                    <FileText className="h-10 w-10 text-zinc-400" />
-                  </div>
-                  <p className="text-center text-sm font-medium text-zinc-200">
-                    {item.title || "Archivo"}
-                  </p>
-                </a>
+                <iframe
+                  src={mediaUrl}
+                  className="h-full w-full rounded-lg"
+                  title={item.title || "Archivo"}
+                />
               ) : (
-                <p className="text-sm text-red-400">No se pudo cargar el archivo</p>
+                <div className="flex flex-1 items-center justify-center">
+                  <p className="text-sm text-red-400">No se pudo cargar el archivo</p>
+                </div>
               )}
             </div>
           ) : (

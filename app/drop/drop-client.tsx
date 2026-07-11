@@ -442,13 +442,17 @@ export function DropClient({
     });
   }, []);
 
-  // realtime
+  // ── realtime (diagnóstico) ─────────────────────────────────────────────────
   useEffect(() => {
     const supabase = createClient();
+    const wsUrl = supabase.realtime?.getApi()?.getWebSocket?.()?.url ?? "unknown";
+    console.log("[RT-DIAG] Creating channel drops:" + userId);
+    console.log("[RT-DIAG] Supabase URL:", supabase.supabaseUrl);
+    console.log("[RT-DIAG] WS URL approx:", wsUrl);
+
     const channel = supabase
       .channel(`drops:${userId}`)
-      .on(
-        "postgres_changes",
+      .on("postgres_changes",
         {
           event: "INSERT",
           schema: "public",
@@ -456,6 +460,8 @@ export function DropClient({
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
+          console.log("[RT-DIAG] ✅ INSERT event received!", payload);
+          console.log("[RT-DIAG] Payload new:", payload.new);
           const nextDrop = payload.new as Drop;
           upsertDrop(nextDrop);
 
@@ -471,9 +477,21 @@ export function DropClient({
           }
         }
       )
-      .subscribe();
+      .subscribe((status: string, err: Error | undefined) => {
+        console.log("[RT-DIAG] Channel status:", status, err ?? "");
+        if (err) console.error("[RT-DIAG] Channel error:", err);
+      });
+
+    // Verificar estado de conexión del websocket periódicamente
+    const checkInterval = setInterval(() => {
+      const socket = supabase.realtime?.getApi()?.getWebSocket();
+      console.log("[RT-DIAG] WS state:", socket?.readyState === 1 ? "OPEN" : socket?.readyState === 0 ? "CONNECTING" : socket?.readyState === 2 ? "CLOSING" : socket?.readyState === 3 ? "CLOSED" : "UNKNOWN", "(readyState:", socket?.readyState, ")");
+      console.log("[RT-DIAG] Channel state:", channel.state);
+    }, 5000);
 
     return () => {
+      console.log("[RT-DIAG] Cleaning up channel drops:" + userId);
+      clearInterval(checkInterval);
       void supabase.removeChannel(channel);
     };
   }, [upsertDrop, userId]);
