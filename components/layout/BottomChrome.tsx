@@ -54,7 +54,7 @@ export function BottomChrome() {
       data-tm-bottom-chrome
       className="tm-bottom-chrome pointer-events-none fixed bottom-0 left-0 right-0 z-[95] flex flex-col"
     >
-      <div className="pointer-events-auto flex w-full items-center justify-around bg-[#1c1c1e] px-2 py-3 shadow-xl shadow-black/50">
+      <div className="pointer-events-auto mx-3 flex items-center justify-around rounded-2xl bg-[#1c1c1e] px-2 py-3 shadow-xl shadow-black/50 ring-2 ring-white/20">
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}

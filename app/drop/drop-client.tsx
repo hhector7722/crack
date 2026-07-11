@@ -17,6 +17,7 @@ import {
   Loader2,
   Paperclip,
   Send,
+  X,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getSignedUrl, uploadFile } from "@/lib/storage";
@@ -243,14 +244,65 @@ function BubbleFile({
   );
 }
 
+// ─── image expanded overlay ────────────────────────────────────────────────────
+
+function ImageExpandedOverlay({
+  path,
+  onClose,
+}: {
+  path: string;
+  onClose: () => void;
+}) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void getOrFetchSignedUrl(path).then((u) => {
+      if (!cancelled) setUrl(u);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [path]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Cerrar"
+        className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70"
+      >
+        <X className="h-5 w-5" />
+      </button>
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={url}
+          alt="Drop imagen ampliada"
+          className="max-h-full max-w-full rounded-lg object-contain"
+          onClick={(e) => e.stopPropagation()}
+        />
+      ) : (
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-400" />
+      )}
+    </div>
+  );
+}
+
 // ─── single bubble ────────────────────────────────────────────────────────────
 
 function DropBubble({
   drop,
   now,
+  onExpandImage,
 }: {
   drop: Drop;
   now: number;
+  onExpandImage: (path: string) => void;
 }) {
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedText, setCopiedText] = useState(false);
@@ -294,7 +346,9 @@ function DropBubble({
           ) : null}
 
           {drop.content_type === "image" && drop.file_url ? (
-            <BubbleImage path={drop.file_url} />
+            <button type="button" onClick={() => onExpandImage(drop.file_url!)} className="block">
+              <BubbleImage path={drop.file_url} />
+            </button>
           ) : null}
 
           {drop.content_type === "audio" && drop.file_url ? (
@@ -355,6 +409,7 @@ export function DropClient({
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [now, setNow] = useState(0);
+  const [expandedImageUrl, setExpandedImageUrl] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -553,7 +608,7 @@ export function DropClient({
         ) : (
           <div className="flex flex-col gap-3">
             {visibleDrops.map((drop) => (
-              <DropBubble key={drop.id} drop={drop} now={now} />
+              <DropBubble key={drop.id} drop={drop} now={now} onExpandImage={setExpandedImageUrl} />
             ))}
           </div>
         )}
@@ -660,6 +715,13 @@ export function DropClient({
           </button>
         </div>
       </form>
+
+      {expandedImageUrl ? (
+        <ImageExpandedOverlay
+          path={expandedImageUrl}
+          onClose={() => setExpandedImageUrl(null)}
+        />
+      ) : null}
     </div>
   );
 }
