@@ -405,7 +405,7 @@ export function DropClient({
 }) {
   const [drops, setDrops] = useState<Drop[]>(() => sortDropsAsc(initialDrops));
   const [content, setContent] = useState("");
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [now, setNow] = useState(0);
@@ -442,17 +442,13 @@ export function DropClient({
     });
   }, []);
 
-  // ── realtime (diagnóstico) ─────────────────────────────────────────────────
+  // ── realtime ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     const supabase = createClient();
-    const wsUrl = supabase.realtime?.getApi()?.getWebSocket?.()?.url ?? "unknown";
-    console.log("[RT-DIAG] Creating channel drops:" + userId);
-    console.log("[RT-DIAG] Supabase URL:", supabase.supabaseUrl);
-    console.log("[RT-DIAG] WS URL approx:", wsUrl);
-
     const channel = supabase
       .channel(`drops:${userId}`)
-      .on("postgres_changes",
+      .on(
+        "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
@@ -460,8 +456,6 @@ export function DropClient({
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log("[RT-DIAG] ✅ INSERT event received!", payload);
-          console.log("[RT-DIAG] Payload new:", payload.new);
           const nextDrop = payload.new as Drop;
           upsertDrop(nextDrop);
 
@@ -477,21 +471,9 @@ export function DropClient({
           }
         }
       )
-      .subscribe((status: string, err: Error | undefined) => {
-        console.log("[RT-DIAG] Channel status:", status, err ?? "");
-        if (err) console.error("[RT-DIAG] Channel error:", err);
-      });
-
-    // Verificar estado de conexión del websocket periódicamente
-    const checkInterval = setInterval(() => {
-      const socket = supabase.realtime?.getApi()?.getWebSocket();
-      console.log("[RT-DIAG] WS state:", socket?.readyState === 1 ? "OPEN" : socket?.readyState === 0 ? "CONNECTING" : socket?.readyState === 2 ? "CLOSING" : socket?.readyState === 3 ? "CLOSED" : "UNKNOWN", "(readyState:", socket?.readyState, ")");
-      console.log("[RT-DIAG] Channel state:", channel.state);
-    }, 5000);
+      .subscribe();
 
     return () => {
-      console.log("[RT-DIAG] Cleaning up channel drops:" + userId);
-      clearInterval(checkInterval);
       void supabase.removeChannel(channel);
     };
   }, [upsertDrop, userId]);
@@ -521,20 +503,21 @@ export function DropClient({
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null;
-    setPendingFile(file);
-    // clear so same file can be re-selected
+    const files = e.target.files;
+    if (files) {
+      setPendingFiles((prev) => [...prev, ...Array.from(files)]);
+    }
     e.target.value = "";
   }
 
-  function removePendingFile() {
-    setPendingFile(null);
+  function removePendingFile(index: number) {
+    setPendingFiles((prev) => prev.filter((_, i) => i !== index));
   }
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = content.trim();
-    if ((!trimmed && !pendingFile) || sending) return;
+    if ((!trimmed && pendingFiles.length === 0) || sending) return;
 
     setSending(true);
     setError(null);
@@ -544,31 +527,34 @@ export function DropClient({
         void Notification.requestPermission();
       }
 
-      if (pendingFile) {
-        // Upload directo con el cliente de sesión — sin pasar por /api/drop
-        // que solo acepta Bearer token (para el Shortcut de iOS).
-        const ct = contentTypeFromFile(pendingFile);
-        const ext = pendingFile.name.split(".").pop()?.toLowerCase() ?? "bin";
+      if (pendingFiles.length > 0) {
         const supabase = createClient();
+        const results = await Promise.all(
+          pendingFiles.map(async (file) => {
+            const ct = contentTypeFromFile(file);
+            const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
+            const filePath = await uploadFile(supabase, userId, "drops", file, ext);
 
-        const filePath = await uploadFile(supabase, userId, "drops", pendingFile, ext);
+            const { data, error: insertError } = await supabase
+              .from("drops")
+              .insert({
+                file_url: filePath,
+                content_type: ct,
+                content: trimmed || null,
+                user_id: userId,
+              })
+              .select(
+                "id, content, file_url, content_type, user_id, created_at, expires_at"
+              )
+              .single();
 
-        const { data, error: insertError } = await supabase
-          .from("drops")
-          .insert({
-            file_url: filePath,
-            content_type: ct,
-            content: trimmed || null,
-            user_id: userId,
+            if (insertError) throw insertError;
+            return data as Drop;
           })
-          .select(
-            "id, content, file_url, content_type, user_id, created_at, expires_at"
-          )
-          .single();
+        );
 
-        if (insertError) throw insertError;
-        upsertDrop(data as Drop);
-        setPendingFile(null);
+        results.forEach((drop) => upsertDrop(drop));
+        setPendingFiles([]);
       } else {
         // plain text via supabase client (same as before)
         const supabase = createClient();
@@ -597,7 +583,7 @@ export function DropClient({
     }
   }
 
-  const canSend = (content.trim().length > 0 || pendingFile !== null) && !sending;
+  const canSend = (content.trim().length > 0 || pendingFiles.length > 0) && !sending;
 
   return (
     <div
@@ -639,21 +625,25 @@ export function DropClient({
         </p>
       ) : null}
 
-      {/* ── pending file chip ── */}
-      {pendingFile ? (
-        <div className="shrink-0 flex items-center gap-2 border-t border-zinc-800/60 bg-zinc-900/60 px-4 py-2">
-          <File className="h-4 w-4 shrink-0 text-violet-400" />
-          <span className="min-w-0 flex-1 truncate text-xs text-zinc-300">
-            {pendingFile.name}
-          </span>
-          <button
-            type="button"
-            onClick={removePendingFile}
-            aria-label="Quitar archivo"
-            className="shrink-0 text-xs text-zinc-500 hover:text-zinc-200"
-          >
-            ✕
-          </button>
+      {/* ── pending files list ── */}
+      {pendingFiles.length > 0 ? (
+        <div className="shrink-0 flex flex-wrap items-center gap-2 border-t border-zinc-800/60 bg-zinc-900/60 px-4 py-2">
+          {pendingFiles.map((file, i) => (
+            <div key={i} className="flex items-center gap-1.5 rounded-md bg-zinc-800 px-2 py-1">
+              <File className="h-3.5 w-3.5 shrink-0 text-violet-400" />
+              <span className="max-w-[120px] truncate text-[11px] text-zinc-300">
+                {file.name}
+              </span>
+              <button
+                type="button"
+                onClick={() => removePendingFile(i)}
+                aria-label="Quitar archivo"
+                className="shrink-0 text-xs text-zinc-500 hover:text-zinc-200"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
         </div>
       ) : null}
 
@@ -677,6 +667,7 @@ export function DropClient({
           <input
             ref={fileInputRef}
             type="file"
+            multiple
             accept="image/*,audio/*,video/*,*/*"
             className="sr-only"
             onChange={handleFileChange}
@@ -706,13 +697,13 @@ export function DropClient({
                   const file = item.getAsFile();
                   if (file) {
                     e.preventDefault();
-                    setPendingFile(file);
+                    setPendingFiles((prev) => [...prev, file]);
                     return;
                   }
                 }
               }
             }}
-            placeholder={pendingFile ? "Añade un texto (opcional)…" : "Suelta algo temporal…"}
+            placeholder={pendingFiles.length > 0 ? "Añade un texto (opcional)…" : "Suelta algo temporal…"}
             rows={1}
             className="min-h-[2.5rem] flex-1 resize-none rounded-2xl border border-zinc-700/60 bg-zinc-800/60 px-3.5 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/30"
             style={{ overflowY: "hidden" }}
