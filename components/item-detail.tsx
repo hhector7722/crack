@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, FileText, Link2, Pencil, Trash2, Share2, Sparkles } from "lucide-react";
+import { FileText, Link2, Pencil, Trash2, Share2, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { AppModal } from "@/components/app-modal";
@@ -421,12 +421,6 @@ function ItemDetailPanel({
             </div>
           ) : item.type === "file" ? (
             <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-zinc-800">
-                <FileText className="h-10 w-10 text-zinc-400" />
-              </div>
-              <p className="text-center text-sm font-medium text-zinc-200">
-                {item.title || "Archivo"}
-              </p>
               {loadingMedia ? (
                 <p className="text-sm text-zinc-500">Cargando...</p>
               ) : mediaUrl ? (
@@ -434,10 +428,14 @@ function ItemDetailPanel({
                   href={mediaUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-full bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-violet-500"
+                  className="flex flex-col items-center gap-4"
                 >
-                  <Download className="h-4 w-4" />
-                  Descargar
+                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-zinc-800 transition-colors hover:bg-zinc-700">
+                    <FileText className="h-10 w-10 text-zinc-400" />
+                  </div>
+                  <p className="text-center text-sm font-medium text-zinc-200">
+                    {item.title || "Archivo"}
+                  </p>
                 </a>
               ) : (
                 <p className="text-sm text-red-400">No se pudo cargar el archivo</p>
