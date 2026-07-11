@@ -503,9 +503,14 @@ export function DropClient({
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files;
-    if (files) {
-      setPendingFiles((prev) => [...prev, ...Array.from(files)]);
+    const fileList = e.target.files;
+    if (fileList && fileList.length > 0) {
+      const files: File[] = [];
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList.item(i);
+        if (file) files.push(file);
+      }
+      setPendingFiles((prev) => [...prev, ...files]);
     }
     e.target.value = "";
   }
