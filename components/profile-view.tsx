@@ -16,6 +16,8 @@ function getSiteUrl() {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "https://tu-dominio.vercel.app";
 }
 
+type CopiedKind = "token" | "shareLinkUrl" | "dropUrl";
+
 export function ProfileView() {
   const [hasToken, setHasToken] = useState(false);
   const [lastUsedAt, setLastUsedAt] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function ProfileView() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState<"token" | "url" | null>(null);
+  const [copied, setCopied] = useState<CopiedKind | null>(null);
 
   const loadStatus = useCallback(async () => {
     setLoading(true);
@@ -74,7 +76,7 @@ export function ProfileView() {
     }
   }
 
-  async function copyText(value: string, kind: "token" | "url") {
+  async function copyText(value: string, kind: CopiedKind) {
     try {
       await navigator.clipboard.writeText(value);
       setCopied(kind);
@@ -84,17 +86,19 @@ export function ProfileView() {
     }
   }
 
-  const apiUrl = `${getSiteUrl()}/api/drop`;
+  const siteUrl = getSiteUrl();
+  const shareLinkApiUrl = `${siteUrl}/api/share-link`;
+  const dropApiUrl = `${siteUrl}/api/drop`;
+  const tokenPlaceholder = plainToken ?? "TU_TOKEN";
 
   return (
     <div className="content-list">
       <section className="py-4">
-        <h2 className="text-sm font-semibold text-zinc-100">
-          Enviar a Drop (Atajos iOS)
-        </h2>
+        <h2 className="text-sm font-semibold text-zinc-100">Atajos iOS</h2>
         <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-          Genera un token y configura un Atajo en iPhone para enviar texto
-          temporal a Drop. Vive 48h y no se guarda en items.
+          Un solo token sirve para dos atajos distintos: guardar enlaces en la
+          app de forma permanente, o enviar contenido temporal al chat de Drop
+          (48 h).
         </p>
 
         {loading ? (
@@ -159,33 +163,83 @@ export function ProfileView() {
               )}
             </div>
 
-            <div className="pt-2">
-              <p className="text-xs text-zinc-500">URL de la API</p>
-              <div className="mt-1 flex items-center gap-2">
-                <code className="min-w-0 flex-1 truncate text-xs text-zinc-400">
-                  {apiUrl}
-                </code>
-                <button
-                  type="button"
-                  onClick={() => void copyText(apiUrl, "url")}
-                  className="action-ghost min-h-10 w-10 shrink-0 px-0"
-                  aria-label="Copiar URL API"
-                >
-                  {copied === "url" ? (
-                    <Check className="h-4 w-4 text-emerald-400" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </button>
+            <div className="space-y-3 pt-2">
+              <div>
+                <p className="text-xs text-zinc-500">Guardar enlace (permanente)</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <code className="min-w-0 flex-1 truncate text-xs text-zinc-400">
+                    {shareLinkApiUrl}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => void copyText(shareLinkApiUrl, "shareLinkUrl")}
+                    className="action-ghost min-h-10 w-10 shrink-0 px-0"
+                    aria-label="Copiar URL guardar enlace"
+                  >
+                    {copied === "shareLinkUrl" ? (
+                      <Check className="h-4 w-4 text-emerald-400" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-zinc-500">Enviar a Drop (48 h)</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <code className="min-w-0 flex-1 truncate text-xs text-zinc-400">
+                    {dropApiUrl}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => void copyText(dropApiUrl, "dropUrl")}
+                    className="action-ghost min-h-10 w-10 shrink-0 px-0"
+                    aria-label="Copiar URL Drop"
+                  >
+                    {copied === "dropUrl" ? (
+                      <Check className="h-4 w-4 text-emerald-400" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
             <details className="pt-2 text-sm text-zinc-400">
               <summary className="cursor-pointer font-medium text-zinc-300">
-                Atajo iPhone (POST con JSON)
+                Atajo 1 — Guardar enlace en Crack
               </summary>
               <p className="mt-3 text-xs leading-relaxed text-emerald-300/90">
-                Compartir → Obtener texto de entrada → enviar a Drop.
+                Compartir → Obtener texto de entrada → guardar en Enlaces.
+              </p>
+              <ol className="mt-3 list-decimal space-y-2 pl-5 text-xs leading-relaxed">
+                <li>Activa Mostrar en la hoja para compartir.</li>
+                <li>Configura la entrada para recibir Texto y URLs.</li>
+                <li>Obtener texto de entrada.</li>
+                <li>Diccionario → url: variable del texto.</li>
+                <li>
+                  Obtener contenido de URL →{" "}
+                  <span className="text-zinc-300">POST {shareLinkApiUrl}</span>
+                </li>
+                <li>Cabecera Authorization: Bearer {tokenPlaceholder}.</li>
+                <li>Cabecera Content-Type: application/json.</li>
+                <li>Cuerpo de solicitud: JSON → diccionario.</li>
+                <li>Si ok es true, mostrar notificación: Enlace guardado.</li>
+              </ol>
+              <p className="mt-3 text-xs text-zinc-500">
+                Opcional: obtener id de la respuesta y abrir{" "}
+                <span className="text-zinc-400">{siteUrl}/?id=…</span> para
+                refrescar la app.
+              </p>
+            </details>
+
+            <details className="pt-2 text-sm text-zinc-400">
+              <summary className="cursor-pointer font-medium text-zinc-300">
+                Atajo 2 — Enviar a Drop
+              </summary>
+              <p className="mt-3 text-xs leading-relaxed text-emerald-300/90">
+                Compartir → Obtener texto de entrada → enviar al chat de Drop.
               </p>
               <ol className="mt-3 list-decimal space-y-2 pl-5 text-xs leading-relaxed">
                 <li>Activa Mostrar en la hoja para compartir.</li>
@@ -194,19 +248,30 @@ export function ProfileView() {
                 <li>Diccionario → content: variable del texto.</li>
                 <li>
                   Obtener contenido de URL →{" "}
-                  <span className="text-zinc-300">
-                    POST {apiUrl}
-                  </span>
+                  <span className="text-zinc-300">POST {dropApiUrl}</span>
                 </li>
-                <li>Cabecera Authorization: Bearer {plainToken ?? "TU_TOKEN"}.</li>
+                <li>Cabecera Authorization: Bearer {tokenPlaceholder}.</li>
                 <li>Cabecera Content-Type: application/json.</li>
                 <li>Cuerpo de solicitud: JSON → diccionario.</li>
-                <li>Si ok es true, mostrar confirmación: Drop enviado.</li>
+                <li>Si ok es true, mostrar notificación: Drop enviado.</li>
               </ol>
-              <p className="mt-3 text-xs text-zinc-500">
-                No uses GET ni query params. Guía completa: docs/ios-shortcuts.md
+            </details>
+
+            <details className="pt-2 text-sm text-zinc-400">
+              <summary className="cursor-pointer font-medium text-zinc-300">
+                Atajo 3 — Archivo a Drop (opcional)
+              </summary>
+              <p className="mt-3 text-xs leading-relaxed">
+                Para fotos, audio o vídeo desde la hoja de compartir, usa POST
+                con cuerpo Formulario y campo file. Guía completa en{" "}
+                <span className="text-zinc-300">docs/ios-shortcuts.md</span>.
               </p>
             </details>
+
+            <p className="pt-2 text-xs text-zinc-500">
+              No uses GET ni pongas el token en la URL. Si regeneras el token,
+              actualízalo en todos los atajos.
+            </p>
           </div>
         )}
 

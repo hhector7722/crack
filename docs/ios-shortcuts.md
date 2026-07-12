@@ -1,19 +1,87 @@
-# Atajo iOS - Enviar a Drop
+# Atajos iOS — Crack
 
 Dominio: `https://crackdecracks.vercel.app`  
-Endpoint: `https://crackdecracks.vercel.app/api/drop`  
-Metodo: `POST`  
-Auth: `Authorization: Bearer TU_TOKEN`
+Auth (ambos atajos): `Authorization: Bearer TU_TOKEN`
+
+Genera el token en Crack → **Perfil** → **Generar token**.
 
 > Si compartes este archivo o lo subes a un repo publico, revoca y regenera el token en Perfil.
 
-## Objetivo
+## Resumen
 
-El atajo envia texto temporal a Drop. Drop vive 48h por defecto y no escribe en `items`.
+| Atajo | Endpoint | Destino | Duracion |
+| --- | --- | --- | --- |
+| Guardar enlace en Crack | `POST /api/share-link` | Pestaña Enlaces (permanente) | Siempre |
+| Enviar a Drop | `POST /api/drop` | Chat de Drop | 48 h |
+| Archivo a Drop (opcional) | `POST /api/drop` (formulario) | Chat de Drop | 48 h |
 
-## Atajo: Enviar texto a Drop
+Un solo token sirve para todos. No uses `GET` ni pongas el token en la URL.
 
-1. Abre Atajos y crea un atajo nuevo.
+---
+
+## Atajo 1: Guardar enlace en Crack
+
+Guarda el enlace compartido en la app de forma permanente (con preview OG).
+
+1. Abre Atajos y crea un atajo nuevo (nombre sugerido: **Guardar enlace en Crack**).
+2. Activa **Mostrar en la hoja para compartir**.
+3. Configura la entrada para recibir **Texto** y **URLs**.
+4. Anade **Obtener texto de entrada**.
+5. Anade **Diccionario** con esta clave:
+
+| Clave | Tipo | Valor |
+| --- | --- | --- |
+| `url` | Texto | variable del paso 4 |
+
+6. Anade **Obtener contenido de URL**.
+7. Configura:
+
+| Campo | Valor |
+| --- | --- |
+| URL | `https://crackdecracks.vercel.app/api/share-link` |
+| Metodo | `POST` |
+| Cabecera `Authorization` | `Bearer TU_TOKEN` |
+| Cabecera `Content-Type` | `application/json` |
+| Cuerpo de solicitud | `JSON` |
+| JSON | diccionario del paso 5 |
+
+8. Anade **Obtener diccionario de entrada** usando la respuesta del paso 6.
+9. Anade **Si** `ok` es `true`.
+10. En el bloque verdadero, anade **Mostrar notificacion** con: `Enlace guardado`.
+11. En el bloque falso, anade **Mostrar resultado** con la respuesta completa.
+
+### Opcional: abrir Crack tras guardar
+
+Despues del paso 8:
+
+1. **Obtener valor** del diccionario → clave `id`.
+2. **URL** → `https://crackdecracks.vercel.app/?id=` + valor.
+3. **Abrir URL**.
+
+### Ejemplo de body
+
+```json
+{
+  "url": "https://ejemplo.com/articulo"
+}
+```
+
+### Respuesta esperada
+
+```json
+{
+  "ok": true,
+  "id": "uuid-del-item"
+}
+```
+
+---
+
+## Atajo 2: Enviar texto a Drop
+
+Envia texto o enlaces al chat temporal de Drop. No se guarda en Enlaces.
+
+1. Abre Atajos y crea un atajo nuevo (nombre sugerido: **Enviar a Drop**).
 2. Activa **Mostrar en la hoja para compartir**.
 3. Configura la entrada para recibir **Texto** y **URLs**.
 4. Anade **Obtener texto de entrada**.
@@ -37,10 +105,10 @@ El atajo envia texto temporal a Drop. Drop vive 48h por defecto y no escribe en 
 
 8. Anade **Obtener diccionario de entrada** usando la respuesta del paso 6.
 9. Anade **Si** `ok` es `true`.
-10. En el bloque verdadero, anade **Mostrar confirmacion** con: `Drop enviado`.
+10. En el bloque verdadero, anade **Mostrar notificacion** con: `Drop enviado`.
 11. En el bloque falso, anade **Mostrar resultado** con la respuesta completa.
 
-## Ejemplo de body
+### Ejemplo de body
 
 ```json
 {
@@ -48,11 +116,7 @@ El atajo envia texto temporal a Drop. Drop vive 48h por defecto y no escribe en 
 }
 ```
 
-## Importante
-
-No uses `GET` ni query params. El token va siempre en la cabecera `Authorization` y el contenido va en el body JSON.
-
-## Respuesta esperada
+### Respuesta esperada
 
 ```json
 {
@@ -60,33 +124,17 @@ No uses `GET` ni query params. El token va siempre en la cabecera `Authorization
   "drop": {
     "id": "...",
     "content": "...",
-    "file_url": null,
-    "content_type": "text",
     "user_id": "...",
     "created_at": "...",
-    "expires_at": "..."
+    "expires_at": "...",
+    "attachments": []
   }
 }
 ```
 
-## Errores frecuentes
-
-| Mensaje | Que hacer |
-| --- | --- |
-| `Token requerido` | Falta la cabecera `Authorization: Bearer TU_TOKEN`. |
-| `Token invalido` | Regenera token en Perfil y actualiza el atajo. |
-| `content o file_url requerido` | El body JSON no incluye `content`. |
-| `503` | Falta `SUPABASE_SERVICE_ROLE_KEY` en Vercel. |
-
-## Requisitos en servidor
-
-- Migracion de `drops` aplicada.
-- Variable `SUPABASE_SERVICE_ROLE_KEY` configurada.
-- Token generado en Perfil.
-
 ---
 
-## Atajo: Compartir foto o archivo a Drop (Share Sheet)
+## Atajo 3: Compartir foto o archivo a Drop (opcional)
 
 Permite enviar una imagen, audio, video o cualquier archivo desde la hoja de compartir
 de iOS directamente a Drop. El servidor detecta el tipo MIME y almacena en Supabase Storage.
@@ -119,7 +167,7 @@ de iOS directamente a Drop. El servidor detecta el tipo MIME y almacena en Supab
 
 7. Anade **Obtener diccionario de entrada** usando la respuesta del paso 5.
 8. Anade **Si** `ok` es `true`.
-9. En el bloque verdadero: **Mostrar confirmacion** → `Drop enviado`.
+9. En el bloque verdadero: **Mostrar notificacion** → `Drop enviado`.
 10. En el bloque falso: **Mostrar resultado** con la respuesta completa.
 
 ### Opcional: agregar texto al archivo
@@ -139,12 +187,20 @@ Si quieres enviar un caption junto al archivo, anade otro campo al formulario de
 | `video/mp4`, `video/quicktime`… | `video` |
 | Cualquier otro MIME | `file` |
 
-### Notas
+---
 
-- El selector nativo de archivo del sistema tambien funciona directamente desde la web
-  en Safari/Chrome en iPhone — no hace falta el Shortcut para fotos nuevas.
-- El Shortcut de archivo es especialmente util para compartir desde Fotos, Archivos,
-  Voice Memos u otras apps directamente a Drop sin abrir el navegador.
-- Los archivos siguen expirando a las 48 h junto con el registro en base de datos;
-  el job pg_cron elimina la fila pero el archivo en Storage puede requerir limpieza
-  manual o una funcion Edge/webhook separada si el espacio es critico.
+## Errores frecuentes
+
+| Mensaje | Que hacer |
+| --- | --- |
+| `Token requerido` | Falta la cabecera `Authorization: Bearer TU_TOKEN`. |
+| `Token invalido` | Regenera token en Perfil y actualiza todos los atajos. |
+| `No se encontro ninguna URL valida` | El atajo 1 no recibio URL; usa Obtener texto de entrada. |
+| `content o un archivo requerido` | El atajo 2 no incluye `content` en el JSON. |
+| `503` | Falta `SUPABASE_SERVICE_ROLE_KEY` en Vercel. |
+
+## Requisitos en servidor
+
+- Migraciones `002_share_tokens.sql` y `drops` aplicadas.
+- Variable `SUPABASE_SERVICE_ROLE_KEY` configurada.
+- Token generado en Perfil.

@@ -123,9 +123,11 @@ El plan gratuito de Supabase limita magic links (~3–4 emails/hora). Si ves *em
 
 1. Ejecuta la migración `002_share_tokens.sql` y configura `SUPABASE_SERVICE_ROLE_KEY` en Vercel
 2. En Crack → **Perfil** → **Generar token**
-3. Crea un Atajo siguiendo [`docs/ios-shortcuts.md`](docs/ios-shortcuts.md)
+3. Crea los atajos siguiendo [`docs/ios-shortcuts.md`](docs/ios-shortcuts.md):
+   - **Guardar enlace en Crack** → enlaces permanentes (`/api/share-link`)
+   - **Enviar a Drop** → chat temporal 48 h (`/api/drop`)
 
-Tras configurarlo, **Guardar en Crack** aparece en el menú Compartir de Safari, YouTube, etc.
+Tras configurarlos, ambos aparecen en el menú Compartir de Safari, YouTube, etc.
 
 ### Android (PWA instalada)
 
