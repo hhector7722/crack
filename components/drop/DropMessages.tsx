@@ -7,11 +7,13 @@ export function DropMessages({
   drops,
   now,
   onExpandImage,
+  onContentResize,
   scrollRef,
 }: {
   drops: Drop[];
   now: number;
   onExpandImage: (paths: string[], index: number) => void;
+  onContentResize?: () => void;
   scrollRef: React.RefObject<HTMLDivElement | null>;
 }) {
   return (
@@ -28,7 +30,13 @@ export function DropMessages({
       ) : (
         <div className="flex flex-col gap-3">
           {drops.map((drop) => (
-            <DropBubble key={drop.id} drop={drop} now={now} onExpandImage={onExpandImage} />
+            <DropBubble
+              key={drop.id}
+              drop={drop}
+              now={now}
+              onExpandImage={onExpandImage}
+              onContentResize={onContentResize}
+            />
           ))}
         </div>
       )}

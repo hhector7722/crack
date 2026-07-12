@@ -33,6 +33,7 @@ export function DropPage({
     textareaRef,
     canSend,
     realtimeStatus,
+    handleContentResize,
     handleFileChange,
     removePendingFile,
     handleSend,
@@ -77,6 +78,7 @@ export function DropPage({
         drops={visibleDrops}
         now={now}
         onExpandImage={(paths, index) => setImageViewer({ paths, index })}
+        onContentResize={handleContentResize}
         scrollRef={scrollRef}
       />
 

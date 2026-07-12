@@ -15,11 +15,13 @@ function AttachmentRenderer({
   imagePaths,
   imageIndex,
   onExpandImage,
+  onContentResize,
 }: {
   attachment: DropAttachment;
   imagePaths: string[];
   imageIndex: number;
   onExpandImage: (paths: string[], index: number) => void;
+  onContentResize?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -42,13 +44,13 @@ function AttachmentRenderer({
           onClick={() => onExpandImage(imagePaths, imageIndex)}
           className="block"
         >
-          <BubbleImage path={attachment.file_url} />
+          <BubbleImage path={attachment.file_url} onLoad={onContentResize} />
         </button>
       );
     case "audio":
       return <BubbleAudio path={attachment.file_url} />;
     case "video":
-      return <BubbleVideo path={attachment.file_url} />;
+      return <BubbleVideo path={attachment.file_url} onLoad={onContentResize} />;
     case "file":
       return <BubbleFile path={attachment.file_url} onCopy={handleCopy} copied={copied} />;
     default:
@@ -60,10 +62,12 @@ export function DropBubble({
   drop,
   now,
   onExpandImage,
+  onContentResize,
 }: {
   drop: Drop;
   now: number;
   onExpandImage: (paths: string[], index: number) => void;
+  onContentResize?: () => void;
 }) {
   const [copiedText, setCopiedText] = useState(false);
   const { attachments, content } = drop;
@@ -110,6 +114,7 @@ export function DropBubble({
                       : -1
                   }
                   onExpandImage={onExpandImage}
+                  onContentResize={onContentResize}
                 />
               ))}
             </div>

@@ -1,10 +1,21 @@
 "use client";
 
+import { useEffect } from "react";
 import { ImageIcon } from "lucide-react";
 import { useSignedUrl } from "@/lib/drop/signed-url-cache";
 
-export function BubbleImage({ path }: { path: string }) {
+export function BubbleImage({
+  path,
+  onLoad,
+}: {
+  path: string;
+  onLoad?: () => void;
+}) {
   const url = useSignedUrl(path);
+
+  useEffect(() => {
+    if (url) onLoad?.();
+  }, [url, onLoad]);
 
   if (!url)
     return (
@@ -19,7 +30,7 @@ export function BubbleImage({ path }: { path: string }) {
       src={url}
       alt="Drop imagen"
       className="max-h-64 max-w-[14rem] rounded-lg object-cover"
-      loading="lazy"
+      onLoad={onLoad}
     />
   );
 }

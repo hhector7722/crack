@@ -64,6 +64,7 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const pinnedToBottomRef = useRef(true);
   const forceScrollRef = useRef(false);
+  const suppressScrollTrackingRef = useRef(false);
 
   const SCROLL_THRESHOLD_PX = 80;
 
@@ -73,12 +74,35 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     );
   }, []);
 
-  const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
+  const scrollToBottom = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior });
+
+    suppressScrollTrackingRef.current = true;
     pinnedToBottomRef.current = true;
-  }, []);
+
+    const snap = () => {
+      el.scrollTop = el.scrollHeight;
+    };
+
+    snap();
+    requestAnimationFrame(() => {
+      snap();
+      requestAnimationFrame(() => {
+        snap();
+        window.setTimeout(() => {
+          suppressScrollTrackingRef.current = false;
+          pinnedToBottomRef.current = isNearBottom(el);
+        }, 50);
+      });
+    });
+  }, [isNearBottom]);
+
+  const handleContentResize = useCallback(() => {
+    if (pinnedToBottomRef.current) {
+      scrollToBottom();
+    }
+  }, [scrollToBottom]);
 
   // clock tick
   useEffect(() => {
@@ -267,6 +291,7 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     if (!el) return;
 
     const onScroll = () => {
+      if (suppressScrollTrackingRef.current) return;
       pinnedToBottomRef.current = isNearBottom(el);
     };
 
@@ -282,13 +307,11 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     if (!content) return;
 
     const ro = new ResizeObserver(() => {
-      if (pinnedToBottomRef.current) {
-        scrollToBottom("auto");
-      }
+      handleContentResize();
     });
     ro.observe(content);
     return () => ro.disconnect();
-  }, [scrollToBottom, drops.length]);
+  }, [handleContentResize, drops.length]);
 
   const visibleDrops = useMemo(
     () =>
@@ -302,7 +325,7 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     const force = forceScrollRef.current;
     forceScrollRef.current = false;
     if (force || pinnedToBottomRef.current) {
-      scrollToBottom(force ? "auto" : "smooth");
+      scrollToBottom();
     }
   }, [visibleDrops, scrollToBottom]);
 
@@ -343,7 +366,7 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
 
     forceScrollRef.current = true;
     pinnedToBottomRef.current = true;
-    scrollToBottom("auto");
+    scrollToBottom();
 
     setSending(true);
     setError(null);
@@ -424,6 +447,7 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     textareaRef,
     canSend,
     realtimeStatus,
+    handleContentResize,
     handleTextareaChange,
     handleFileChange,
     removePendingFile,
