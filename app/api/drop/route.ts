@@ -14,21 +14,28 @@ function mimeToContentType(mime: string): ContentType {
   return "file";
 }
 
+type DropAttachmentRow = {
+  id: string;
+  drop_id: string;
+  file_url: string;
+  content_type: ContentType;
+  created_at: string;
+};
+
+type DropRow = {
+  id: string;
+  content: string | null;
+  user_id: string;
+  created_at: string;
+  expires_at: string;
+  attachments: DropAttachmentRow[];
+};
+
 const jsonPayloadSchema = z.object({
   content: z.string().trim().max(10000).optional(),
   fileUrl: z.string().trim().max(2048).optional(),
   file_url: z.string().trim().max(2048).optional(),
 });
-
-type DropRow = {
-  id: string;
-  content: string | null;
-  file_url: string | null;
-  content_type: ContentType;
-  user_id: string;
-  created_at: string;
-  expires_at: string;
-};
 
 function getBearerToken(request: Request): string | null {
   const header = request.headers.get("authorization");
@@ -83,7 +90,7 @@ export async function GET(request: Request) {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("drops")
-    .select("id, content, file_url, content_type, user_id, created_at, expires_at")
+    .select("id, content, user_id, created_at, expires_at, attachments:drop_attachments(*)")
     .eq("user_id", auth.userId)
     .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false });
@@ -113,38 +120,37 @@ export async function POST(request: Request) {
 
   const contentTypeHeader = request.headers.get("content-type") ?? "";
   let content: string | null = null;
-  let fileUrl: string | null = null;
-  let dropContentType: ContentType = "text";
+  let attachments: { file_url: string; content_type: ContentType }[] = [];
 
   try {
     if (contentTypeHeader.includes("multipart/form-data")) {
       const formData = await request.formData();
       const rawContent = formData.get("content") ?? formData.get("text");
-      const rawFileUrl = formData.get("file_url") ?? formData.get("fileUrl");
       const file = formData.get("file");
 
       if (typeof rawContent === "string") content = rawContent.trim() || null;
-      if (typeof rawFileUrl === "string") fileUrl = rawFileUrl.trim() || null;
 
       if (file instanceof File && file.size > 0) {
-        dropContentType = mimeToContentType(file.type);
+        const ct = mimeToContentType(file.type);
         const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
-        fileUrl = await uploadFile(
+        const filePath = await uploadFile(
           createAdminClient(),
           auth.userId,
           "drops",
           file,
           ext,
         );
-      } else if (content) {
-        dropContentType = "text";
+        attachments = [{ file_url: filePath, content_type: ct }];
       }
     } else {
       const json = await request.json();
       const parsed = jsonPayloadSchema.parse(json);
       content = parsed.content?.trim() || null;
-      fileUrl = parsed.file_url?.trim() ?? parsed.fileUrl?.trim() ?? null;
-      dropContentType = "text";
+
+      const fileUrl = parsed.file_url?.trim() ?? parsed.fileUrl?.trim() ?? null;
+      if (fileUrl) {
+        attachments = [{ file_url: fileUrl, content_type: "file" }];
+      }
     }
   } catch {
     return NextResponse.json(
@@ -153,27 +159,25 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!content && !fileUrl) {
+  if (!content && attachments.length === 0) {
     return NextResponse.json(
-      { error: "content o file_url requerido" },
+      { error: "content o un archivo requerido" },
       { status: 400 },
     );
   }
 
   const admin = createAdminClient();
-  const { data, error } = await admin
-    .from("drops")
-    .insert({
-      content,
-      file_url: fileUrl,
-      content_type: dropContentType,
-      user_id: auth.userId,
-    })
-    .select("id, content, file_url, content_type, user_id, created_at, expires_at")
-    .single();
+  const { data, error: rpcError } = await admin.rpc(
+    "insert_drop_with_attachments",
+    {
+      p_content: content,
+      p_user_id: auth.userId,
+      p_attachments: attachments,
+    },
+  );
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (rpcError) {
+    return NextResponse.json({ error: rpcError.message }, { status: 500 });
   }
 
   await touchToken(auth.tokenHash);

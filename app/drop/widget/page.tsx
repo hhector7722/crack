@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { DropClient, type Drop } from "./drop-client";
+import { DropPage, type Drop } from "@/components/drop/DropPage";
 
-export default async function DropPage() {
+export default async function DropWidgetPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login?next=/drop");
+    redirect("/login?next=/drop/widget");
   }
 
   const { data, error } = await supabase
@@ -24,9 +24,10 @@ export default async function DropPage() {
   }
 
   return (
-    <DropClient
+    <DropPage
       initialDrops={(data ?? []) as Drop[]}
       userId={user.id}
+      showHeader={false}
     />
   );
 }
