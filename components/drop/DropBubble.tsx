@@ -12,10 +12,14 @@ import { BubbleFile } from "./bubbles/BubbleFile";
 
 function AttachmentRenderer({
   attachment,
+  imagePaths,
+  imageIndex,
   onExpandImage,
 }: {
   attachment: DropAttachment;
-  onExpandImage: (path: string) => void;
+  imagePaths: string[];
+  imageIndex: number;
+  onExpandImage: (paths: string[], index: number) => void;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -33,7 +37,11 @@ function AttachmentRenderer({
   switch (attachment.content_type) {
     case "image":
       return (
-        <button type="button" onClick={() => onExpandImage(attachment.file_url)} className="block">
+        <button
+          type="button"
+          onClick={() => onExpandImage(imagePaths, imageIndex)}
+          className="block"
+        >
           <BubbleImage path={attachment.file_url} />
         </button>
       );
@@ -55,10 +63,14 @@ export function DropBubble({
 }: {
   drop: Drop;
   now: number;
-  onExpandImage: (path: string) => void;
+  onExpandImage: (paths: string[], index: number) => void;
 }) {
   const [copiedText, setCopiedText] = useState(false);
   const { attachments, content } = drop;
+
+  const imagePaths = attachments
+    .filter((a) => a.content_type === "image")
+    .map((a) => a.file_url);
 
   async function copyText() {
     const value = content?.trim() ?? "";
@@ -91,6 +103,12 @@ export function DropBubble({
                 <AttachmentRenderer
                   key={a.id}
                   attachment={a}
+                  imagePaths={imagePaths}
+                  imageIndex={
+                    a.content_type === "image"
+                      ? imagePaths.indexOf(a.file_url)
+                      : -1
+                  }
                   onExpandImage={onExpandImage}
                 />
               ))}

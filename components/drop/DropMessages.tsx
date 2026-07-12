@@ -11,7 +11,7 @@ export function DropMessages({
 }: {
   drops: Drop[];
   now: number;
-  onExpandImage: (path: string) => void;
+  onExpandImage: (paths: string[], index: number) => void;
   scrollRef: React.RefObject<HTMLDivElement | null>;
 }) {
   return (

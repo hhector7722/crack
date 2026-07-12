@@ -7,10 +7,22 @@ import {
   useRef,
   useState,
 } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { uploadFile } from "@/lib/storage";
-import type { Drop } from "@/lib/drop/types";
+import type { Drop, DropImageViewerState } from "@/lib/drop/types";
 import { sortDropsAsc, contentTypeFromFile } from "@/lib/drop/helpers";
+
+/** Logs temporales de diagnóstico Realtime — eliminar cuando Drop esté estable. */
+const DROP_RT_LOG = process.env.NODE_ENV !== "production";
+
+function rtLog(...args: unknown[]) {
+  if (DROP_RT_LOG) {
+    console.log("[Drop RT]", new Date().toISOString(), ...args);
+  }
+}
+
+const RESUBSCRIBE_DELAYS_MS = [1_000, 2_000, 5_000, 10_000] as const;
 
 interface UseDropsOptions {
   initialDrops: Drop[];
@@ -42,12 +54,31 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [now, setNow] = useState(0);
-  const [expandedImageUrl, setExpandedImageUrl] = useState<string | null>(null);
+  const [imageViewer, setImageViewer] = useState<DropImageViewerState | null>(
+    null
+  );
   const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "connected" | "error">("connecting");
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const pinnedToBottomRef = useRef(true);
+  const forceScrollRef = useRef(false);
+
+  const SCROLL_THRESHOLD_PX = 80;
+
+  const isNearBottom = useCallback((el: HTMLElement) => {
+    return (
+      el.scrollHeight - el.scrollTop - el.clientHeight <= SCROLL_THRESHOLD_PX
+    );
+  }, []);
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "auto") => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior });
+    pinnedToBottomRef.current = true;
+  }, []);
 
   // clock tick
   useEffect(() => {
@@ -79,56 +110,185 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
   // realtime
   useEffect(() => {
     const supabase = createClient();
-    setRealtimeStatus("connecting");
+    let channel: RealtimeChannel | null = null;
+    let resubscribeAttempt = 0;
+    let resubscribeTimer: ReturnType<typeof setTimeout> | null = null;
+    let disposed = false;
 
-    const channel = supabase
-      .channel(`drops:${userId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "drops",
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          const raw = { ...(payload.new as Drop), attachments: [] };
-          upsertDrop(raw);
+    const clearResubscribeTimer = () => {
+      if (resubscribeTimer) {
+        clearTimeout(resubscribeTimer);
+        resubscribeTimer = null;
+      }
+    };
 
-          fetchAttachments(supabase, raw.id)
-            .then((full) => upsertDrop(full))
-            .catch(() => {});
+    const scheduleResubscribe = (reason: string) => {
+      if (disposed) return;
+      clearResubscribeTimer();
+      const delay =
+        RESUBSCRIBE_DELAYS_MS[
+          Math.min(resubscribeAttempt, RESUBSCRIBE_DELAYS_MS.length - 1)
+        ];
+      resubscribeAttempt += 1;
+      rtLog("resubscribe programado", {
+        reason,
+        delay,
+        attempt: resubscribeAttempt,
+        socketConnected: supabase.realtime.isConnected(),
+      });
+      resubscribeTimer = setTimeout(() => {
+        resubscribeTimer = null;
+        void subscribeChannel(`retry:${reason}`);
+      }, delay);
+    };
 
-          if (
-            document.hidden &&
-            "Notification" in window &&
-            Notification.permission === "granted"
-          ) {
-            const body = raw.content?.slice(0, 120) ?? "Nuevo Drop";
-            new Notification("Nuevo Drop", { body });
-          }
-        }
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          setRealtimeStatus("connected");
-        } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
-          setRealtimeStatus("error");
-        }
+    const subscribeChannel = async (trigger: string) => {
+      if (disposed) return;
+
+      clearResubscribeTimer();
+      setRealtimeStatus("connecting");
+
+      if (channel) {
+        rtLog("eliminando canal previo", { trigger, topic: channel.topic });
+        await supabase.removeChannel(channel);
+        channel = null;
+      }
+
+      const topic = `drops:${userId}`;
+      rtLog("suscribiendo canal", {
+        trigger,
+        topic,
+        socketConnected: supabase.realtime.isConnected(),
+        visibility: document.visibilityState,
       });
 
+      if (!supabase.realtime.isConnected()) {
+        rtLog("socket desconectado → connect()");
+        supabase.realtime.connect();
+      }
+
+      channel = supabase
+        .channel(topic)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "drops",
+            filter: `user_id=eq.${userId}`,
+          },
+          (payload) => {
+            rtLog("INSERT recibido", {
+              id: (payload.new as Drop).id,
+              socketConnected: supabase.realtime.isConnected(),
+            });
+            const raw = { ...(payload.new as Drop), attachments: [] };
+            upsertDrop(raw);
+
+            fetchAttachments(supabase, raw.id)
+              .then((full) => upsertDrop(full))
+              .catch(() => {});
+
+            if (
+              document.hidden &&
+              "Notification" in window &&
+              Notification.permission === "granted"
+            ) {
+              const body = raw.content?.slice(0, 120) ?? "Nuevo Drop";
+              new Notification("Nuevo Drop", { body });
+            }
+          }
+        )
+        .subscribe((status, err) => {
+          rtLog("estado canal", status, {
+            error: err?.message,
+            topic,
+            socketConnected: supabase.realtime.isConnected(),
+            visibility: document.visibilityState,
+          });
+
+          if (status === "SUBSCRIBED") {
+            resubscribeAttempt = 0;
+            setRealtimeStatus("connected");
+            return;
+          }
+
+          if (
+            status === "CLOSED" ||
+            status === "CHANNEL_ERROR" ||
+            status === "TIMED_OUT"
+          ) {
+            setRealtimeStatus("error");
+            scheduleResubscribe(status);
+          }
+        });
+    };
+
+    const onVisibilityChange = () => {
+      rtLog("visibilitychange", {
+        state: document.visibilityState,
+        socketConnected: supabase.realtime.isConnected(),
+        channelTopic: channel?.topic,
+      });
+
+      if (document.visibilityState !== "visible" || disposed) return;
+
+      if (!supabase.realtime.isConnected()) {
+        rtLog("pestaña visible + socket caído → connect()");
+        supabase.realtime.connect();
+      }
+
+      // Canal muerto pero socket vivo: re-suscribir.
+      if (channel && channel.state !== "joined") {
+        rtLog("pestaña visible + canal no joined → resubscribe", {
+          channelState: channel.state,
+        });
+        scheduleResubscribe("visibility");
+      }
+    };
+
+    void subscribeChannel("mount");
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
-      void supabase.removeChannel(channel);
+      disposed = true;
+      clearResubscribeTimer();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      if (channel) {
+        rtLog("cleanup → removeChannel", { topic: channel.topic });
+        void supabase.removeChannel(channel);
+      }
     };
   }, [upsertDrop, userId]);
 
-  // auto-scroll
+  // auto-scroll: estilo WhatsApp/Telegram
   useEffect(() => {
     const el = scrollRef.current;
-    if (el) {
-      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-    }
-  }, [drops]);
+    if (!el) return;
+
+    const onScroll = () => {
+      pinnedToBottomRef.current = isNearBottom(el);
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [isNearBottom]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const content = el.firstElementChild;
+    if (!content) return;
+
+    const ro = new ResizeObserver(() => {
+      if (pinnedToBottomRef.current) {
+        scrollToBottom("auto");
+      }
+    });
+    ro.observe(content);
+    return () => ro.disconnect();
+  }, [scrollToBottom, drops.length]);
 
   const visibleDrops = useMemo(
     () =>
@@ -137,6 +297,14 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
       ),
     [drops, now]
   );
+
+  useEffect(() => {
+    const force = forceScrollRef.current;
+    forceScrollRef.current = false;
+    if (force || pinnedToBottomRef.current) {
+      scrollToBottom(force ? "auto" : "smooth");
+    }
+  }, [visibleDrops, scrollToBottom]);
 
   const handleTextareaChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -172,6 +340,10 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     e.preventDefault();
     const trimmed = content.trim();
     if ((!trimmed && pendingFiles.length === 0) || sending) return;
+
+    forceScrollRef.current = true;
+    pinnedToBottomRef.current = true;
+    scrollToBottom("auto");
 
     setSending(true);
     setError(null);
@@ -245,8 +417,8 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     error,
     sending,
     now,
-    expandedImageUrl,
-    setExpandedImageUrl,
+    imageViewer,
+    setImageViewer,
     scrollRef,
     fileInputRef,
     textareaRef,

@@ -27,7 +27,7 @@ export function DropPage({
     error,
     sending,
     now,
-    expandedImageUrl, setExpandedImageUrl,
+    imageViewer, setImageViewer,
     scrollRef,
     fileInputRef,
     textareaRef,
@@ -76,7 +76,7 @@ export function DropPage({
       <DropMessages
         drops={visibleDrops}
         now={now}
-        onExpandImage={setExpandedImageUrl}
+        onExpandImage={(paths, index) => setImageViewer({ paths, index })}
         scrollRef={scrollRef}
       />
 
@@ -124,10 +124,15 @@ export function DropPage({
         </span>
       </div>
 
-      {expandedImageUrl ? (
+      {imageViewer ? (
         <DropImageOverlay
-          path={expandedImageUrl}
-          onClose={() => setExpandedImageUrl(null)}
+          viewer={imageViewer}
+          onIndexChange={(index) =>
+            setImageViewer((current) =>
+              current ? { ...current, index } : null
+            )
+          }
+          onClose={() => setImageViewer(null)}
         />
       ) : null}
     </div>

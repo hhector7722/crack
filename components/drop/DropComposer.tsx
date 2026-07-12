@@ -83,7 +83,6 @@ export function DropComposer({
             ref={fileInputRef}
             type="file"
             multiple
-            accept="image/*,audio/*,video/*,*/*"
             className="sr-only"
             onChange={onFileChange}
             aria-hidden="true"

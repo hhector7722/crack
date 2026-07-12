@@ -16,3 +16,8 @@ export type Drop = {
   expires_at: string;
   attachments: DropAttachment[];
 };
+
+export type DropImageViewerState = {
+  paths: string[];
+  index: number;
+};
