@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -65,6 +66,8 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
   const pinnedToBottomRef = useRef(true);
   const forceScrollRef = useRef(false);
   const suppressScrollTrackingRef = useRef(false);
+  const awaitingInitialScrollRef = useRef(true);
+  const hasRunOpenScrollRef = useRef(false);
 
   const SCROLL_THRESHOLD_PX = 80;
 
@@ -92,6 +95,17 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
         snap();
         window.setTimeout(() => {
           suppressScrollTrackingRef.current = false;
+          if (awaitingInitialScrollRef.current) {
+            pinnedToBottomRef.current = true;
+            if (!isNearBottom(el)) {
+              suppressScrollTrackingRef.current = true;
+              el.scrollTop = el.scrollHeight;
+              window.setTimeout(() => {
+                suppressScrollTrackingRef.current = false;
+              }, 50);
+            }
+            return;
+          }
           pinnedToBottomRef.current = isNearBottom(el);
         }, 50);
       });
@@ -99,7 +113,7 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
   }, [isNearBottom]);
 
   const handleContentResize = useCallback(() => {
-    if (pinnedToBottomRef.current) {
+    if (pinnedToBottomRef.current || awaitingInitialScrollRef.current) {
       scrollToBottom();
     }
   }, [scrollToBottom]);
@@ -292,7 +306,9 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
 
     const onScroll = () => {
       if (suppressScrollTrackingRef.current) return;
-      pinnedToBottomRef.current = isNearBottom(el);
+      const near = isNearBottom(el);
+      pinnedToBottomRef.current = near;
+      if (!near) awaitingInitialScrollRef.current = false;
     };
 
     el.addEventListener("scroll", onScroll, { passive: true });
@@ -328,6 +344,36 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
       scrollToBottom();
     }
   }, [visibleDrops, scrollToBottom]);
+
+  // Al abrir Drop: bajar al último mensaje aunque las imágenes carguen después.
+  useLayoutEffect(() => {
+    if (hasRunOpenScrollRef.current || visibleDrops.length === 0) {
+      if (visibleDrops.length === 0) awaitingInitialScrollRef.current = false;
+      return;
+    }
+
+    hasRunOpenScrollRef.current = true;
+    awaitingInitialScrollRef.current = true;
+    pinnedToBottomRef.current = true;
+
+    const snapToBottom = () => {
+      pinnedToBottomRef.current = true;
+      scrollToBottom();
+    };
+
+    snapToBottom();
+    const timers = [50, 150, 400, 800, 1500, 2500].map((ms) =>
+      window.setTimeout(snapToBottom, ms)
+    );
+    const endTimer = window.setTimeout(() => {
+      awaitingInitialScrollRef.current = false;
+    }, 3000);
+
+    return () => {
+      timers.forEach((id) => window.clearTimeout(id));
+      window.clearTimeout(endTimer);
+    };
+  }, [scrollToBottom, visibleDrops.length]);
 
   const handleTextareaChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {

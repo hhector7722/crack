@@ -19,7 +19,7 @@ export function DropMessages({
   return (
     <div
       ref={scrollRef}
-      className="flex-1 overflow-y-auto overscroll-contain px-4 py-4"
+      className="flex-1 overflow-y-auto overscroll-contain px-4 py-4 [overflow-anchor:none]"
     >
       {drops.length === 0 ? (
         <p className="mt-16 text-center text-sm text-zinc-500">
