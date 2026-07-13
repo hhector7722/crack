@@ -89,7 +89,6 @@ export function ProfileView() {
   const siteUrl = getSiteUrl();
   const shareLinkApiUrl = `${siteUrl}/api/share-link`;
   const dropApiUrl = `${siteUrl}/api/drop`;
-  const tokenPlaceholder = plainToken ?? "TU_TOKEN";
 
   return (
     <div className="content-list">
@@ -98,7 +97,7 @@ export function ProfileView() {
         <p className="mt-2 text-sm leading-relaxed text-zinc-400">
           Un solo token sirve para dos atajos distintos: guardar enlaces en la
           app de forma permanente, o enviar contenido temporal al chat de Drop
-          (48 h).
+          (48 h). Guía escrita para <strong className="text-zinc-300">iOS 26.5</strong>.
         </p>
 
         {loading ? (
@@ -211,28 +210,12 @@ export function ProfileView() {
                 Atajo 1 — Guardar enlace en Crack
               </summary>
               <p className="mt-3 text-xs leading-relaxed text-zinc-400">
-                Guía paso a paso (53 pasos) en{" "}
-                <span className="text-zinc-300">docs/atajos-ios-crack.pdf</span>
+                Guía completa en docs/atajos-ios-crack.pdf (iOS 26.5, 58 pasos).
               </p>
-              <p className="mt-2 text-xs leading-relaxed">
-                Resumen del orden de bloques:
-              </p>
-              <ol className="mt-1 list-decimal space-y-1 pl-5 text-xs leading-relaxed">
-                <li>Recibir → Compartir → Texto + URLs</li>
-                <li>Obtener texto de la entrada del atajo</li>
-                <li>
-                  Diccionario → izquierda <code>url</code> → derecha Texto
-                </li>
-                <li>
-                  Obtener contenido de URL → POST {shareLinkApiUrl}
-                </li>
-                <li>Obtener diccionario de → Contenido de URL</li>
-                <li>Si → ok es verdadero → Mostrar notificación</li>
-              </ol>
-              <p className="mt-2 text-xs text-zinc-500">
-                Cabeceras: Authorization Bearer {tokenPlaceholder} ·
-                Content-Type application/json · Solicitar cuerpo JSON →
-                Diccionario
+              <p className="mt-2 text-xs leading-relaxed text-zinc-500">
+                Orden de bloques: entrada con Texto y Direcciones URL, Obtener
+                texto de la entrada del atajo, Diccionario, Obtener contenido de
+                URL, Obtener diccionario de la entrada, Si.
               </p>
             </details>
 
@@ -241,19 +224,13 @@ export function ProfileView() {
                 Atajo 2 — Enviar a Drop
               </summary>
               <p className="mt-3 text-xs leading-relaxed text-zinc-400">
-                Igual que el Atajo 1. Ver PDF con todos los pasos.
+                Igual que el Atajo 1. Cambia el nombre, el Diccionario, la URL y
+                el mensaje de notificación. Ver PDF.
               </p>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-relaxed">
-                <li>Nombre: Enviar a Drop</li>
-                <li>Diccionario → izquierda: content (no url)</li>
-                <li>URL: {dropApiUrl}</li>
-                <li>Notificación: Drop enviado</li>
-              </ul>
             </details>
 
             <p className="pt-2 text-xs text-zinc-500">
-              Abre docs/atajos-ios-crack.pdf en el iPhone para seguir cada paso
-              con los nombres exactos de la app Atajos.
+              Abre docs/atajos-ios-crack.pdf en el iPhone.
             </p>
           </div>
         )}

@@ -1,189 +1,155 @@
 # Atajos iPhone para Crack
 
-Necesitas el token de Crack → Perfil → Generar token. Cópialo antes de empezar.
+Guía para iOS 26.5.
 
-Vas a crear **dos atajos distintos** en la app **Atajos**:
+Antes de empezar: abre Crack, ve a Perfil y pulsa Generar token. Copia el token.
 
-| Nombre del atajo | Para qué sirve |
-| --- | --- |
-| Guardar enlace en Crack | El enlace se queda en Enlaces para siempre |
-| Enviar a Drop | El texto o enlace va al chat de Drop (dura 48 h) |
+Vas a crear dos atajos:
 
-Los pasos son casi iguales. La diferencia está marcada al final.
+- Guardar enlace en Crack — el enlace queda en Enlaces
+- Enviar a Drop — va al chat de Drop
 
 ---
 
 # ATAJO 1: Guardar enlace en Crack
 
-## 1. Crear el atajo vacío
+## Crear el atajo
 
-1. Abre la app **Atajos**.
-2. Pulsa el **+** de abajo a la derecha.
-3. Pulsa **Crear atajo**.
-4. Arriba, donde pone **Nuevo atajo**, escribe: `Guardar enlace en Crack`.
+1. Abre Atajos.
+2. Pulsa el más de arriba a la derecha.
+3. Pulsa Nuevo atajo.
+4. Pulsa Renombrar.
+5. Escribe Guardar enlace en Crack.
+6. Pulsa OK.
 
-## 2. Que salga cuando compartes desde otra app
+## Mostrar al compartir
 
-5. Pulsa el **ⓘ** de arriba a la derecha (pantalla **Detalles**).
-6. Activa **Mostrar en el menú Compartir** (en algunos iPhone pone **Mostrar en la hoja para compartir**).
-7. Pulsa **Atrás** para volver al atajo.
+7. Pulsa Detalles.
+8. Activa Mostrar al compartir.
+9. Pulsa OK.
 
-## 3. Configurar el bloque Recibir (arriba del todo)
+Arriba del todo aparece una acción de entrada nueva.
 
-Ya en el editor del atajo, arriba verás un bloque que empieza por **Recibir**.
+## Qué puede recibir el atajo
 
-8. Pulsa donde pone el tipo de contenido (puede poner **Apps**, **Ninguno**, etc.).
-9. Elige **Compartir** (o **Hoja para compartir**, según tu versión).
-10. Activa solo **Texto** y **URLs**. Puedes desactivar el resto.
-11. Donde pone **Si no hay datos de entrada**, déjalo en **Continuar**.
+10. En esa acción de entrada, pulsa Cualquiera.
+11. Deja activado solo Texto y Direcciones URL. Desactiva el resto.
+12. Pulsa OK.
+13. Pulsa Continuar.
+14. Vuelve a pulsar Continuar.
+15. Pulsa OK.
 
-## 4. Añadir: Obtener texto de la entrada del atajo
+## Obtener texto de la entrada del atajo
 
-12. Pulsa el **+** de abajo.
-13. En el buscador escribe: `texto de la entrada`
-14. Pulsa la acción **Obtener texto de la entrada del atajo**.
+16. Pulsa Añadir acción.
+17. En el buscador escribe texto de la entrada.
+18. Pulsa Obtener texto de la entrada del atajo.
 
-Verás un bloque gris que dice algo como:
+Verás un bloque que dice Obtener texto de y una palabra azul Entrada de atajo.
 
-> **Obtener texto de** `Entrada de atajo`
+## Diccionario
 
-(la palabra azul puede decir **Entrada de atajo** o **Entrada del atajo**).
+19. Pulsa Añadir acción.
+20. En el buscador escribe Diccionario.
+21. Pulsa Diccionario.
 
-No toques nada más en ese bloque.
+Verás una línea que empieza por Texto y dos huecos.
 
-## 5. Añadir: Diccionario
+22. En el hueco de la izquierda escribe url.
+23. En el hueco de la derecha pulsa y elige la palabra azul Texto del bloque anterior.
 
-15. Pulsa el **+** de abajo.
-16. Busca: `Diccionario`
-17. Pulsa la acción **Diccionario**.
+## Obtener contenido de URL
 
-Verás un bloque **Diccionario** con **una fila de dos huecos**:
+24. Pulsa Añadir acción.
+25. En el buscador escribe Obtener contenido de.
+26. Pulsa Obtener contenido de URL.
+27. En URL pega esto:
 
-```
-[ hueco izquierdo ]    [ hueco derecho ]
-```
-
-18. En el **hueco de la izquierda**, escribe con el teclado: `url`
-19. En el **hueco de la derecha**, pulsa sobre él.
-20. Te sale un menú. Elige la palabra azul **Texto** (la del bloque anterior).
-
-El bloque debe quedar así:
-
-> **Diccionario**
-> `url` → `Texto`
-
-## 6. Añadir: Obtener contenido de URL
-
-21. Pulsa el **+** de abajo.
-22. Busca: `Obtener contenido de`
-23. Pulsa **Obtener contenido de URL**.
-
-24. En la línea **URL**, escribe o pega exactamente:
-
-```
 https://crackdecracks.vercel.app/api/share-link
-```
 
-25. Pulsa **Mostrar más** (dentro de ese mismo bloque, abajo).
+28. Pulsa Mostrar más.
+29. En Método elige POST.
+30. Pulsa Cabeceras.
+31. Añade una fila. En el primer hueco escribe Authorization. En el segundo hueco escribe Bearer, un espacio, y pega tu token de Perfil.
+32. Añade otra fila. En el primer hueco escribe Content-Type. En el segundo hueco escribe application/json.
+33. En Solicitar cuerpo elige JSON.
+34. Pulsa el segundo Solicitar cuerpo que aparece debajo.
+35. Elige la palabra azul Diccionario del bloque anterior.
 
-26. En **Método**, cambia a **POST**.
+## Obtener diccionario de la entrada
 
-27. Pulsa **Cabeceras** para desplegarlas.
+36. Pulsa Añadir acción.
+37. En el buscador escribe Obtener diccionario de.
+38. Pulsa Obtener diccionario de la entrada.
+39. Pulsa el hueco de entrada y elige la palabra azul Contenido de URL.
 
-28. Pulsa el botón para añadir una cabecera (suele ser **+** o **Añadir nuevo campo**).
-    - En el primer hueco escribe: `Authorization`
-    - En el segundo hueco escribe: `Bearer ` y pega tu token (el de Perfil en Crack).
-    - Ejemplo: `Bearer gxwppbwXLhjFIIDscBu6pShs5sRa-kE_3iRYFCx-cF-s`
+## Si
 
-29. Añade otra cabecera igual:
-    - Primer hueco: `Content-Type`
-    - Segundo hueco: `application/json`
+40. Pulsa Añadir acción.
+41. En el buscador escribe Si.
+42. Pulsa Si.
+43. Pulsa la condición del bloque Si.
+44. Elige Diccionario del bloque anterior.
+45. Pulsa Obtener valor del diccionario.
+46. Escribe ok.
+47. Pulsa es.
+48. Elige verdadero.
 
-30. Aparece una línea **Solicitar cuerpo**. Púlsala y elige **JSON**.
+## Cuando funciona
 
-31. Debajo sale otro campo **Solicitar cuerpo** (o **Cuerpo de solicitud**). Púlsalo.
-32. Elige la palabra azul **Diccionario** (la del bloque del paso 17).
+Dentro del bloque Si, en la parte de arriba:
 
-## 7. Añadir: Obtener diccionario de
+49. Pulsa Añadir acción.
+50. En el buscador escribe Mostrar notificación.
+51. Pulsa Mostrar notificación.
+52. Escribe Enlace guardado en Crack.
 
-33. Pulsa el **+** de abajo.
-34. Busca: `Obtener diccionario de`
-35. Pulsa **Obtener diccionario de** (a veces pone **Obtener diccionario de la entrada**).
+## Cuando falla
 
-36. En ese bloque, donde pide el texto o la entrada, pulsa y elige la palabra azul **Contenido de URL** (la del paso 23).
+En la parte De lo contrario:
 
-## 8. Añadir: Si
+53. Pulsa Añadir acción.
+54. En el buscador escribe Mostrar resultado.
+55. Pulsa Mostrar resultado.
+56. Elige Contenido de URL.
 
-37. Pulsa el **+** de abajo.
-38. Busca: `Si`
-39. Pulsa la acción **Si**.
+## Probar
 
-40. Pulsa la condición del **Si** (la zona del medio del bloque).
-41. Elige **Diccionario** (el del paso 35).
-42. Pulsa **Obtener valor del diccionario** (en tu iPhone puede decir **Obtener Valor para**).
-43. Escribe la clave: `ok`
-44. Pulsa **es** y elige que sea **verdadero** (o **es** → `true`, según lo que te deje elegir).
-
-## 9. Dentro del Si — si ha ido bien
-
-Dentro del bloque **Si**, en la parte de arriba (cuando la condición se cumple):
-
-45. Pulsa el **+** que sale **dentro** del Si.
-46. Busca: `Mostrar notificación`
-47. Pulsa **Mostrar notificación**.
-48. Donde pide el texto, escribe: `Enlace guardado en Crack`
-
-## 10. Si ha fallado
-
-En la parte de abajo del bloque **Si**, donde pone **De lo contrario**:
-
-49. Pulsa el **+** dentro de **De lo contrario**.
-50. Busca: `Mostrar resultado`
-51. Pulsa **Mostrar resultado**.
-52. Donde pide qué mostrar, elige **Contenido de URL** (así ves el mensaje de error).
-
-## 11. Probar
-
-53. Pulsa **▶** (reproducir) abajo del atajo, o comparte un enlace desde Safari → **Compartir** → **Guardar enlace en Crack**.
+57. Pulsa OK arriba a la derecha.
+58. Abre Safari, comparte un enlace, pulsa Compartir y elige Guardar enlace en Crack.
 
 ---
 
 # ATAJO 2: Enviar a Drop
 
-Repite **todo el proceso del Atajo 1**, creando un atajo nuevo llamado `Enviar a Drop`.
+Repite todos los pasos del Atajo 1 creando un atajo nuevo.
 
 Solo cambia esto:
 
-| Paso | Atajo 1 (Enlaces) | Atajo 2 (Drop) |
-| --- | --- | --- |
-| Nombre del atajo | Guardar enlace en Crack | Enviar a Drop |
-| Paso 18 — hueco izquierdo del Diccionario | `url` | `content` |
-| Paso 24 — URL del bloque Obtener contenido de | `https://crackdecracks.vercel.app/api/share-link` | `https://crackdecracks.vercel.app/api/drop` |
-| Paso 48 — texto de Mostrar notificación | `Enlace guardado en Crack` | `Drop enviado` |
+- Paso 5: escribe Enviar a Drop
+- Paso 22: en el hueco izquierdo del Diccionario escribe content
+- Paso 27: pega esta URL:
 
-Todo lo demás es **exactamente igual** (Recibir, cabeceras, POST, JSON, Si, etc.).
+https://crackdecracks.vercel.app/api/drop
+
+- Paso 52: escribe Drop enviado
+
+---
+
+# Orden de bloques de arriba a abajo
+
+1. Acción de entrada con Texto y Direcciones URL
+2. Obtener texto de la entrada del atajo
+3. Diccionario
+4. Obtener contenido de URL
+5. Obtener diccionario de la entrada
+6. Si con Mostrar notificación arriba y Mostrar resultado en De lo contrario
 
 ---
 
 # Si algo falla
 
-| Lo que ves al probar | Qué mirar |
-| --- | --- |
-| Dice algo de token inválido | Ve a Crack → Perfil → Regenerar token. Cambia el paso 28 con el token nuevo. |
-| No sale el atajo al compartir | Paso 6: ¿está activado Mostrar en el menú Compartir? |
-| No pasa nada al terminar | ¿Añadiste Mostrar notificación dentro del Si? |
-| Error de URL | Atajo 1: en el Diccionario, ¿el hueco izquierdo dice `url`? |
-| Error de content | Atajo 2: en el Diccionario, ¿el hueco izquierdo dice `content`? |
-
----
-
-# Resumen: orden de los bloques
-
-De arriba a abajo, tu atajo debe tener:
-
-1. **Recibir** (configurado en los pasos 8–11)
-2. **Obtener texto de la entrada del atajo**
-3. **Diccionario**
-4. **Obtener contenido de URL**
-5. **Obtener diccionario de**
-6. **Si** → con **Mostrar notificación** arriba y **Mostrar resultado** en **De lo contrario**
+- Si dice token inválido: regenera el token en Perfil y cambia el paso 31.
+- Si no sale al compartir: revisa que Mostrar al compartir esté activado en el paso 8.
+- Atajo 1: el hueco izquierdo del Diccionario debe decir url.
+- Atajo 2: el hueco izquierdo del Diccionario debe decir content.

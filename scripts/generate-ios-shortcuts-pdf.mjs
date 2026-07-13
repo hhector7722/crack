@@ -30,199 +30,135 @@ function newPage() {
 }
 
 function space(h) {
-  if (y + h > PAGE_H - M - 10) newPage();
+  if (y + h > PAGE_H - M - 12) newPage();
 }
 
-function title(text) {
-  space(28);
-  doc.font("Helvetica-Bold").fontSize(16).fillColor("#000").text(text, M, y, { width: W });
-  y = doc.y + 10;
-}
-
-function section(text) {
+function heading(text) {
   space(22);
-  doc.font("Helvetica-Bold").fontSize(11).fillColor("#000").text(text, M, y, { width: W });
-  y = doc.y + 6;
-}
-
-function step(n, text) {
-  space(18);
-  doc.font("Helvetica-Bold").fontSize(9).fillColor("#000").text(`${n}.`, M, y, { width: 18 });
-  doc.font("Helvetica").fontSize(9).fillColor("#222").text(text, M + 20, y, { width: W - 20, lineGap: 1 });
-  y = doc.y + 5;
-}
-
-function note(text) {
-  space(24);
-  doc.font("Helvetica-Oblique").fontSize(8.5).fillColor("#555").text(text, M + 10, y, { width: W - 20, lineGap: 1 });
+  doc.font("Helvetica-Bold").fontSize(12).fillColor("#000").text(text, M, y, { width: W });
   y = doc.y + 8;
 }
 
-function line(text) {
-  space(14);
-  doc.font("Courier").fontSize(8).fillColor("#333").text(text, M + 10, y, { width: W - 20 });
+function step(n, text) {
+  space(15);
+  doc.font("Helvetica-Bold").fontSize(8.5).fillColor("#000").text(`${n}.`, M, y, { width: 16 });
+  doc.font("Helvetica").fontSize(8.5).fillColor("#222").text(text, M + 18, y, { width: W - 18, lineGap: 1 });
+  y = doc.y + 4;
+}
+
+function pasteUrl(url) {
+  space(12);
+  doc.font("Helvetica").fontSize(8).fillColor("#333").text(url, M + 18, y, { width: W - 18 });
   y = doc.y + 6;
 }
 
-// ─── PORTADA ───
-title("Atajos iPhone para Crack");
-doc.font("Helvetica").fontSize(10).fillColor("#444").text(
-  "Sigue cada paso en orden. Los nombres son los de la app Atajos en español.",
-  M,
-  y,
-  { width: W }
-);
-y = doc.y + 14;
-
-step(0, "Antes de empezar: abre Crack → Perfil → Generar token. Copia el token.");
-
-section("Vas a crear dos atajos");
-doc.font("Helvetica").fontSize(9).fillColor("#222");
-[
-  "· Guardar enlace en Crack  →  el enlace queda en Enlaces",
-  "· Enviar a Drop  →  va al chat de Drop (48 h)",
-].forEach((t) => {
-  space(14);
-  doc.text(t, M, y, { width: W });
-  y = doc.y + 3;
-});
-y += 8;
-
-title("ATAJO 1: Guardar enlace en Crack");
-
-section("1. Crear el atajo vacío");
-step(1, "Abre la app Atajos.");
-step(2, "Pulsa el + de abajo a la derecha.");
-step(3, "Pulsa Crear atajo.");
-step(4, 'Arriba, donde pone Nuevo atajo, escribe: Guardar enlace en Crack');
-
-section("2. Que salga al compartir");
-step(5, "Pulsa el ⓘ de arriba a la derecha (pantalla Detalles).");
-step(6, "Activa Mostrar en el menú Compartir (o Mostrar en la hoja para compartir).");
-step(7, "Pulsa Atrás para volver al atajo.");
-
-section("3. Bloque Recibir (arriba del todo)");
-step(8, "Pulsa donde pone el tipo de contenido (Apps, Ninguno, etc.).");
-step(9, "Elige Compartir (o Hoja para compartir).");
-step(10, "Activa solo Texto y URLs.");
-step(11, "Si no hay datos de entrada: déjalo en Continuar.");
-
-section("4. Obtener texto de la entrada del atajo");
-step(12, "Pulsa el + de abajo.");
-step(13, 'En el buscador escribe: texto de la entrada');
-step(14, "Pulsa la acción Obtener texto de la entrada del atajo.");
-note('Verás: Obtener texto de [Entrada de atajo] (palabra azul). No toques nada más.');
-
-// page 2
-newPage();
-section("5. Diccionario");
-step(15, "Pulsa el + de abajo.");
-step(16, "Busca: Diccionario");
-step(17, "Pulsa la acción Diccionario.");
-step(18, "En el hueco de la IZQUIERDA de la fila, escribe: url");
-step(19, "En el hueco de la DERECHA, pulsa sobre él.");
-step(20, "En el menú, elige la palabra azul Texto (del bloque anterior).");
-note("Debe quedar: url  →  Texto");
-
-section("6. Obtener contenido de URL");
-step(21, "Pulsa el + de abajo.");
-step(22, "Busca: Obtener contenido de");
-step(23, "Pulsa Obtener contenido de URL.");
-step(24, "En la línea URL, pega:");
-line(SHARE);
-step(25, "Pulsa Mostrar más (dentro de ese bloque).");
-step(26, "En Método, elige POST.");
-step(27, "Pulsa Cabeceras para desplegarlas.");
-step(28, "Añade una cabecera: Authorization  →  Bearer [tu token de Perfil]");
-step(29, "Añade otra cabecera: Content-Type  →  application/json");
-step(30, "En Solicitar cuerpo, elige JSON.");
-step(31, "En el campo Solicitar cuerpo de abajo, elige la palabra azul Diccionario.");
-
-section("7. Obtener diccionario de");
-step(32, "Pulsa el + de abajo.");
-step(33, "Busca: Obtener diccionario de");
-step(34, "Pulsa Obtener diccionario de.");
-step(35, "Pulsa el campo y elige la palabra azul Contenido de URL.");
-
-section("8. Si");
-step(36, "Pulsa el + de abajo.");
-step(37, "Busca: Si");
-step(38, "Pulsa la acción Si.");
-step(39, "Pulsa la condición del Si.");
-step(40, "Elige Diccionario (del paso anterior).");
-step(41, "Pulsa Obtener valor del diccionario (o Obtener Valor para).");
-step(42, "Escribe: ok");
-step(43, "Pulsa es → elige verdadero (o true).");
-
-// page 3
-newPage();
-section("9. Si ha ido bien (dentro del Si, arriba)");
-step(44, "Pulsa el + que sale DENTRO del Si.");
-step(45, "Busca: Mostrar notificación");
-step(46, "Pulsa Mostrar notificación.");
-step(47, "Escribe: Enlace guardado en Crack");
-
-section("10. Si ha fallado (De lo contrario)");
-step(48, "Pulsa el + dentro de De lo contrario.");
-step(49, "Busca: Mostrar resultado");
-step(50, "Pulsa Mostrar resultado.");
-step(51, "Elige Contenido de URL para ver el error.");
-
-section("11. Probar");
-step(52, "Pulsa ▶ abajo, o comparte un enlace desde Safari → Compartir → tu atajo.");
-
-title("ATAJO 2: Enviar a Drop");
-doc.font("Helvetica").fontSize(9).fillColor("#222").text(
-  "Repite TODO el Atajo 1 con un atajo nuevo. Solo cambia esto:",
+doc.font("Helvetica").fontSize(8).fillColor("#666").text("iOS 26.5", M, y);
+y = doc.y + 4;
+heading("Atajos iPhone para Crack");
+doc.font("Helvetica").fontSize(9).fillColor("#444").text(
+  "Cada paso es algo que ves o pulsas en el iPhone. Sigue el orden.",
   M,
   y,
   { width: W }
 );
 y = doc.y + 10;
 
-space(80);
-const tableY = y;
-const c1 = 155;
-const c2 = W - c1;
-const rows = [
-  ["Nombre del atajo", "Enviar a Drop"],
-  ["Paso 18 — hueco izquierdo", "content (no url)"],
-  ["Paso 24 — URL", DROP],
-  ["Paso 47 — notificación", "Drop enviado"],
-];
-rows.forEach(([a, b], i) => {
-  doc.rect(M, tableY + i * 20, c1, 20).stroke("#ccc");
-  doc.rect(M + c1, tableY + i * 20, c2, 20).stroke("#ccc");
-  doc.font("Helvetica").fontSize(8.5).fillColor("#000").text(a, M + 4, tableY + i * 20 + 6, { width: c1 - 8 });
-  doc.font("Helvetica-Bold").fontSize(8).text(b, M + c1 + 4, tableY + i * 20 + 6, { width: c2 - 8 });
-});
-y = tableY + rows.length * 20 + 16;
+heading("ATAJO 1: Guardar enlace en Crack");
 
-section("Orden final de bloques (de arriba a abajo)");
-[
-  "Recibir",
-  "Obtener texto de la entrada del atajo",
-  "Diccionario",
-  "Obtener contenido de URL",
-  "Obtener diccionario de",
-  "Si → Mostrar notificación / De lo contrario → Mostrar resultado",
-].forEach((t, i) => {
-  step(i + 1, t);
-});
+heading("Crear el atajo");
+step(1, "Abre Atajos.");
+step(2, "Pulsa el más de arriba a la derecha.");
+step(3, "Pulsa Nuevo atajo.");
+step(4, "Pulsa Renombrar.");
+step(5, "Escribe Guardar enlace en Crack.");
+step(6, "Pulsa OK.");
 
-section("Si algo falla");
-[
-  "Token inválido → Regenerar en Perfil, cambiar paso 28",
-  "No sale al compartir → Paso 6: Mostrar en el menú Compartir",
-  "No pasa nada → Falta Mostrar notificación dentro del Si",
-].forEach((t, i) => {
-  step(i + 1, t);
-});
+heading("Mostrar al compartir");
+step(7, "Pulsa Detalles.");
+step(8, "Activa Mostrar al compartir.");
+step(9, "Pulsa OK.");
 
-doc.font("Helvetica").fontSize(7).fillColor("#999").text("crackdecracks.vercel.app", M, PAGE_H - M - 8, {
-  width: W,
-  align: "center",
-});
+heading("Qué recibe el atajo");
+step(10, "En la acción de entrada, pulsa Cualquiera.");
+step(11, "Deja activado solo Texto y Direcciones URL.");
+step(12, "Pulsa OK.");
+step(13, "Pulsa Continuar.");
+step(14, "Vuelve a pulsar Continuar.");
+step(15, "Pulsa OK.");
+
+heading("Obtener texto de la entrada del atajo");
+step(16, "Pulsa Añadir acción.");
+step(17, "Escribe en el buscador: texto de la entrada");
+step(18, "Pulsa Obtener texto de la entrada del atajo.");
+
+heading("Diccionario");
+step(19, "Pulsa Añadir acción.");
+step(20, "Escribe en el buscador: Diccionario");
+step(21, "Pulsa Diccionario.");
+step(22, "En el hueco izquierdo escribe: url");
+step(23, "En el hueco derecho elige la palabra azul Texto.");
+
+heading("Obtener contenido de URL");
+step(24, "Pulsa Añadir acción.");
+step(25, "Escribe en el buscador: Obtener contenido de");
+step(26, "Pulsa Obtener contenido de URL.");
+step(27, "En URL pega:");
+pasteUrl(SHARE);
+step(28, "Pulsa Mostrar más.");
+step(29, "En Método elige POST.");
+step(30, "Pulsa Cabeceras.");
+step(31, "Primera fila: Authorization en el primer hueco. Bearer y tu token en el segundo.");
+step(32, "Segunda fila: Content-Type en el primer hueco. application/json en el segundo.");
+step(33, "En Solicitar cuerpo elige JSON.");
+step(34, "Pulsa el segundo Solicitar cuerpo.");
+step(35, "Elige la palabra azul Diccionario.");
+
+newPage();
+heading("Obtener diccionario de la entrada");
+step(36, "Pulsa Añadir acción.");
+step(37, "Escribe en el buscador: Obtener diccionario de");
+step(38, "Pulsa Obtener diccionario de la entrada.");
+step(39, "Elige la palabra azul Contenido de URL.");
+
+heading("Si");
+step(40, "Pulsa Añadir acción.");
+step(41, "Escribe en el buscador: Si");
+step(42, "Pulsa Si.");
+step(43, "Pulsa la condición.");
+step(44, "Elige Diccionario.");
+step(45, "Pulsa Obtener valor del diccionario.");
+step(46, "Escribe ok.");
+step(47, "Pulsa es.");
+step(48, "Elige verdadero.");
+
+heading("Cuando funciona");
+step(49, "Dentro del Si, pulsa Añadir acción.");
+step(50, "Pulsa Mostrar notificación.");
+step(51, "Escribe Enlace guardado en Crack.");
+
+heading("Cuando falla");
+step(52, "En De lo contrario, pulsa Añadir acción.");
+step(53, "Pulsa Mostrar resultado.");
+step(54, "Elige Contenido de URL.");
+
+heading("Probar");
+step(55, "Pulsa OK.");
+step(56, "Comparte un enlace desde Safari y elige tu atajo.");
+
+heading("ATAJO 2: Enviar a Drop");
+doc.font("Helvetica").fontSize(9).fillColor("#222").text(
+  "Repite el Atajo 1. Cambia solo el nombre, el Diccionario, la URL y el mensaje:",
+  M,
+  y,
+  { width: W }
+);
+y = doc.y + 8;
+
+step(1, "Nombre: Enviar a Drop");
+step(2, "Diccionario hueco izquierdo: content");
+step(3, "URL:");
+pasteUrl(DROP);
+step(4, "Mensaje: Drop enviado");
 
 doc.end();
 
