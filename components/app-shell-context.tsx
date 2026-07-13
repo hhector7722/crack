@@ -20,6 +20,7 @@ export type CaptureMode = "menu" | "note" | "voice" | "image";
 interface AppShellContextValue {
   openCamera: () => void;
   openGallery: () => void;
+  openFilePicker: () => void;
   openCapture: (mode: CaptureMode) => void;
   openCaptureMenu: () => void;
   pagerIndex: number;

@@ -16,7 +16,26 @@ const NAV_ITEMS: { pageIndex: number; label: string; icon: LucideIcon }[] = [
 
 export function BottomChrome() {
   const pathname = usePathname();
-  const { pagerIndex, navigateToPage } = useAppShell();
+  const { pagerIndex, navigateToPage, openFilePicker, openCapture } = useAppShell();
+
+  function handleNavAction(pageIndex: number) {
+    switch (pageIndex) {
+      case 0:
+        openFilePicker();
+        return;
+      case 1:
+        openCapture("voice");
+        return;
+      case 2:
+        openCapture("image");
+        return;
+      case 4:
+        navigateToPage(pageIndex);
+        return;
+      default:
+        navigateToPage(pageIndex);
+    }
+  }
 
   if (pathname === "/login" || pathname.startsWith("/auth")) {
     return null;
@@ -35,7 +54,7 @@ export function BottomChrome() {
             <button
               key={label}
               type="button"
-              onClick={() => navigateToPage(pageIndex)}
+              onClick={() => handleNavAction(pageIndex)}
               aria-label={label}
               aria-current={active ? "page" : undefined}
               className={cn(

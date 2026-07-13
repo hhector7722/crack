@@ -18,6 +18,7 @@ import { ProfileView } from "@/components/profile-view";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { SearchProvider, useSearch } from "@/components/search-context";
 import { uploadMediaFromFile } from "@/lib/image-upload";
+import { uploadFileFromPicker } from "@/lib/file-upload";
 
 const RefreshContext = createContext({
   refreshKey: 0,
@@ -56,6 +57,7 @@ export default function AppLayout({
 }) {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<CaptureMode>("menu");
@@ -74,6 +76,11 @@ export default function AppLayout({
   const openGallery = useCallback(() => {
     setUploadError(null);
     galleryInputRef.current?.click();
+  }, []);
+
+  const openFilePicker = useCallback(() => {
+    setUploadError(null);
+    documentInputRef.current?.click();
   }, []);
 
   const openCapture = useCallback((mode: CaptureMode) => {
@@ -110,10 +117,29 @@ export default function AppLayout({
     }
   }
 
+  async function handleDocumentSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      await uploadFileFromPicker(file);
+      bumpRefresh();
+    } catch (err) {
+      setUploadError(
+        err instanceof Error ? err.message : "Error subiendo archivo"
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
   return (
     <RefreshContext.Provider value={{ refreshKey, bumpRefresh }}>
       <AppShellProvider
-        value={{ openCamera, openGallery, openCapture, openCaptureMenu }}
+        value={{ openCamera, openGallery, openFilePicker, openCapture, openCaptureMenu }}
       >
         <SearchProvider>
           <KeyboardShortcuts />
@@ -179,6 +205,13 @@ export default function AppLayout({
               accept="image/*,video/*"
               className="hidden"
               onChange={(e) => handleMediaSelected(e, "gallery")}
+            />
+
+            <input
+              ref={documentInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleDocumentSelected}
             />
 
             <CaptureSheet
