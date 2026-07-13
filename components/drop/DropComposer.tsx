@@ -1,8 +1,7 @@
 "use client";
 
-import { File, Loader2, Paperclip, Send } from "lucide-react";
-import { isImageFile } from "@/lib/drop/helpers";
-import { PendingImageThumb } from "./PendingImageThumb";
+import { Loader2, Paperclip, Send } from "lucide-react";
+import { PendingMediaThumb } from "./PendingMediaThumb";
 
 export function DropComposer({
   content,
@@ -48,34 +47,14 @@ export function DropComposer({
 
       {pendingFiles.length > 0 ? (
         <div className="shrink-0 border-t border-zinc-800/60 bg-zinc-900/60 px-4 py-2">
-          <div className="flex flex-wrap items-center gap-2">
-            {pendingFiles.map((file, i) =>
-              isImageFile(file) ? (
-                <PendingImageThumb
-                  key={`${file.name}-${i}`}
-                  file={file}
-                  onRemove={() => onRemovePendingFile(i)}
-                />
-              ) : (
-                <div
-                  key={`${file.name}-${i}`}
-                  className="flex items-center gap-1.5 rounded-md bg-zinc-800 px-2 py-1"
-                >
-                  <File className="h-3.5 w-3.5 shrink-0 text-violet-400" />
-                  <span className="max-w-[120px] truncate text-[11px] text-zinc-300">
-                    {file.name}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => onRemovePendingFile(i)}
-                    aria-label="Quitar archivo"
-                    className="shrink-0 text-xs text-zinc-500 hover:text-zinc-200"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )
-            )}
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {pendingFiles.map((file, i) => (
+              <PendingMediaThumb
+                key={`${file.name}-${i}`}
+                file={file}
+                onRemove={() => onRemovePendingFile(i)}
+              />
+            ))}
           </div>
         </div>
       ) : null}

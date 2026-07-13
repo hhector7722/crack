@@ -21,3 +21,8 @@ export type DropImageViewerState = {
   paths: string[];
   index: number;
 };
+
+export type DropVideoViewerState = {
+  paths: string[];
+  index: number;
+};

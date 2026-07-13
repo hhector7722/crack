@@ -49,3 +49,20 @@ export async function deleteFile(
     throw new Error(`Error eliminando archivo: ${error.message}`);
   }
 }
+
+export async function duplicateStorageFile(
+  supabase: SupabaseClient,
+  sourcePath: string,
+  userId: string,
+  folder: "images" | "audio" | "files"
+): Promise<string> {
+  const signedUrl = await getSignedUrl(supabase, sourcePath);
+  const response = await fetch(signedUrl);
+  if (!response.ok) {
+    throw new Error("No se pudo copiar el archivo");
+  }
+
+  const blob = await response.blob();
+  const ext = sourcePath.split(".").pop()?.toLowerCase() ?? "bin";
+  return uploadFile(supabase, userId, folder, blob, ext);
+}

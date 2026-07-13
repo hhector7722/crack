@@ -7,12 +7,16 @@ export function DropMessages({
   drops,
   now,
   onExpandImage,
+  onExpandVideo,
+  onOpenActions,
   onContentResize,
   scrollRef,
 }: {
   drops: Drop[];
   now: number;
   onExpandImage: (paths: string[], index: number) => void;
+  onExpandVideo: (paths: string[], index: number) => void;
+  onOpenActions: (drop: Drop) => void;
   onContentResize?: () => void;
   scrollRef: React.RefObject<HTMLDivElement | null>;
 }) {
@@ -35,6 +39,8 @@ export function DropMessages({
               drop={drop}
               now={now}
               onExpandImage={onExpandImage}
+              onExpandVideo={onExpandVideo}
+              onOpenActions={onOpenActions}
               onContentResize={onContentResize}
             />
           ))}

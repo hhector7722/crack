@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import type { Drop } from "@/lib/drop/types";
+import type { Drop, DropVideoViewerState } from "@/lib/drop/types";
 import { useDrops } from "@/hooks/useDrops";
+import { useDropActions } from "@/hooks/useDropActions";
 import { DropHeader } from "@/components/drop/DropHeader";
 import { DropInstallHint } from "@/components/drop/DropInstallHint";
 import { DropMessages } from "@/components/drop/DropMessages";
 import { DropComposer } from "@/components/drop/DropComposer";
 import { DropImageOverlay } from "@/components/drop/DropImageOverlay";
+import { DropVideoOverlay } from "@/components/drop/DropVideoOverlay";
 
 export type { Drop };
 
@@ -38,8 +40,17 @@ export function DropPage({
     handleFileChange,
     removePendingFile,
     handleSend,
+    removeDrop,
   } = useDrops({ initialDrops, userId });
 
+  const { openActions, sheet: actionSheet } = useDropActions({
+    userId,
+    onDeleted: removeDrop,
+  });
+
+  const [videoViewer, setVideoViewer] = useState<DropVideoViewerState | null>(
+    null
+  );
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -84,6 +95,8 @@ export function DropPage({
         drops={visibleDrops}
         now={now}
         onExpandImage={(paths, index) => setImageViewer({ paths, index })}
+        onExpandVideo={(paths, index) => setVideoViewer({ paths, index })}
+        onOpenActions={openActions}
         onContentResize={handleContentResize}
         scrollRef={scrollRef}
       />
@@ -143,6 +156,20 @@ export function DropPage({
           onClose={() => setImageViewer(null)}
         />
       ) : null}
+
+      {videoViewer ? (
+        <DropVideoOverlay
+          viewer={videoViewer}
+          onIndexChange={(index) =>
+            setVideoViewer((current) =>
+              current ? { ...current, index } : null
+            )
+          }
+          onClose={() => setVideoViewer(null)}
+        />
+      ) : null}
+
+      {actionSheet}
     </div>
   );
 }

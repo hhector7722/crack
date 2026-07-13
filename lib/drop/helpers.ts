@@ -88,3 +88,52 @@ export function splitTextWithUrls(text: string): TextPart[] {
 export function isImageFile(file: File) {
   return contentTypeFromFile(file) === "image";
 }
+
+export function isVideoFile(file: File) {
+  return contentTypeFromFile(file) === "video";
+}
+
+export function isPreviewableMime(mime: string) {
+  const m = mime.toLowerCase();
+  return (
+    m.startsWith("image/") ||
+    m.startsWith("video/") ||
+    m === "application/pdf" ||
+    m === "text/plain"
+  );
+}
+
+export function isPreviewableFile(file: File) {
+  const mime = file.type || mimeFromExt(file.name);
+  return isPreviewableMime(mime);
+}
+
+export function isFloatingAttachmentType(type: Exclude<ContentType, "text">) {
+  return (
+    type === "image" ||
+    type === "video" ||
+    type === "audio" ||
+    type === "file"
+  );
+}
+
+export function isPreviewablePath(path: string) {
+  return isPreviewableMime(mimeFromExt(fileLabel(path)));
+}
+
+export function itemTypeFromContentType(
+  type: Exclude<ContentType, "text">
+): "image" | "video" | "audio" | "file" {
+  if (type === "image") return "image";
+  if (type === "video") return "video";
+  if (type === "audio") return "audio";
+  return "file";
+}
+
+export function storageFolderFromContentType(
+  type: Exclude<ContentType, "text">
+): "images" | "audio" | "files" {
+  if (type === "image" || type === "video") return "images";
+  if (type === "audio") return "audio";
+  return "files";
+}

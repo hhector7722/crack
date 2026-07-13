@@ -1,51 +1,43 @@
 "use client";
 
-import { Check, Download, ExternalLink, File } from "lucide-react";
+import { File, FileText } from "lucide-react";
+import { fileLabel, isPreviewablePath } from "@/lib/drop/helpers";
 import { useSignedUrl } from "@/lib/drop/signed-url-cache";
-import { fileLabel } from "@/lib/drop/helpers";
+
+const THUMB_CLASS = "h-[4.5rem] w-[4.5rem] shrink-0";
 
 export function BubbleFile({
   path,
-  onCopy,
-  copied,
+  onOpen,
 }: {
   path: string;
-  onCopy: () => void;
-  copied: boolean;
+  onOpen: (url: string) => void;
 }) {
   const url = useSignedUrl(path);
   const name = fileLabel(path);
+  const previewable = isPreviewablePath(path);
+
+  function handleOpen() {
+    if (!url) return;
+    onOpen(url);
+  }
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2">
-        <File className="h-5 w-5 shrink-0 text-violet-400" />
-        <span className="max-w-[10rem] truncate text-sm text-zinc-200">{name}</span>
-      </div>
-      <div className="flex gap-2">
-        {url ? (
-          <a
-            href={url}
-            download={name}
-            className="flex h-8 items-center gap-1.5 rounded-md bg-zinc-700 px-3 text-xs font-semibold text-zinc-100 transition-colors hover:bg-zinc-600"
-          >
-            <Download className="h-3.5 w-3.5" />
-            Descargar
-          </a>
-        ) : null}
-        <button
-          type="button"
-          onClick={onCopy}
-          className="flex h-8 items-center gap-1.5 rounded-md bg-zinc-700 px-3 text-xs font-semibold text-zinc-100 transition-colors hover:bg-zinc-600"
-        >
-          {copied ? (
-            <Check className="h-3.5 w-3.5 text-emerald-400" />
-          ) : (
-            <ExternalLink className="h-3.5 w-3.5" />
-          )}
-          {copied ? "Copiado" : "Copiar enlace"}
-        </button>
-      </div>
-    </div>
+    <button
+      type="button"
+      onClick={handleOpen}
+      disabled={!url}
+      aria-label={previewable ? `Abrir ${name}` : `Descargar ${name}`}
+      className={`flex ${THUMB_CLASS} flex-col items-center justify-center gap-1 rounded-lg bg-zinc-800 px-1 disabled:opacity-60`}
+    >
+      {previewable ? (
+        <FileText className="h-5 w-5 text-violet-400" />
+      ) : (
+        <File className="h-5 w-5 text-violet-400" />
+      )}
+      <span className="line-clamp-2 w-full text-center text-[9px] leading-tight text-zinc-400">
+        {name}
+      </span>
+    </button>
   );
 }

@@ -145,6 +145,10 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     });
   }, []);
 
+  const removeDrop = useCallback((dropId: string) => {
+    setDrops((current) => current.filter((d) => d.id !== dropId));
+  }, []);
+
   // realtime
   useEffect(() => {
     const supabase = createClient();
@@ -499,5 +503,6 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     removePendingFile,
     handleSend,
     upsertDrop,
+    removeDrop,
   };
 }
