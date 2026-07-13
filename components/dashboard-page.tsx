@@ -26,15 +26,38 @@ type Categorized = {
   files: Item[];
 };
 
-function SectionWrapper({ children, onClick, className }: { children: React.ReactNode; onClick?: () => void; className?: string }) {
+function SectionWrapper({
+  children,
+  onClick,
+  className,
+  scroll = "y",
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  scroll?: "y" | "x" | "none";
+}) {
   return (
-    <section 
-      className={cn("rounded-2xl bg-[#1c1c1e] p-5", onClick ? "cursor-pointer" : "", className)}
+    <section
+      className={cn(
+        "flex flex-col overflow-hidden rounded-2xl bg-[#1c1c1e] p-5",
+        onClick ? "cursor-pointer" : "",
+        className
+      )}
       onClick={(e) => {
         if (e.target === e.currentTarget && onClick) onClick();
       }}
     >
-      {children}
+      <div
+        className={cn(
+          "min-h-0 flex-1",
+          scroll === "y" && "overflow-y-auto",
+          scroll === "x" && "overflow-x-auto no-scrollbar",
+          scroll === "none" && "overflow-hidden"
+        )}
+      >
+        {children}
+      </div>
     </section>
   );
 }
@@ -46,38 +69,111 @@ function ImageThumb({
   isVideo,
   onClick,
   className,
+  compact = false,
 }: {
   url: string | null;
   isVideo?: boolean;
   onClick?: () => void;
   className?: string;
+  compact?: boolean;
 }) {
-  const inner = url ? (
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    if (!isVideo || !url) return;
+    const video = videoRef.current;
+    if (!video) return;
+
+    const showPosterFrame = () => {
+      if (video.readyState >= 1) {
+        video.currentTime = 0.1;
+      }
+    };
+
+    video.addEventListener("loadeddata", showPosterFrame);
+    showPosterFrame();
+    return () => video.removeEventListener("loadeddata", showPosterFrame);
+  }, [isVideo, url]);
+
+  async function handlePlay(e: React.MouseEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+    const video = videoRef.current;
+    if (!video) return;
+    try {
+      video.muted = false;
+      await video.play();
+      setPlaying(true);
+    } catch {
+      // ignore autoplay restrictions
+    }
+  }
+
+  const playIconClass = compact ? "h-3.5 w-3.5" : "h-5 w-5";
+
+  const media = url ? (
     isVideo ? (
-      <div className={cn("relative overflow-hidden rounded-lg w-full h-full", className)}>
-        <video src={url} muted playsInline preload="metadata" className="object-cover w-full h-full" />
-        <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/25">
-          <Play className="h-5 w-5 fill-white text-white" />
-        </span>
+      <div className={cn("relative h-full w-full overflow-hidden rounded-lg", className)}>
+        <video
+          ref={videoRef}
+          src={url}
+          muted
+          playsInline
+          preload="auto"
+          className="h-full w-full object-cover"
+          onClick={(e) => {
+            if (!playing) return;
+            e.stopPropagation();
+            videoRef.current?.pause();
+          }}
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+          onEnded={() => setPlaying(false)}
+        />
+        {!playing && (
+          <>
+            <span className="pointer-events-none absolute inset-0 bg-black/25" />
+            <button
+              type="button"
+              onClick={handlePlay}
+              className="absolute inset-0 flex items-center justify-center"
+              aria-label="Reproducir vídeo"
+            >
+              <Play className={cn("fill-white text-white", playIconClass)} />
+            </button>
+          </>
+        )}
       </div>
     ) : (
-      <img src={url} alt="" className={cn("object-cover rounded-lg w-full h-full", className)} />
+      <img src={url} alt="" className={cn("h-full w-full rounded-lg object-cover", className)} />
     )
   ) : (
-    <div className={cn("flex items-center justify-center rounded-lg bg-zinc-900 w-full h-full", className)}>
+    <div className={cn("flex h-full w-full items-center justify-center rounded-lg bg-zinc-900", className)}>
       <Loader2 className="h-4 w-4 animate-spin text-zinc-600" />
     </div>
   );
 
-  if (onClick) {
-    return (
-      <button type="button" onClick={onClick} className={cn("w-full h-full text-left active:opacity-80 block", className)}>
-        {inner}
-      </button>
-    );
-  }
+  if (!onClick) return media;
 
-  return inner;
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => {
+        if (!playing) onClick();
+      }}
+      onKeyDown={(e) => {
+        if (!playing && (e.key === "Enter" || e.key === " ")) {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className={cn("block h-full w-full text-left active:opacity-80", !playing && "cursor-pointer")}
+    >
+      {media}
+    </div>
+  );
 }
 
 
@@ -165,10 +261,10 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
         </SectionWrapper>
       )}
       {categorized.audios.length > 0 && (
-      <SectionWrapper className="h-[140px]" onClick={() => setSelectedCategory("audios")}>
-        <div className="grid grid-cols-2 gap-4 pointer-events-none h-full overflow-hidden">
-          {categorized.audios.slice(0, 4).map((item) => (
-            <div key={item.id} className="pointer-events-auto">
+      <SectionWrapper className="h-[140px]" scroll="y" onClick={() => setSelectedCategory("audios")}>
+        <div className="grid grid-cols-2 gap-4">
+          {categorized.audios.map((item) => (
+            <div key={item.id}>
               <CompactAudioItem item={item} onClick={() => setSelectedItem({ item, category: "audios" })} />
             </div>
           ))}
@@ -177,13 +273,14 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
     )}
 
     {categorized.images.length > 0 && (
-      <SectionWrapper className="h-[140px]" onClick={() => setSelectedCategory("images")}>
-        <div className="flex overflow-x-auto gap-3 pointer-events-none no-scrollbar h-full items-center">
+      <SectionWrapper className="h-[96px] p-3" scroll="x" onClick={() => setSelectedCategory("images")}>
+        <div className="flex h-full items-center gap-2">
           {categorized.images.map((item) => (
-            <div key={item.id} className="pointer-events-auto h-full shrink-0 aspect-square">
+            <div key={item.id} className="aspect-square h-full shrink-0">
               <ImageThumb
                 url={item.file_url ? imageUrls[item.file_url] ?? null : null}
                 isVideo={item.type === "video"}
+                compact
                 onClick={() => setSelectedItem({ item, category: "images" })}
               />
             </div>
@@ -194,10 +291,10 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
 
     <div className="grid grid-cols-2 gap-5">
       {categorized.notes.length > 0 ? (
-        <SectionWrapper className="h-[180px]" onClick={() => setSelectedCategory("notes")}>
-          <div className="flex flex-col gap-3 pointer-events-none overflow-hidden h-full">
-            {categorized.notes.slice(0, 3).map((item) => (
-              <div key={item.id} className="pointer-events-auto shrink-0">
+        <SectionWrapper className="h-[180px]" scroll="y" onClick={() => setSelectedCategory("notes")}>
+          <div className="flex flex-col gap-3">
+            {categorized.notes.map((item) => (
+              <div key={item.id} className="shrink-0">
                 <CompactNoteItem item={item} onClick={() => setSelectedItem({ item, category: "notes" })} />
               </div>
             ))}
@@ -205,16 +302,16 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
         </SectionWrapper>
       ) : <div />}
 
-      <SectionWrapper className="h-[180px]" onClick={() => setSelectedCategory("files")}>
-        <div className="flex flex-col gap-3 pointer-events-none overflow-hidden h-full">
+      <SectionWrapper className="h-[180px]" scroll="y" onClick={() => setSelectedCategory("files")}>
+        <div className="flex flex-col gap-3">
           {categorized.files && categorized.files.length > 0 ? (
-            categorized.files.slice(0, 3).map((item) => (
-              <div key={item.id} className="pointer-events-auto shrink-0">
+            categorized.files.map((item) => (
+              <div key={item.id} className="shrink-0">
                 <CompactFileItem item={item} onClick={() => setSelectedItem({ item, category: "files" })} />
               </div>
             ))
           ) : (
-            <div className="flex items-center justify-center h-full text-zinc-500 text-sm">
+            <div className="flex h-full items-center justify-center text-sm text-zinc-500">
               No hay archivos
             </div>
           )}
@@ -223,10 +320,10 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
     </div>
 
     {categorized.links.length > 0 && (
-      <SectionWrapper onClick={() => setSelectedCategory("links")}>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3 pointer-events-none">
-          {categorized.links.slice(0, 4).map((item) => (
-            <div key={item.id} className="pointer-events-auto">
+      <SectionWrapper className="max-h-[180px]" scroll="y" onClick={() => setSelectedCategory("links")}>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+          {categorized.links.map((item) => (
+            <div key={item.id}>
               <CompactLinkItem item={item} onClick={() => setSelectedItem({ item, category: "links" })} />
             </div>
           ))}
@@ -286,6 +383,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
                   <ImageThumb
                     key={item.id}
                     url={item.file_url ? imageUrls[item.file_url] ?? null : null}
+                    isVideo={item.type === "video"}
                     onClick={() => setSelectedItem({ item, category: "images" })}
                   />
                 ))}
