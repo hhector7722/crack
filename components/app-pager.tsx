@@ -129,6 +129,7 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
         open={searchOpen}
         onOpenChange={setSearchOpen}
         onSelect={handleSearchSelect}
+        onRefresh={handleRefresh}
       />
     </>
   );

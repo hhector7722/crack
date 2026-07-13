@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, FileText, Mic, Image as ImageIcon, Link2, Loader2, Command } from "lucide-react";
 import { createPortal } from "react-dom";
+import { PullToRefresh } from "@/components/pull-to-refresh";
 import { useModalOpen } from "@/lib/ui/use-modal-open";
 import { cn, getNoteUrl } from "@/lib/utils";
 import { format } from "date-fns";
@@ -13,6 +14,7 @@ interface SearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (item: SearchResultItem) => void;
+  onRefresh?: () => void | Promise<void>;
 }
 
 function TypeIcon({ type, item }: { type: string; item: SearchResultItem }) {
@@ -23,7 +25,7 @@ function TypeIcon({ type, item }: { type: string; item: SearchResultItem }) {
   return <FileText className="h-4 w-4 text-zinc-400" />;
 }
 
-export function SearchModal({ open, onOpenChange, onSelect }: SearchModalProps) {
+export function SearchModal({ open, onOpenChange, onSelect, onRefresh }: SearchModalProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -149,94 +151,99 @@ export function SearchModal({ open, onOpenChange, onSelect }: SearchModalProps) 
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
-        <div className="flex items-center gap-3 border-b border-zinc-800 px-4">
-          <Search className="h-5 w-5 shrink-0 text-zinc-500" />
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => handleChange(e.target.value)}
-            placeholder="Buscar en Crack..."
-            className="h-14 w-full bg-transparent text-lg text-zinc-100 placeholder-zinc-600 outline-none"
-            autoFocus
-          />
-          {loading && <Loader2 className="h-4 w-4 animate-spin text-zinc-500" />}
-        </div>
-
-        {results.length > 0 && (
-          <div className="flex items-center gap-2 border-b border-zinc-800/50 px-4 py-1.5">
-            <span className="text-xs text-zinc-600">
-              {results.length} resultado{results.length !== 1 ? "s" : ""}
-            </span>
-            {hasSemantic && (
-              <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400">
-                semántico
-              </span>
-            )}
-            {!hasSemantic && query.trim() && (
-              <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-amber-400">
-                solo texto
-              </span>
-            )}
+        <PullToRefresh
+          action="refresh"
+          onPullRelease={async () => {
+            if (onRefresh) await onRefresh();
+          }}
+          className="max-h-[min(72dvh,520px)]"
+        >
+          <div className="flex items-center gap-3 border-b border-zinc-800 px-4">
+            <Search className="h-5 w-5 shrink-0 text-zinc-500" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => handleChange(e.target.value)}
+              placeholder="Buscar en Crack..."
+              className="h-14 w-full bg-transparent text-lg text-zinc-100 placeholder-zinc-600 outline-none"
+              autoFocus
+            />
+            {loading && <Loader2 className="h-4 w-4 animate-spin text-zinc-500" />}
           </div>
-        )}
 
-        {query.trim() && !loading && results.length === 0 && (
-          <div className="flex flex-col items-center gap-2 px-4 py-12 text-zinc-500">
-            <Search className="h-8 w-8" />
-            <p className="text-sm">Sin resultados para &ldquo;{query}&rdquo;</p>
-          </div>
-        )}
+          {results.length > 0 && (
+            <div className="flex items-center gap-2 border-b border-zinc-800/50 px-4 py-1.5">
+              <span className="text-xs text-zinc-600">
+                {results.length} resultado{results.length !== 1 ? "s" : ""}
+              </span>
+              {hasSemantic && (
+                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-400">
+                  semántico
+                </span>
+              )}
+              {!hasSemantic && query.trim() && (
+                <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-amber-400">
+                  solo texto
+                </span>
+              )}
+            </div>
+          )}
 
-        {results.length > 0 && (
-          <div
-            ref={listRef}
-            className="max-h-[min(60dvh,400px)] overflow-y-auto overscroll-contain"
-          >
-            {results.map((item, i) => (
-              <button
-                key={item.id}
-                type="button"
-                data-index={i}
-                className={cn(
-                  "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
-                  i === selectedIndex
-                    ? "bg-zinc-800/80"
-                    : "hover:bg-zinc-800/40"
-                )}
-                onClick={() => {
-                  logSearchEvent({ query, item_id: item.id, position: i + 1, clicked: true });
-                  onSelect(item);
-                  onOpenChange(false);
-                }}
-                onMouseEnter={() => setSelectedIndex(i)}
-              >
-                <TypeIcon type={item.type} item={item} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-sm font-medium text-zinc-100">
-                      {item.title || "Sin título"}
-                    </span>
-                    {item.pinned && (
-                      <span className="shrink-0 text-[10px] text-amber-400">📌</span>
-                    )}
+          {query.trim() && !loading && results.length === 0 && (
+            <div className="flex flex-col items-center gap-2 px-4 py-12 text-zinc-500">
+              <Search className="h-8 w-8" />
+              <p className="text-sm">Sin resultados para &ldquo;{query}&rdquo;</p>
+            </div>
+          )}
+
+          {results.length > 0 && (
+            <div ref={listRef}>
+              {results.map((item, i) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  data-index={i}
+                  className={cn(
+                    "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors",
+                    i === selectedIndex
+                      ? "bg-zinc-800/80"
+                      : "hover:bg-zinc-800/40"
+                  )}
+                  onClick={() => {
+                    logSearchEvent({ query, item_id: item.id, position: i + 1, clicked: true });
+                    onSelect(item);
+                    onOpenChange(false);
+                  }}
+                  onMouseEnter={() => setSelectedIndex(i)}
+                >
+                  <TypeIcon type={item.type} item={item} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="truncate text-sm font-medium text-zinc-100">
+                        {item.title || "Sin título"}
+                      </span>
+                      {item.pinned && (
+                        <span className="shrink-0 text-[10px] text-amber-400">📌</span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 line-clamp-1 text-xs text-zinc-500">
+                      {item.metadata?.summary || item.content || ""}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-zinc-600">
+                      {format(new Date(item.created_at), "d MMM", { locale: es })}
+                    </p>
                   </div>
-                  <p className="mt-0.5 line-clamp-1 text-xs text-zinc-500">
-                    {item.metadata?.summary || item.content || ""}
-                  </p>
-                  <p className="mt-0.5 text-[10px] text-zinc-600">
-                    {format(new Date(item.created_at), "d MMM", { locale: es })}
-                  </p>
-                </div>
-                {i === selectedIndex && (
-                  <kbd className="hidden shrink-0 items-center gap-0.5 rounded-md border border-zinc-700 bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400 sm:flex">
-                    ⏎
-                  </kbd>
-                )}
-              </button>
-            ))}
-          </div>
-        )}
+                  {i === selectedIndex && (
+                    <kbd className="hidden shrink-0 items-center gap-0.5 rounded-md border border-zinc-700 bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-400 sm:flex">
+                      ⏎
+                    </kbd>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </PullToRefresh>
 
         <div className="hidden border-t border-zinc-800/50 px-4 py-2 sm:flex items-center justify-between text-[11px] text-zinc-600">
           <div className="flex items-center gap-3">
@@ -258,7 +265,11 @@ export function SearchModal({ open, onOpenChange, onSelect }: SearchModalProps) 
             <kbd className="flex items-center gap-0.5 rounded border border-zinc-700 bg-zinc-800 px-1.5 py-0.5 font-mono">
               <Command className="h-3 w-3" />K
             </kbd>
-            abrir búsqueda
+            búsqueda
+          </span>
+          <span className="flex items-center gap-1">
+            deslizar ↓
+            refrescar
           </span>
         </div>
       </div>

@@ -1,12 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { iosTransition } from "@/lib/ui/motion";
 
+export type PullAction = "search" | "refresh";
+
 interface PullToRefreshProps {
-  onRefresh: () => void | Promise<void>;
+  action: PullAction;
+  onPullRelease: () => void | Promise<void>;
   children: React.ReactNode;
   className?: string;
 }
@@ -14,31 +17,32 @@ interface PullToRefreshProps {
 const PULL_THRESHOLD = 72;
 
 export function PullToRefresh({
-  onRefresh,
+  action,
+  onPullRelease,
   children,
   className,
 }: PullToRefreshProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pull, setPull] = useState(0);
-  const [refreshing, setRefreshing] = useState(false);
+  const [acting, setActing] = useState(false);
   const startY = useRef(0);
   const pulling = useRef(false);
 
-  async function triggerRefresh() {
-    if (refreshing) return;
-    setRefreshing(true);
+  async function triggerAction() {
+    if (acting) return;
+    setActing(true);
     setPull(48);
     try {
-      await onRefresh();
+      await onPullRelease();
     } finally {
-      setRefreshing(false);
+      setActing(false);
       setPull(0);
     }
   }
 
   function onTouchStart(e: React.TouchEvent) {
     const el = scrollRef.current;
-    if (!el || refreshing) return;
+    if (!el || acting) return;
     if (el.scrollTop <= 0) {
       startY.current = e.touches[0].clientY;
       pulling.current = true;
@@ -46,7 +50,7 @@ export function PullToRefresh({
   }
 
   function onTouchMove(e: React.TouchEvent) {
-    if (!pulling.current || refreshing) return;
+    if (!pulling.current || acting) return;
     const el = scrollRef.current;
     if (!el || el.scrollTop > 0) {
       pulling.current = false;
@@ -66,11 +70,13 @@ export function PullToRefresh({
     if (!pulling.current) return;
     pulling.current = false;
     if (pull >= PULL_THRESHOLD) {
-      void triggerRefresh();
+      void triggerAction();
     } else {
       setPull(0);
     }
   }
+
+  const ActionIcon = action === "search" ? Search : Loader2;
 
   return (
     <div
@@ -85,7 +91,7 @@ export function PullToRefresh({
       onTouchCancel={onTouchEnd}
     >
       <div
-        className="absolute left-0 top-0 flex w-full items-center justify-center pointer-events-none"
+        className="pointer-events-none absolute left-0 top-0 flex w-full items-center justify-center"
         style={{
           transform: `translateY(${Math.max(0, pull - 40)}px)`,
           opacity: pull > 10 ? 1 : 0,
@@ -93,14 +99,20 @@ export function PullToRefresh({
         }}
       >
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-900 shadow-md">
-          <Loader2
+          <ActionIcon
             className={cn(
               "h-5 w-5 text-zinc-400",
-              refreshing && "animate-spin"
+              action === "refresh" && acting && "animate-spin"
             )}
             style={{
-              transform: `rotate(${pull * 2}deg)`,
-              animation: refreshing ? "spin 1s linear infinite" : "none"
+              transform:
+                action === "search"
+                  ? undefined
+                  : `rotate(${pull * 2}deg)`,
+              animation:
+                action === "refresh" && acting
+                  ? "spin 1s linear infinite"
+                  : "none",
             }}
           />
         </div>
@@ -108,7 +120,7 @@ export function PullToRefresh({
       <div
         className="min-h-full"
         style={{
-          transform: `translateY(${refreshing ? 48 : pull}px)`,
+          transform: `translateY(${acting ? 48 : pull}px)`,
           transition: pulling.current ? "none" : iosTransition("transform", 300),
         }}
       >
