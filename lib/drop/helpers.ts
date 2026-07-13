@@ -58,3 +58,33 @@ export function contentTypeFromFile(file: File): ContentType {
 export function fileLabel(path: string) {
   return path.split("/").pop() ?? path;
 }
+
+const URL_IN_TEXT =
+  /(https?:\/\/[^\s<]+[^\s<.,;:!?'")\]}>])/g;
+
+export type TextPart = { type: "text" | "url"; value: string };
+
+export function splitTextWithUrls(text: string): TextPart[] {
+  const parts: TextPart[] = [];
+  let lastIndex = 0;
+  const re = new RegExp(URL_IN_TEXT.source, "g");
+  let match: RegExpExecArray | null;
+
+  while ((match = re.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: "text", value: text.slice(lastIndex, match.index) });
+    }
+    parts.push({ type: "url", value: match[1] });
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({ type: "text", value: text.slice(lastIndex) });
+  }
+
+  return parts;
+}
+
+export function isImageFile(file: File) {
+  return contentTypeFromFile(file) === "image";
+}

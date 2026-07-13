@@ -16,6 +16,21 @@ export async function getOrFetchSignedUrl(path: string): Promise<string> {
   return url;
 }
 
+export async function downloadSignedFile(path: string, filename?: string) {
+  const url = await getOrFetchSignedUrl(path);
+  const name = filename ?? path.split("/").pop() ?? "drop-file";
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("No se pudo descargar el archivo");
+
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = blobUrl;
+  anchor.download = name;
+  anchor.click();
+  URL.revokeObjectURL(blobUrl);
+}
+
 export function useSignedUrl(path: string): string | null {
   const [url, setUrl] = useState<string | null>(null);
 

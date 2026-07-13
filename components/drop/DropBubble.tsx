@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Download, Loader2 } from "lucide-react";
 import type { Drop, DropAttachment } from "@/lib/drop/types";
 import { formatRemaining } from "@/lib/drop/helpers";
-import { getOrFetchSignedUrl } from "@/lib/drop/signed-url-cache";
+import {
+  downloadSignedFile,
+  getOrFetchSignedUrl,
+} from "@/lib/drop/signed-url-cache";
+import { DropTextContent } from "./DropTextContent";
 import { BubbleImage } from "./bubbles/BubbleImage";
 import { BubbleAudio } from "./bubbles/BubbleAudio";
 import { BubbleVideo } from "./bubbles/BubbleVideo";
@@ -12,15 +16,9 @@ import { BubbleFile } from "./bubbles/BubbleFile";
 
 function AttachmentRenderer({
   attachment,
-  imagePaths,
-  imageIndex,
-  onExpandImage,
   onContentResize,
 }: {
   attachment: DropAttachment;
-  imagePaths: string[];
-  imageIndex: number;
-  onExpandImage: (paths: string[], index: number) => void;
   onContentResize?: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -37,16 +35,6 @@ function AttachmentRenderer({
   }
 
   switch (attachment.content_type) {
-    case "image":
-      return (
-        <button
-          type="button"
-          onClick={() => onExpandImage(imagePaths, imageIndex)}
-          className="block"
-        >
-          <BubbleImage path={attachment.file_url} onLoad={onContentResize} />
-        </button>
-      );
     case "audio":
       return <BubbleAudio path={attachment.file_url} />;
     case "video":
@@ -70,11 +58,13 @@ export function DropBubble({
   onContentResize?: () => void;
 }) {
   const [copiedText, setCopiedText] = useState(false);
+  const [downloadingAll, setDownloadingAll] = useState(false);
   const { attachments, content } = drop;
 
-  const imagePaths = attachments
-    .filter((a) => a.content_type === "image")
-    .map((a) => a.file_url);
+  const imageAttachments = attachments.filter((a) => a.content_type === "image");
+  const otherAttachments = attachments.filter((a) => a.content_type !== "image");
+  const imagePaths = imageAttachments.map((a) => a.file_url);
+  const hasCardContent = Boolean(content?.trim()) || otherAttachments.length > 0;
 
   async function copyText() {
     const value = content?.trim() ?? "";
@@ -88,45 +78,82 @@ export function DropBubble({
     }
   }
 
+  async function downloadAllImages() {
+    if (imagePaths.length === 0 || downloadingAll) return;
+    setDownloadingAll(true);
+    try {
+      for (const path of imagePaths) {
+        await downloadSignedFile(path);
+      }
+    } catch {
+      /* ignore */
+    } finally {
+      setDownloadingAll(false);
+    }
+  }
+
   const remainingLabel =
     now === 0 ? "--" : formatRemaining(drop.expires_at, now);
 
   return (
     <div className="flex justify-end">
-      <div className="relative flex max-w-[80%] flex-col gap-1.5">
-        <div className="rounded-2xl rounded-br-sm bg-violet-600/20 px-3.5 py-2.5 ring-1 ring-inset ring-violet-500/30">
-          {content ? (
-            <p className="whitespace-pre-wrap break-words text-sm leading-6 text-zinc-100">
-              {content}
-            </p>
-          ) : null}
+      <div className="relative flex max-w-[80%] flex-col items-end gap-1.5">
+        {hasCardContent ? (
+          <div className="rounded-2xl rounded-br-sm bg-[#1c1c1e] px-3.5 py-2.5">
+            {content?.trim() ? <DropTextContent content={content} /> : null}
 
-          {attachments.length > 0 ? (
-            <div className="flex flex-col gap-2">
-              {attachments.map((a) => (
-                <AttachmentRenderer
-                  key={a.id}
-                  attachment={a}
-                  imagePaths={imagePaths}
-                  imageIndex={
-                    a.content_type === "image"
-                      ? imagePaths.indexOf(a.file_url)
-                      : -1
-                  }
-                  onExpandImage={onExpandImage}
-                  onContentResize={onContentResize}
-                />
-              ))}
-            </div>
-          ) : null}
-        </div>
+            {otherAttachments.length > 0 ? (
+              <div className={content?.trim() ? "mt-2 flex flex-col gap-2" : "flex flex-col gap-2"}>
+                {otherAttachments.map((a) => (
+                  <AttachmentRenderer
+                    key={a.id}
+                    attachment={a}
+                    onContentResize={onContentResize}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {imageAttachments.length > 0 ? (
+          <div className="flex max-w-full flex-wrap justify-end gap-1.5">
+            {imageAttachments.map((a) => (
+              <BubbleImage
+                key={a.id}
+                path={a.file_url}
+                onLoad={onContentResize}
+                onExpand={() =>
+                  onExpandImage(imagePaths, imagePaths.indexOf(a.file_url))
+                }
+                onDownload={() => downloadSignedFile(a.file_url)}
+              />
+            ))}
+          </div>
+        ) : null}
 
         <div className="flex items-center justify-end gap-2 px-1">
           <span className="font-mono text-[10px] text-zinc-500">
             {remainingLabel}
           </span>
 
-          {content ? (
+          {imageAttachments.length > 1 ? (
+            <button
+              type="button"
+              onClick={() => void downloadAllImages()}
+              disabled={downloadingAll}
+              aria-label="Guardar imágenes"
+              className="flex h-5 w-5 items-center justify-center rounded text-zinc-500 transition-colors hover:text-zinc-300 disabled:opacity-50"
+            >
+              {downloadingAll ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Download className="h-3 w-3" />
+              )}
+            </button>
+          ) : null}
+
+          {content?.trim() ? (
             <button
               type="button"
               onClick={copyText}

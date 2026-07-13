@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Download, Loader2, X } from "lucide-react";
 import type { DropImageViewerState } from "@/lib/drop/types";
-import { useSignedUrl } from "@/lib/drop/signed-url-cache";
+import { downloadSignedFile, useSignedUrl } from "@/lib/drop/signed-url-cache";
 import { cn } from "@/lib/utils";
 
 export function DropImageOverlay({
@@ -21,6 +21,19 @@ export function DropImageOverlay({
   const hasMultiple = paths.length > 1;
   const canGoPrev = index > 0;
   const canGoNext = index < paths.length - 1;
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = useCallback(async () => {
+    if (!path || downloading) return;
+    setDownloading(true);
+    try {
+      await downloadSignedFile(path);
+    } catch {
+      /* ignore */
+    } finally {
+      setDownloading(false);
+    }
+  }, [downloading, path]);
 
   const goPrev = useCallback(() => {
     if (canGoPrev) onIndexChange(index - 1);
@@ -55,6 +68,20 @@ export function DropImageOverlay({
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4"
       onClick={onClose}
     >
+      <button
+        type="button"
+        onClick={() => void handleDownload()}
+        disabled={!url || downloading}
+        aria-label="Guardar imagen"
+        className="absolute left-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white transition-colors hover:bg-black/70 disabled:opacity-50"
+      >
+        {downloading ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <Download className="h-5 w-5" />
+        )}
+      </button>
+
       <button
         type="button"
         onClick={onClose}
