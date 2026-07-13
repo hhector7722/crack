@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import type { Drop } from "@/lib/drop/types";
 import { useDrops } from "@/hooks/useDrops";
 import { DropHeader } from "@/components/drop/DropHeader";
+import { DropInstallHint } from "@/components/drop/DropInstallHint";
 import { DropMessages } from "@/components/drop/DropMessages";
 import { DropComposer } from "@/components/drop/DropComposer";
 import { DropImageOverlay } from "@/components/drop/DropImageOverlay";
@@ -72,7 +73,12 @@ export function DropPage({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {showHeader ? <DropHeader /> : null}
+      {showHeader ? (
+        <>
+          <DropHeader />
+          <DropInstallHint />
+        </>
+      ) : null}
 
       <DropMessages
         drops={visibleDrops}

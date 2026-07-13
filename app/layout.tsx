@@ -49,10 +49,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} dark antialiased`}>
-      <head>
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon.png" />
-      </head>
       <body className="antialiased touch-manipulation">
         {children}
       </body>

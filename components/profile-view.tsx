@@ -16,7 +16,7 @@ function getSiteUrl() {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "https://tu-dominio.vercel.app";
 }
 
-type CopiedKind = "token" | "shareLinkUrl" | "dropUrl";
+type CopiedKind = "token" | "shareLinkUrl" | "dropUrl" | "dropPageUrl";
 
 export function ProfileView() {
   const [hasToken, setHasToken] = useState(false);
@@ -89,6 +89,7 @@ export function ProfileView() {
   const siteUrl = getSiteUrl();
   const shareLinkApiUrl = `${siteUrl}/api/share-link`;
   const dropApiUrl = `${siteUrl}/api/drop`;
+  const dropPageUrl = `${siteUrl}/drop/`;
 
   return (
     <div className="content-list">
@@ -204,6 +205,46 @@ export function ProfileView() {
                 </div>
               </div>
             </div>
+
+            <details className="pt-2 text-sm text-zinc-400">
+              <summary className="cursor-pointer font-medium text-zinc-300">
+                Icono Drop en pantalla de inicio
+              </summary>
+              <ol className="mt-3 list-decimal space-y-2 pl-4 text-xs leading-relaxed text-zinc-400">
+                <li>
+                  Abre <strong className="text-zinc-300">Safari</strong> (no la app
+                  Crack del inicio).
+                </li>
+                <li>
+                  Visita la URL de Drop, inicia sesión si hace falta.
+                </li>
+                <li>
+                  Compartir → <strong className="text-zinc-300">Añadir a pantalla de inicio</strong>.
+                  Debe salir el nombre <strong className="text-zinc-300">Drop</strong>.
+                </li>
+              </ol>
+              <div className="mt-3 flex items-center gap-2">
+                <code className="min-w-0 flex-1 truncate text-xs text-zinc-400">
+                  {dropPageUrl}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => void copyText(dropPageUrl, "dropPageUrl")}
+                  className="action-ghost min-h-10 w-10 shrink-0 px-0"
+                  aria-label="Copiar URL página Drop"
+                >
+                  {copied === "dropPageUrl" ? (
+                    <Check className="h-4 w-4 text-emerald-400" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-zinc-500">
+                Si ya tienes Crack en el inicio y Safari no muestra la opción,
+                copia la URL arriba y ábrela en Safari en una pestaña nueva.
+              </p>
+            </details>
 
             <details className="pt-2 text-sm text-zinc-400">
               <summary className="cursor-pointer font-medium text-zinc-300">

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 export const metadata: Metadata = {
   title: "Drop",
@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     icon: [
       { url: "/icons/drop-favicon.png", sizes: "32x32", type: "image/png" },
       { url: "/icons/drop-icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/drop-icon-512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: [
       {
@@ -22,6 +23,14 @@ export const metadata: Metadata = {
       },
     ],
   },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-title": "Drop",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#09090b",
 };
 
 export default function DropLayout({
@@ -29,16 +38,5 @@ export default function DropLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      <link rel="manifest" href="/manifest-drop.json" />
-      <link rel="icon" type="image/png" href="/icons/drop-favicon.png" />
-      <link
-        rel="apple-touch-icon"
-        href="/icons/drop-apple-touch-icon.png"
-        sizes="180x180"
-      />
-      {children}
-    </>
-  );
+  return children;
 }

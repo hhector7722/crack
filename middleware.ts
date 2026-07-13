@@ -12,6 +12,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/icons") ||
     pathname.startsWith("/auth/") ||
     pathname === "/manifest.json" ||
+    pathname === "/manifest-drop.json" ||
     pathname === "/sw.js" ||
     pathname.match(/\.(ico|png|svg|js|json)$/)
   ) {
