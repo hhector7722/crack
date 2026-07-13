@@ -5,6 +5,7 @@ import { DashboardPage } from "@/components/dashboard-page";
 import { NoteList } from "@/components/note-list";
 import { GalleryFeed } from "@/components/gallery-feed";
 import { AudioFeed } from "@/components/audio-feed";
+import { FileFeed } from "@/components/file-feed";
 import { SwipePager } from "@/components/swipe-pager";
 import { PagerPanel } from "@/components/pager-panel";
 import { ItemDetail } from "@/components/item-detail";
@@ -70,6 +71,15 @@ export function AppPager({ refreshKey = 0 }: AppPagerProps) {
           index={pagerIndex}
           onIndexChange={handleIndexChange}
         >
+          <PagerPanel onRefresh={handleRefresh}>
+            <div className="pb-2">
+              <FileFeed
+                refreshKey={combinedRefresh}
+                onSelect={setSelectedItem}
+              />
+            </div>
+          </PagerPanel>
+
           <PagerPanel onRefresh={handleRefresh}>
             <div className="pb-2">
               <AudioFeed

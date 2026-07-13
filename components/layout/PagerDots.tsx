@@ -6,7 +6,7 @@ import { pagerIndexToDotIndex } from "@/lib/pager-routes";
 
 export function PagerDots() {
   const { pagerIndex, navigateToPage } = useAppShell();
-  const dotPages = [0, 2, 4];
+  const dotPages = [0, 3, 5];
 
   return (
     <div

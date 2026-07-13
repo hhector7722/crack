@@ -11,11 +11,11 @@ type CrackNavItem = {
 };
 
 const CRACK_NAV_ITEMS: CrackNavItem[] = [
-  { name: "Audios", pageIndex: 0, icon: Mic },
-  { name: "Imágenes", pageIndex: 1, icon: Image },
-  { name: "Inicio", pageIndex: 2, icon: Home },
-  { name: "Enlaces", pageIndex: 3, icon: Link2 },
-  { name: "Notas", pageIndex: 4, icon: FileText },
+  { name: "Audios", pageIndex: 1, icon: Mic },
+  { name: "Imágenes", pageIndex: 2, icon: Image },
+  { name: "Inicio", pageIndex: 3, icon: Home },
+  { name: "Enlaces", pageIndex: 4, icon: Link2 },
+  { name: "Notas", pageIndex: 5, icon: FileText },
 ];
 
 export function TabBar() {

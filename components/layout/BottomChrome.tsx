@@ -81,7 +81,7 @@ export function BottomChrome() {
         </button>
         <button
           type="button"
-          onClick={() => navigateToPage(2)}
+          onClick={() => navigateToPage(3)}
           aria-label="Inicio"
           className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-300 transition-colors active:text-zinc-100 active:bg-zinc-800"
         >
