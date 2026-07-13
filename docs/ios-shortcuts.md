@@ -1,206 +1,189 @@
-# Atajos iOS — Crack
+# Atajos iPhone para Crack
 
-Dominio: `https://crackdecracks.vercel.app`  
-Auth (ambos atajos): `Authorization: Bearer TU_TOKEN`
+Necesitas el token de Crack → Perfil → Generar token. Cópialo antes de empezar.
 
-Genera el token en Crack → **Perfil** → **Generar token**.
+Vas a crear **dos atajos distintos** en la app **Atajos**:
 
-> Si compartes este archivo o lo subes a un repo publico, revoca y regenera el token en Perfil.
+| Nombre del atajo | Para qué sirve |
+| --- | --- |
+| Guardar enlace en Crack | El enlace se queda en Enlaces para siempre |
+| Enviar a Drop | El texto o enlace va al chat de Drop (dura 48 h) |
 
-## Resumen
-
-| Atajo | Endpoint | Destino | Duracion |
-| --- | --- | --- | --- |
-| Guardar enlace en Crack | `POST /api/share-link` | Pestaña Enlaces (permanente) | Siempre |
-| Enviar a Drop | `POST /api/drop` | Chat de Drop | 48 h |
-| Archivo a Drop (opcional) | `POST /api/drop` (formulario) | Chat de Drop | 48 h |
-
-Un solo token sirve para todos. No uses `GET` ni pongas el token en la URL.
+Los pasos son casi iguales. La diferencia está marcada al final.
 
 ---
 
-## Atajo 1: Guardar enlace en Crack
+# ATAJO 1: Guardar enlace en Crack
 
-Guarda el enlace compartido en la app de forma permanente (con preview OG).
+## 1. Crear el atajo vacío
 
-1. Abre Atajos y crea un atajo nuevo (nombre sugerido: **Guardar enlace en Crack**).
-2. Activa **Mostrar en la hoja para compartir**.
-3. Configura la entrada para recibir **Texto** y **URLs**.
-4. Anade **Obtener texto de entrada**.
-5. Anade **Diccionario** con esta clave:
+1. Abre la app **Atajos**.
+2. Pulsa el **+** de abajo a la derecha.
+3. Pulsa **Crear atajo**.
+4. Arriba, donde pone **Nuevo atajo**, escribe: `Guardar enlace en Crack`.
 
-| Clave | Tipo | Valor |
-| --- | --- | --- |
-| `url` | Texto | variable del paso 4 |
+## 2. Que salga cuando compartes desde otra app
 
-6. Anade **Obtener contenido de URL**.
-7. Configura:
+5. Pulsa el **ⓘ** de arriba a la derecha (pantalla **Detalles**).
+6. Activa **Mostrar en el menú Compartir** (en algunos iPhone pone **Mostrar en la hoja para compartir**).
+7. Pulsa **Atrás** para volver al atajo.
 
-| Campo | Valor |
-| --- | --- |
-| URL | `https://crackdecracks.vercel.app/api/share-link` |
-| Metodo | `POST` |
-| Cabecera `Authorization` | `Bearer TU_TOKEN` |
-| Cabecera `Content-Type` | `application/json` |
-| Cuerpo de solicitud | `JSON` |
-| JSON | diccionario del paso 5 |
+## 3. Configurar el bloque Recibir (arriba del todo)
 
-8. Anade **Obtener diccionario de entrada** usando la respuesta del paso 6.
-9. Anade **Si** `ok` es `true`.
-10. En el bloque verdadero, anade **Mostrar notificacion** con: `Enlace guardado`.
-11. En el bloque falso, anade **Mostrar resultado** con la respuesta completa.
+Ya en el editor del atajo, arriba verás un bloque que empieza por **Recibir**.
 
-### Opcional: abrir Crack tras guardar
+8. Pulsa donde pone el tipo de contenido (puede poner **Apps**, **Ninguno**, etc.).
+9. Elige **Compartir** (o **Hoja para compartir**, según tu versión).
+10. Activa solo **Texto** y **URLs**. Puedes desactivar el resto.
+11. Donde pone **Si no hay datos de entrada**, déjalo en **Continuar**.
 
-Despues del paso 8:
+## 4. Añadir: Obtener texto de la entrada del atajo
 
-1. **Obtener valor** del diccionario → clave `id`.
-2. **URL** → `https://crackdecracks.vercel.app/?id=` + valor.
-3. **Abrir URL**.
+12. Pulsa el **+** de abajo.
+13. En el buscador escribe: `texto de la entrada`
+14. Pulsa la acción **Obtener texto de la entrada del atajo**.
 
-### Ejemplo de body
+Verás un bloque gris que dice algo como:
 
-```json
-{
-  "url": "https://ejemplo.com/articulo"
-}
+> **Obtener texto de** `Entrada de atajo`
+
+(la palabra azul puede decir **Entrada de atajo** o **Entrada del atajo**).
+
+No toques nada más en ese bloque.
+
+## 5. Añadir: Diccionario
+
+15. Pulsa el **+** de abajo.
+16. Busca: `Diccionario`
+17. Pulsa la acción **Diccionario**.
+
+Verás un bloque **Diccionario** con **una fila de dos huecos**:
+
+```
+[ hueco izquierdo ]    [ hueco derecho ]
 ```
 
-### Respuesta esperada
+18. En el **hueco de la izquierda**, escribe con el teclado: `url`
+19. En el **hueco de la derecha**, pulsa sobre él.
+20. Te sale un menú. Elige la palabra azul **Texto** (la del bloque anterior).
 
-```json
-{
-  "ok": true,
-  "id": "uuid-del-item"
-}
+El bloque debe quedar así:
+
+> **Diccionario**
+> `url` → `Texto`
+
+## 6. Añadir: Obtener contenido de URL
+
+21. Pulsa el **+** de abajo.
+22. Busca: `Obtener contenido de`
+23. Pulsa **Obtener contenido de URL**.
+
+24. En la línea **URL**, escribe o pega exactamente:
+
 ```
+https://crackdecracks.vercel.app/api/share-link
+```
+
+25. Pulsa **Mostrar más** (dentro de ese mismo bloque, abajo).
+
+26. En **Método**, cambia a **POST**.
+
+27. Pulsa **Cabeceras** para desplegarlas.
+
+28. Pulsa el botón para añadir una cabecera (suele ser **+** o **Añadir nuevo campo**).
+    - En el primer hueco escribe: `Authorization`
+    - En el segundo hueco escribe: `Bearer ` y pega tu token (el de Perfil en Crack).
+    - Ejemplo: `Bearer gxwppbwXLhjFIIDscBu6pShs5sRa-kE_3iRYFCx-cF-s`
+
+29. Añade otra cabecera igual:
+    - Primer hueco: `Content-Type`
+    - Segundo hueco: `application/json`
+
+30. Aparece una línea **Solicitar cuerpo**. Púlsala y elige **JSON**.
+
+31. Debajo sale otro campo **Solicitar cuerpo** (o **Cuerpo de solicitud**). Púlsalo.
+32. Elige la palabra azul **Diccionario** (la del bloque del paso 17).
+
+## 7. Añadir: Obtener diccionario de
+
+33. Pulsa el **+** de abajo.
+34. Busca: `Obtener diccionario de`
+35. Pulsa **Obtener diccionario de** (a veces pone **Obtener diccionario de la entrada**).
+
+36. En ese bloque, donde pide el texto o la entrada, pulsa y elige la palabra azul **Contenido de URL** (la del paso 23).
+
+## 8. Añadir: Si
+
+37. Pulsa el **+** de abajo.
+38. Busca: `Si`
+39. Pulsa la acción **Si**.
+
+40. Pulsa la condición del **Si** (la zona del medio del bloque).
+41. Elige **Diccionario** (el del paso 35).
+42. Pulsa **Obtener valor del diccionario** (en tu iPhone puede decir **Obtener Valor para**).
+43. Escribe la clave: `ok`
+44. Pulsa **es** y elige que sea **verdadero** (o **es** → `true`, según lo que te deje elegir).
+
+## 9. Dentro del Si — si ha ido bien
+
+Dentro del bloque **Si**, en la parte de arriba (cuando la condición se cumple):
+
+45. Pulsa el **+** que sale **dentro** del Si.
+46. Busca: `Mostrar notificación`
+47. Pulsa **Mostrar notificación**.
+48. Donde pide el texto, escribe: `Enlace guardado en Crack`
+
+## 10. Si ha fallado
+
+En la parte de abajo del bloque **Si**, donde pone **De lo contrario**:
+
+49. Pulsa el **+** dentro de **De lo contrario**.
+50. Busca: `Mostrar resultado`
+51. Pulsa **Mostrar resultado**.
+52. Donde pide qué mostrar, elige **Contenido de URL** (así ves el mensaje de error).
+
+## 11. Probar
+
+53. Pulsa **▶** (reproducir) abajo del atajo, o comparte un enlace desde Safari → **Compartir** → **Guardar enlace en Crack**.
 
 ---
 
-## Atajo 2: Enviar texto a Drop
+# ATAJO 2: Enviar a Drop
 
-Envia texto o enlaces al chat temporal de Drop. No se guarda en Enlaces.
+Repite **todo el proceso del Atajo 1**, creando un atajo nuevo llamado `Enviar a Drop`.
 
-1. Abre Atajos y crea un atajo nuevo (nombre sugerido: **Enviar a Drop**).
-2. Activa **Mostrar en la hoja para compartir**.
-3. Configura la entrada para recibir **Texto** y **URLs**.
-4. Anade **Obtener texto de entrada**.
-5. Anade **Diccionario** con esta clave:
+Solo cambia esto:
 
-| Clave | Tipo | Valor |
+| Paso | Atajo 1 (Enlaces) | Atajo 2 (Drop) |
 | --- | --- | --- |
-| `content` | Texto | variable del paso 4 |
+| Nombre del atajo | Guardar enlace en Crack | Enviar a Drop |
+| Paso 18 — hueco izquierdo del Diccionario | `url` | `content` |
+| Paso 24 — URL del bloque Obtener contenido de | `https://crackdecracks.vercel.app/api/share-link` | `https://crackdecracks.vercel.app/api/drop` |
+| Paso 48 — texto de Mostrar notificación | `Enlace guardado en Crack` | `Drop enviado` |
 
-6. Anade **Obtener contenido de URL**.
-7. Configura:
-
-| Campo | Valor |
-| --- | --- |
-| URL | `https://crackdecracks.vercel.app/api/drop` |
-| Metodo | `POST` |
-| Cabecera `Authorization` | `Bearer TU_TOKEN` |
-| Cabecera `Content-Type` | `application/json` |
-| Cuerpo de solicitud | `JSON` |
-| JSON | diccionario del paso 5 |
-
-8. Anade **Obtener diccionario de entrada** usando la respuesta del paso 6.
-9. Anade **Si** `ok` es `true`.
-10. En el bloque verdadero, anade **Mostrar notificacion** con: `Drop enviado`.
-11. En el bloque falso, anade **Mostrar resultado** con la respuesta completa.
-
-### Ejemplo de body
-
-```json
-{
-  "content": "Texto temporal enviado desde iOS"
-}
-```
-
-### Respuesta esperada
-
-```json
-{
-  "ok": true,
-  "drop": {
-    "id": "...",
-    "content": "...",
-    "user_id": "...",
-    "created_at": "...",
-    "expires_at": "...",
-    "attachments": []
-  }
-}
-```
+Todo lo demás es **exactamente igual** (Recibir, cabeceras, POST, JSON, Si, etc.).
 
 ---
 
-## Atajo 3: Compartir foto o archivo a Drop (opcional)
+# Si algo falla
 
-Permite enviar una imagen, audio, video o cualquier archivo desde la hoja de compartir
-de iOS directamente a Drop. El servidor detecta el tipo MIME y almacena en Supabase Storage.
-
-### Configuracion
-
-1. Abre Atajos y crea un atajo nuevo.
-2. Activa **Mostrar en la hoja para compartir**.
-3. Configura la entrada para recibir **Imagen**, **Archivos**, **Audio** y **Video**
-   (activa todos los tipos que quieras soportar).
-4. Anade **Obtener contenido de adjunto como archivo** (esto convierte el item
-   compartido a un archivo binario).
-5. Anade **Obtener contenido de URL** y configura:
-
-| Campo | Valor |
+| Lo que ves al probar | Qué mirar |
 | --- | --- |
-| URL | `https://crackdecracks.vercel.app/api/drop` |
-| Metodo | `POST` |
-| Cabecera `Authorization` | `Bearer TU_TOKEN` |
-| Cuerpo de solicitud | `Formulario` |
-
-6. En el cuerpo tipo Formulario, anade un campo:
-
-| Nombre | Tipo | Valor |
-| --- | --- | --- |
-| `file` | Archivo | variable del paso 4 |
-
-   > No pongas `Content-Type` manualmente; iOS lo establece como `multipart/form-data`
-   > con el boundary correcto cuando el cuerpo es de tipo Formulario.
-
-7. Anade **Obtener diccionario de entrada** usando la respuesta del paso 5.
-8. Anade **Si** `ok` es `true`.
-9. En el bloque verdadero: **Mostrar notificacion** → `Drop enviado`.
-10. En el bloque falso: **Mostrar resultado** con la respuesta completa.
-
-### Opcional: agregar texto al archivo
-
-Si quieres enviar un caption junto al archivo, anade otro campo al formulario del paso 6:
-
-| Nombre | Tipo | Valor |
-| --- | --- | --- |
-| `content` | Texto | "Mi descripcion" (o variable) |
-
-### Tipos de contenido soportados
-
-| Extension / MIME | content_type guardado |
-| --- | --- |
-| `image/jpeg`, `image/png`, `image/webp`… | `image` |
-| `audio/mpeg`, `audio/mp4`, `audio/wav`… | `audio` |
-| `video/mp4`, `video/quicktime`… | `video` |
-| Cualquier otro MIME | `file` |
+| Dice algo de token inválido | Ve a Crack → Perfil → Regenerar token. Cambia el paso 28 con el token nuevo. |
+| No sale el atajo al compartir | Paso 6: ¿está activado Mostrar en el menú Compartir? |
+| No pasa nada al terminar | ¿Añadiste Mostrar notificación dentro del Si? |
+| Error de URL | Atajo 1: en el Diccionario, ¿el hueco izquierdo dice `url`? |
+| Error de content | Atajo 2: en el Diccionario, ¿el hueco izquierdo dice `content`? |
 
 ---
 
-## Errores frecuentes
+# Resumen: orden de los bloques
 
-| Mensaje | Que hacer |
-| --- | --- |
-| `Token requerido` | Falta la cabecera `Authorization: Bearer TU_TOKEN`. |
-| `Token invalido` | Regenera token en Perfil y actualiza todos los atajos. |
-| `No se encontro ninguna URL valida` | El atajo 1 no recibio URL; usa Obtener texto de entrada. |
-| `content o un archivo requerido` | El atajo 2 no incluye `content` en el JSON. |
-| `503` | Falta `SUPABASE_SERVICE_ROLE_KEY` en Vercel. |
+De arriba a abajo, tu atajo debe tener:
 
-## Requisitos en servidor
-
-- Migraciones `002_share_tokens.sql` y `drops` aplicadas.
-- Variable `SUPABASE_SERVICE_ROLE_KEY` configurada.
-- Token generado en Perfil.
+1. **Recibir** (configurado en los pasos 8–11)
+2. **Obtener texto de la entrada del atajo**
+3. **Diccionario**
+4. **Obtener contenido de URL**
+5. **Obtener diccionario de**
+6. **Si** → con **Mostrar notificación** arriba y **Mostrar resultado** en **De lo contrario**

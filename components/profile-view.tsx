@@ -210,27 +210,29 @@ export function ProfileView() {
               <summary className="cursor-pointer font-medium text-zinc-300">
                 Atajo 1 — Guardar enlace en Crack
               </summary>
-              <p className="mt-3 text-xs leading-relaxed text-emerald-300/90">
-                Compartir → Obtener texto de entrada → guardar en Enlaces.
+              <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+                Guía paso a paso (53 pasos) en{" "}
+                <span className="text-zinc-300">docs/atajos-ios-crack.pdf</span>
               </p>
-              <ol className="mt-3 list-decimal space-y-2 pl-5 text-xs leading-relaxed">
-                <li>Activa Mostrar en la hoja para compartir.</li>
-                <li>Configura la entrada para recibir Texto y URLs.</li>
-                <li>Obtener texto de entrada.</li>
-                <li>Diccionario → url: variable del texto.</li>
+              <p className="mt-2 text-xs leading-relaxed">
+                Resumen del orden de bloques:
+              </p>
+              <ol className="mt-1 list-decimal space-y-1 pl-5 text-xs leading-relaxed">
+                <li>Recibir → Compartir → Texto + URLs</li>
+                <li>Obtener texto de la entrada del atajo</li>
                 <li>
-                  Obtener contenido de URL →{" "}
-                  <span className="text-zinc-300">POST {shareLinkApiUrl}</span>
+                  Diccionario → izquierda <code>url</code> → derecha Texto
                 </li>
-                <li>Cabecera Authorization: Bearer {tokenPlaceholder}.</li>
-                <li>Cabecera Content-Type: application/json.</li>
-                <li>Cuerpo de solicitud: JSON → diccionario.</li>
-                <li>Si ok es true, mostrar notificación: Enlace guardado.</li>
+                <li>
+                  Obtener contenido de URL → POST {shareLinkApiUrl}
+                </li>
+                <li>Obtener diccionario de → Contenido de URL</li>
+                <li>Si → ok es verdadero → Mostrar notificación</li>
               </ol>
-              <p className="mt-3 text-xs text-zinc-500">
-                Opcional: obtener id de la respuesta y abrir{" "}
-                <span className="text-zinc-400">{siteUrl}/?id=…</span> para
-                refrescar la app.
+              <p className="mt-2 text-xs text-zinc-500">
+                Cabeceras: Authorization Bearer {tokenPlaceholder} ·
+                Content-Type application/json · Solicitar cuerpo JSON →
+                Diccionario
               </p>
             </details>
 
@@ -238,39 +240,20 @@ export function ProfileView() {
               <summary className="cursor-pointer font-medium text-zinc-300">
                 Atajo 2 — Enviar a Drop
               </summary>
-              <p className="mt-3 text-xs leading-relaxed text-emerald-300/90">
-                Compartir → Obtener texto de entrada → enviar al chat de Drop.
+              <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+                Igual que el Atajo 1. Ver PDF con todos los pasos.
               </p>
-              <ol className="mt-3 list-decimal space-y-2 pl-5 text-xs leading-relaxed">
-                <li>Activa Mostrar en la hoja para compartir.</li>
-                <li>Configura la entrada para recibir Texto y URLs.</li>
-                <li>Obtener texto de entrada.</li>
-                <li>Diccionario → content: variable del texto.</li>
-                <li>
-                  Obtener contenido de URL →{" "}
-                  <span className="text-zinc-300">POST {dropApiUrl}</span>
-                </li>
-                <li>Cabecera Authorization: Bearer {tokenPlaceholder}.</li>
-                <li>Cabecera Content-Type: application/json.</li>
-                <li>Cuerpo de solicitud: JSON → diccionario.</li>
-                <li>Si ok es true, mostrar notificación: Drop enviado.</li>
-              </ol>
-            </details>
-
-            <details className="pt-2 text-sm text-zinc-400">
-              <summary className="cursor-pointer font-medium text-zinc-300">
-                Atajo 3 — Archivo a Drop (opcional)
-              </summary>
-              <p className="mt-3 text-xs leading-relaxed">
-                Para fotos, audio o vídeo desde la hoja de compartir, usa POST
-                con cuerpo Formulario y campo file. Guía completa en{" "}
-                <span className="text-zinc-300">docs/ios-shortcuts.md</span>.
-              </p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-relaxed">
+                <li>Nombre: Enviar a Drop</li>
+                <li>Diccionario → izquierda: content (no url)</li>
+                <li>URL: {dropApiUrl}</li>
+                <li>Notificación: Drop enviado</li>
+              </ul>
             </details>
 
             <p className="pt-2 text-xs text-zinc-500">
-              No uses GET ni pongas el token en la URL. Si regeneras el token,
-              actualízalo en todos los atajos.
+              Abre docs/atajos-ios-crack.pdf en el iPhone para seguir cada paso
+              con los nombres exactos de la app Atajos.
             </p>
           </div>
         )}
