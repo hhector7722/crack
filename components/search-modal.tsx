@@ -18,6 +18,7 @@ interface SearchModalProps {
 function TypeIcon({ type, item }: { type: string; item: SearchResultItem }) {
   if (type === "audio") return <Mic className="h-4 w-4 text-zinc-400" />;
   if (type === "image") return <ImageIcon className="h-4 w-4 text-zinc-400" />;
+  if (type === "video") return <ImageIcon className="h-4 w-4 text-zinc-400" />;
   if (getNoteUrl(item)) return <Link2 className="h-4 w-4 text-zinc-400" />;
   return <FileText className="h-4 w-4 text-zinc-400" />;
 }

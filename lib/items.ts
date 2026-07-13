@@ -3,7 +3,7 @@ import type { Item, ItemMetadata, ItemType } from "./types";
 
 export async function fetchItems(
   supabase: SupabaseClient,
-  filter?: ItemType,
+  filter?: ItemType | ItemType[],
   opts?: { limit?: number }
 ): Promise<Item[]> {
   let query = supabase
@@ -13,7 +13,11 @@ export async function fetchItems(
     .order("created_at", { ascending: false });
 
   if (filter) {
-    query = query.eq("type", filter);
+    if (Array.isArray(filter)) {
+      query = query.in("type", filter);
+    } else {
+      query = query.eq("type", filter);
+    }
   }
   if (opts?.limit) {
     query = query.limit(opts.limit);

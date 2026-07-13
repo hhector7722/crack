@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, Play } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchItems, deleteItem } from "@/lib/items";
 import { deleteFile, getSignedUrl } from "@/lib/storage";
@@ -32,6 +32,7 @@ function GalleryThumb({
   onShare: (item: Item, mediaUrl?: string | null) => void;
 }) {
   const longPress = useLongPress(() => onShare(item, url));
+  const isVideo = item.type === "video";
 
   return (
     <button
@@ -41,11 +42,26 @@ function GalleryThumb({
         if (longPress.consumeLongPress()) return;
         onSelect();
       }}
-      className="aspect-square w-full overflow-hidden rounded-md bg-white shadow-sm shadow-black/40 active:opacity-80"
+      className="relative aspect-square w-full overflow-hidden rounded-md bg-white shadow-sm shadow-black/40 active:opacity-80"
     >
       {url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={url} alt="" className="h-full w-full object-contain" />
+        isVideo ? (
+          <>
+            <video
+              src={url}
+              muted
+              playsInline
+              preload="metadata"
+              className="h-full w-full object-contain"
+            />
+            <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/25">
+              <Play className="h-6 w-6 fill-white text-white" />
+            </span>
+          </>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={url} alt="" className="h-full w-full object-contain" />
+        )
       ) : (
         <div className="flex h-full w-full items-center justify-center">
           <Loader2 className="h-4 w-4 animate-spin text-zinc-600" />
@@ -76,7 +92,7 @@ export function GalleryFeed({
     setError(null);
     try {
       const supabase = createClient();
-      const data = await fetchItems(supabase, "image");
+      const data = await fetchItems(supabase, ["image", "video"]);
       setItems(data);
 
       const paths = [
@@ -112,22 +128,26 @@ export function GalleryFeed({
   useRealtimeSubscription(
     "items",
     (payload) => {
+      const isMedia = (type: string) => type === "image" || type === "video";
       if (payload.eventType === "INSERT") {
         const newItem = payload.new as unknown as Item;
-        if (newItem.type === "image") {
+        if (isMedia(newItem.type)) {
           setItems((prev) => [newItem, ...prev]);
         }
       } else if (payload.eventType === "UPDATE") {
         const updated = payload.new as unknown as Item;
-        setItems((prev) =>
-          prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i))
-        );
+        if (isMedia(updated.type)) {
+          setItems((prev) =>
+            prev.map((i) => (i.id === updated.id ? { ...i, ...updated } : i))
+          );
+        }
       } else if (payload.eventType === "DELETE") {
         const deleted = payload.old as unknown as Item;
-        setItems((prev) => prev.filter((i) => i.id !== deleted.id));
+        if (isMedia(deleted.type)) {
+          setItems((prev) => prev.filter((i) => i.id !== deleted.id));
+        }
       }
-    },
-    "type=eq.image"
+    }
   );
 
   async function handleDelete(item: Item) {
@@ -194,7 +214,7 @@ export function GalleryFeed({
   if (visible.length === 0) {
     return (
       <p className="py-6 text-center text-sm text-zinc-400">
-        Sin fotos todavía
+        Sin fotos ni vídeos todavía
       </p>
     );
   }

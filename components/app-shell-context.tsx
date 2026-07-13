@@ -15,7 +15,7 @@ import {
   pathnameToIndex,
 } from "@/lib/pager-routes";
 
-export type CaptureMode = "menu" | "note" | "voice";
+export type CaptureMode = "menu" | "note" | "voice" | "image";
 
 interface AppShellContextValue {
   openCamera: () => void;

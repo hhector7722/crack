@@ -23,6 +23,7 @@ function TypeIcon({ type }: { type: Item["type"] }) {
     case "audio":
       return <Mic className="h-4 w-4 text-zinc-500" />;
     case "image":
+    case "video":
       return <ImageIcon className="h-4 w-4 text-zinc-500" />;
     default:
       return <FileText className="h-4 w-4 text-zinc-500" />;

@@ -14,7 +14,7 @@ import { createItem, triggerEmbed } from "@/lib/items";
 export function BottomChrome() {
   const pathname = usePathname();
   const router = useRouter();
-  const { navigateToPage } = useAppShell();
+  const { navigateToPage, openCapture } = useAppShell();
   const { toggleSearch } = useSearch();
   const bumpRefresh = useBumpRefresh();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -65,16 +65,16 @@ export function BottomChrome() {
         </button>
         <button
           type="button"
-          onClick={() => navigateToPage(0)}
-          aria-label="Audio"
+          onClick={() => openCapture("voice")}
+          aria-label="Grabar audio"
           className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-300 transition-colors active:text-zinc-100 active:bg-zinc-800"
         >
           <Mic className="h-5 w-5" strokeWidth={2} />
         </button>
         <button
           type="button"
-          onClick={() => navigateToPage(1)}
-          aria-label="Imagen"
+          onClick={() => openCapture("image")}
+          aria-label="Foto o vídeo"
           className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-300 transition-colors active:text-zinc-100 active:bg-zinc-800"
         >
           <Image className="h-5 w-5" strokeWidth={2} />
@@ -89,8 +89,8 @@ export function BottomChrome() {
         </button>
         <button
           type="button"
-          onClick={() => navigateToPage(4)}
-          aria-label="Notas"
+          onClick={() => openCapture("note")}
+          aria-label="Nueva nota"
           className="flex h-11 w-11 items-center justify-center rounded-full text-zinc-300 transition-colors active:text-zinc-100 active:bg-zinc-800"
         >
           <FileText className="h-5 w-5" strokeWidth={2} />

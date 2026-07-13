@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect } from "react";
 import { UrlSyncObserver } from "@/components/url-sync-observer";
-
 import {
   createContext,
   useContext,
@@ -10,7 +9,6 @@ import {
   useState,
   useCallback,
 } from "react";
-import { useRouter } from "next/navigation";
 import { Settings, X } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { TabBarWrapper } from "@/components/layout/TabBarWrapper";
@@ -19,7 +17,7 @@ import { AppPager } from "@/components/app-pager";
 import { ProfileView } from "@/components/profile-view";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { SearchProvider, useSearch } from "@/components/search-context";
-import { uploadImageFromFile } from "@/lib/image-upload";
+import { uploadMediaFromFile } from "@/lib/image-upload";
 
 const RefreshContext = createContext({
   refreshKey: 0,
@@ -56,7 +54,6 @@ export default function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -91,7 +88,7 @@ export default function AppLayout({
     setSheetOpen(true);
   }, []);
 
-  async function handleImageSelected(
+  async function handleMediaSelected(
     e: React.ChangeEvent<HTMLInputElement>,
     _source: "camera" | "gallery"
   ) {
@@ -102,12 +99,11 @@ export default function AppLayout({
     setUploading(true);
     setUploadError(null);
     try {
-      await uploadImageFromFile(file);
+      await uploadMediaFromFile(file);
       bumpRefresh();
-      router.push("/media");
     } catch (err) {
       setUploadError(
-        err instanceof Error ? err.message : "Error subiendo imagen"
+        err instanceof Error ? err.message : "Error subiendo archivo"
       );
     } finally {
       setUploading(false);
@@ -151,7 +147,7 @@ export default function AppLayout({
               ) : null}
               {uploading ? (
                 <p className="mx-4 shrink-0 text-center text-sm text-zinc-400">
-                  Subiendo imagen...
+                  Subiendo...
                 </p>
               ) : null}
               {showProfile ? (
@@ -171,18 +167,18 @@ export default function AppLayout({
             <input
               ref={cameraInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               capture="environment"
               className="hidden"
-              onChange={(e) => handleImageSelected(e, "camera")}
+              onChange={(e) => handleMediaSelected(e, "camera")}
             />
 
             <input
               ref={galleryInputRef}
               type="file"
-              accept="image/*"
+              accept="image/*,video/*"
               className="hidden"
-              onChange={(e) => handleImageSelected(e, "gallery")}
+              onChange={(e) => handleMediaSelected(e, "gallery")}
             />
 
             <CaptureSheet

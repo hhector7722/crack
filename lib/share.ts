@@ -19,8 +19,8 @@ export function buildSharePayload(
     };
   }
 
-  if (item.type === "image" && mediaUrl) {
-    return { title: item.title ?? "Imagen", url: mediaUrl };
+  if ((item.type === "image" || item.type === "video") && mediaUrl) {
+    return { title: item.title ?? (item.type === "video" ? "Vídeo" : "Imagen"), url: mediaUrl };
   }
 
   const text =

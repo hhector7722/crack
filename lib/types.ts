@@ -1,4 +1,4 @@
-export type ItemType = "note" | "image" | "audio" | "file";
+export type ItemType = "note" | "image" | "video" | "audio" | "file";
 export type ClassificationType = "note" | "reminder" | "important" | "info";
 export type Priority = "high" | "medium" | "low";
 export type Theme = "Dev" | "Marbella" | "Sport" | "Politics" | "Fun" | "She" | "Other";

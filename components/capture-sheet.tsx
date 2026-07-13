@@ -9,7 +9,7 @@ import { NoteCapture, type NoteCaptureHandle } from "@/components/note-capture";
 import { useAppShell } from "@/components/app-shell-context";
 import type { CaptureMode } from "@/components/app-shell-context";
 
-type ViewMode = CaptureMode | "image";
+type ViewMode = CaptureMode;
 
 interface CaptureSheetProps {
   open: boolean;
@@ -72,10 +72,10 @@ export function CaptureSheet({
     menu: "Nuevo",
     voice: "Grabar voz",
     note: "Nota de texto",
-    image: "",
+    image: "Foto o vídeo",
   };
 
-  const showBack = mode === "menu" && viewMode !== "menu" && viewMode !== "image";
+  const showBack = mode === "menu" && viewMode !== "menu";
 
   if (!open) return null;
 
@@ -133,7 +133,7 @@ export function CaptureSheet({
             onClick={() => pickImage("gallery")}
             className="content-row min-h-12 text-left"
           >
-            <span className="font-semibold text-zinc-100">Galería</span>
+            <span className="font-semibold text-zinc-100">Fototeca</span>
           </button>
         </div>
       ) : null}

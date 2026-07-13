@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Mic, ImageIcon, FileText, Link2, ExternalLink } from "lucide-react";
+import { Loader2, Mic, ImageIcon, FileText, Link2, ExternalLink, Play } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchItems } from "@/lib/items";
 import { getSignedUrl } from "@/lib/storage";
@@ -41,9 +41,28 @@ function SectionWrapper({ children, onClick, className }: { children: React.Reac
 
 
 
-function ImageThumb({ url, onClick, className }: { url: string | null; onClick?: () => void; className?: string }) {
+function ImageThumb({
+  url,
+  isVideo,
+  onClick,
+  className,
+}: {
+  url: string | null;
+  isVideo?: boolean;
+  onClick?: () => void;
+  className?: string;
+}) {
   const inner = url ? (
-    <img src={url} alt="" className={cn("object-cover rounded-lg w-full h-full", className)} />
+    isVideo ? (
+      <div className={cn("relative overflow-hidden rounded-lg w-full h-full", className)}>
+        <video src={url} muted playsInline preload="metadata" className="object-cover w-full h-full" />
+        <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/25">
+          <Play className="h-5 w-5 fill-white text-white" />
+        </span>
+      </div>
+    ) : (
+      <img src={url} alt="" className={cn("object-cover rounded-lg w-full h-full", className)} />
+    )
   ) : (
     <div className={cn("flex items-center justify-center rounded-lg bg-zinc-900 w-full h-full", className)}>
       <Loader2 className="h-4 w-4 animate-spin text-zinc-600" />
@@ -80,7 +99,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
 
       const [audios, images, notes, files] = await Promise.all([
         fetchItems(supabase, "audio", { limit: 20 }),
-        fetchItems(supabase, "image", { limit: 20 }),
+        fetchItems(supabase, ["image", "video"], { limit: 20 }),
         fetchItems(supabase, "note", { limit: 40 }),
         fetchItems(supabase, "file", { limit: 20 }),
       ]);
@@ -164,6 +183,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
             <div key={item.id} className="pointer-events-auto h-full shrink-0 aspect-square">
               <ImageThumb
                 url={item.file_url ? imageUrls[item.file_url] ?? null : null}
+                isVideo={item.type === "video"}
                 onClick={() => setSelectedItem({ item, category: "images" })}
               />
             </div>

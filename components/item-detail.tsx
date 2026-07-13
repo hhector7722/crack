@@ -217,13 +217,14 @@ function ItemDetailPanel({
   }
 
   async function handleShare() {
-    if (item.type === "audio" || item.type === "image") {
+    if (item.type === "audio" || item.type === "image" || item.type === "video") {
       const fileUrl = mediaUrl;
       if (fileUrl && navigator.share) {
         try {
           const res = await fetch(fileUrl);
           const blob = await res.blob();
-          const ext = item.type === "audio" ? "webm" : "jpg";
+          const ext =
+            item.type === "audio" ? "webm" : item.type === "video" ? "mp4" : "jpg";
           const file = new File([blob], `crack-${item.id}.${ext}`, { type: blob.type });
           await navigator.share({ files: [file] });
           return;
@@ -401,6 +402,21 @@ function ItemDetailPanel({
                 <p className="text-sm text-red-400">No se pudo cargar la imagen</p>
               )}
             </div>
+          ) : item.type === "video" ? (
+            <div className="flex min-h-0 flex-1 items-center justify-center">
+              {loadingMedia ? (
+                <p className="text-sm text-zinc-500">Cargando vídeo...</p>
+              ) : mediaUrl ? (
+                <video
+                  controls
+                  src={mediaUrl}
+                  playsInline
+                  className="max-h-full max-w-full rounded-lg"
+                />
+              ) : (
+                <p className="text-sm text-red-400">No se pudo cargar el vídeo</p>
+              )}
+            </div>
           ) : item.type === "audio" ? (
             <div className="flex flex-col gap-3">
               {item.content ? (
@@ -506,6 +522,21 @@ function ItemDetailPanel({
                 <p className="text-sm text-red-400">No se pudo cargar la imagen</p>
               )}
             </div>
+          ) : item.type === "video" ? (
+            <div className="flex min-h-0 flex-1 items-center justify-center">
+              {loadingMedia ? (
+                <p className="text-sm text-zinc-500">Cargando vídeo...</p>
+              ) : mediaUrl ? (
+                <video
+                  controls
+                  src={mediaUrl}
+                  playsInline
+                  className="max-h-full max-w-full rounded-lg"
+                />
+              ) : (
+                <p className="text-sm text-red-400">No se pudo cargar el vídeo</p>
+              )}
+            </div>
           ) : item.type === "audio" ? (
             <div className="flex flex-col gap-3">
               {content ? (
@@ -605,7 +636,7 @@ function ItemDetailPanel({
               </div>
             ) : null}
 
-            {item.type === "image" || url ? (
+            {item.type === "image" || item.type === "video" || url ? (
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-sm text-zinc-400">Tipo IA</label>
