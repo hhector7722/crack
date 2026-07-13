@@ -72,9 +72,15 @@ https://crackdecracks.vercel.app/api/share-link
 30. Pulsa Cabeceras.
 31. Añade una fila. En el primer hueco escribe Authorization. En el segundo hueco escribe Bearer, un espacio, y pega tu token de Perfil.
 32. Añade otra fila. En el primer hueco escribe Content-Type. En el segundo hueco escribe application/json.
-33. En Solicitar cuerpo elige JSON.
-34. Pulsa el segundo Solicitar cuerpo que aparece debajo.
-35. Elige la palabra azul Diccionario del bloque anterior.
+33. En Cuerpo de la solicitud elige JSON.
+34. Pulsa Añadir nuevo campo.
+35. En la fila nueva: en el hueco izquierdo escribe url. En el hueco derecho elige la palabra azul Texto.
+
+Si ya ves arriba una fila con url y Texto, salta al paso 36.
+
+Revisa las cabeceras antes de seguir:
+- Authorization: debe poner Bearer, un espacio, y tu token (sin pegar Bearer y token juntos).
+- Content-Type: debe poner application/json (sin punto delante).
 
 ## Obtener diccionario de la entrada
 
@@ -88,12 +94,19 @@ https://crackdecracks.vercel.app/api/share-link
 40. Pulsa Añadir acción.
 41. En el buscador escribe Si.
 42. Pulsa Si.
-43. Pulsa la condición del bloque Si.
-44. Elige Diccionario del bloque anterior.
-45. Pulsa Obtener valor del diccionario.
-46. Escribe ok.
-47. Pulsa es.
+
+El bloque dirá algo como: Si Diccionario tiene algún valor.
+
+43. Toca la palabra Diccionario (icono naranja a la izquierda). No toques tiene algún valor.
+44. Baja en el menú hasta el final.
+45. Donde pone Obtener valor de clave, escribe ok.
+46. Toca tiene algún valor (la parte derecha del Si).
+47. Cámbialo a es.
 48. Elige verdadero.
+
+Si no te deja poner verdadero, elige el número 1.
+
+Si esto te resulta muy lioso, borra el bloque Si y pon Mostrar notificación justo después de Obtener diccionario de la entrada.
 
 ## Cuando funciona
 
