@@ -10,8 +10,17 @@ export const metadata: Metadata = {
     title: "Drop",
   },
   icons: {
-    icon: [{ url: "/icons/drop.svg", type: "image/svg+xml" }],
-    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    icon: [
+      { url: "/icons/drop-favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/drop-icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [
+      {
+        url: "/icons/drop-apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
   },
 };
 
@@ -23,7 +32,12 @@ export default function DropLayout({
   return (
     <>
       <link rel="manifest" href="/manifest-drop.json" />
-      <link rel="icon" type="image/svg+xml" href="/icons/drop.svg" />
+      <link rel="icon" type="image/png" href="/icons/drop-favicon.png" />
+      <link
+        rel="apple-touch-icon"
+        href="/icons/drop-apple-touch-icon.png"
+        sizes="180x180"
+      />
       {children}
     </>
   );
