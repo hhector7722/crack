@@ -111,10 +111,10 @@ export function DropBubble({
   }
 
   return (
-    <div className="flex justify-end" {...longPress}>
-      <div className="relative flex max-w-[80%] flex-col items-end gap-1.5">
+    <div className="flex min-w-0 justify-end" {...longPress}>
+      <div className="relative flex min-w-0 max-w-[80%] flex-col items-end gap-1.5">
         {hasText ? (
-          <div className="rounded-2xl rounded-br-sm bg-[#1c1c1e] px-3.5 py-2.5">
+          <div className="min-w-0 max-w-full break-words rounded-2xl rounded-br-sm bg-[#1c1c1e] px-3.5 py-2.5">
             <DropTextContent content={content!} />
           </div>
         ) : null}

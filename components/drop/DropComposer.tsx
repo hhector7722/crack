@@ -46,8 +46,8 @@ export function DropComposer({
       ) : null}
 
       {pendingFiles.length > 0 ? (
-        <div className="shrink-0 border-t border-zinc-800/60 bg-zinc-900/60 px-4 py-2">
-          <div className="flex flex-wrap items-center justify-end gap-2">
+        <div className="min-w-0 shrink-0 border-t border-zinc-800/60 bg-zinc-900/60 px-2 py-2 sm:px-4">
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
             {pendingFiles.map((file, i) => (
               <PendingMediaThumb
                 key={`${file.name}-${i}`}
@@ -61,9 +61,9 @@ export function DropComposer({
 
       <form
         onSubmit={onSend}
-        className="shrink-0 border-t border-zinc-800/60 bg-zinc-900/80 px-3 pb-[env(safe-area-inset-bottom,0.75rem)] pt-2.5 backdrop-blur-sm"
+        className="min-w-0 shrink-0 border-t border-zinc-800/60 bg-zinc-900/80 px-2 pb-[env(safe-area-inset-bottom,0.75rem)] pt-2.5 backdrop-blur-sm sm:px-3"
       >
-        <div className="flex items-end gap-2">
+        <div className="flex min-w-0 items-end gap-1.5 sm:gap-2">
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -112,9 +112,9 @@ export function DropComposer({
                 }
               }
             }}
-            placeholder={pendingFiles.length > 0 ? "Añade un texto (opcional)…" : "Suelta algo temporal…"}
+            placeholder={pendingFiles.length > 0 ? "Texto opcional…" : "Suelta algo…"}
             rows={1}
-            className="min-h-[2.5rem] flex-1 resize-none rounded-2xl border border-zinc-700/60 bg-zinc-800/60 px-3.5 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/30"
+            className="min-h-[2.5rem] min-w-0 flex-1 resize-none rounded-2xl border border-zinc-700/60 bg-zinc-800/60 px-2.5 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/30 sm:px-3.5"
             style={{ overflowY: "hidden" }}
           />
 

@@ -78,7 +78,8 @@ export function DropPage({
 
   return (
     <div
-      className="fixed inset-0 flex flex-col bg-zinc-950 text-zinc-100"
+      data-drop-shell
+      className="fixed inset-0 flex min-w-0 flex-col overflow-x-hidden bg-zinc-950 text-zinc-100"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}

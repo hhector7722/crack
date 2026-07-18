@@ -99,6 +99,13 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Drop en ventana estrecha (PWA / panel lateral): no forzar ancho mínimo de contenido */
+html:has([data-drop-shell]),
+body:has([data-drop-shell]) {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
 html {
   background-color: var(--tm-tabbar-bg-hex);
   touch-action: manipulation;
