@@ -189,9 +189,17 @@ export function CompactNoteItem({ item, onClick }: { item: Item; onClick?: () =>
   return <div className="py-1">{inner}</div>;
 }
 
-function FileThumbnail({ fileUrl, className }: { fileUrl: string; className?: string }) {
+function FileThumbnail({
+  fileUrl,
+  size = "sm",
+}: {
+  fileUrl: string;
+  size?: "sm" | "lg";
+}) {
   const [url, setUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const box = size === "lg" ? "h-full w-full" : "h-10 w-10";
+  const icon = size === "lg" ? "h-6 w-6" : "h-4 w-4";
 
   useEffect(() => {
     let cancelled = false;
@@ -207,14 +215,14 @@ function FileThumbnail({ fileUrl, className }: { fileUrl: string; className?: st
 
   if (!url || failed) {
     return (
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-zinc-900">
-        <FileText className="h-4 w-4 text-zinc-400" />
+      <div className={`flex ${box} shrink-0 items-center justify-center rounded-lg bg-zinc-900`}>
+        <FileText className={`${icon} text-zinc-400`} />
       </div>
     );
   }
 
   return (
-    <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-zinc-900">
+    <div className={`${box} shrink-0 overflow-hidden rounded-lg bg-zinc-900`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={url}
@@ -256,4 +264,44 @@ export function CompactFileItem({ item, onClick }: { item: Item; onClick?: () =>
   }
 
   return <div className="py-1">{inner}</div>;
+}
+
+/** Miniatura vertical para el carrusel de documentos en Inicio. */
+export function CompactFileThumb({ item, onClick }: { item: Item; onClick?: () => void }) {
+  const label = displayValue(item.title) || "Documento";
+  const inner = (
+    <>
+      <div className="aspect-square w-full overflow-hidden rounded-lg bg-zinc-900">
+        {item.file_url ? (
+          <FileThumbnail fileUrl={item.file_url} size="lg" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <FileText className="h-6 w-6 text-zinc-400" />
+          </div>
+        )}
+      </div>
+      <p className="mt-1.5 w-full truncate text-center text-[10px] leading-tight text-zinc-400">
+        {label}
+      </p>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex h-full w-[4.5rem] shrink-0 flex-col items-center text-left active:opacity-70"
+        title={label}
+      >
+        {inner}
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex h-full w-[4.5rem] shrink-0 flex-col items-center" title={label}>
+      {inner}
+    </div>
+  );
 }

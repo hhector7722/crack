@@ -1,16 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Loader2, Mic, ImageIcon, FileText, Link2, ExternalLink, Play } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Loader2, Play } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { fetchItems } from "@/lib/items";
 import { getSignedUrl } from "@/lib/storage";
-import { usePager } from "@/components/app-shell-context";
-import { resolveLinkTitle, titleFromUrl } from "@/lib/link-preview";
-import { displayValue, getNoteUrl, cn } from "@/lib/utils";
+import { getNoteUrl, cn } from "@/lib/utils";
 import { useRealtimeSubscription } from "@/hooks/use-realtime";
 import type { Item } from "@/lib/types";
-import { CompactAudioItem, CompactLinkItem, CompactNoteItem, CompactFileItem } from "@/components/compact-items";
+import {
+  CompactLinkItem,
+  CompactNoteItem,
+  CompactFileItem,
+  CompactFileThumb,
+} from "@/components/compact-items";
 import { ItemDetail } from "@/components/item-detail";
 import { AppModal } from "@/components/app-modal";
 
@@ -19,7 +22,6 @@ interface DashboardPageProps {
 }
 
 type Categorized = {
-  audios: Item[];
   images: Item[];
   notes: Item[];
   links: Item[];
@@ -61,8 +63,6 @@ function SectionWrapper({
     </section>
   );
 }
-
-
 
 function ImageThumb({
   url,
@@ -176,12 +176,9 @@ function ImageThumb({
   );
 }
 
-
-
 export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   const [categorized, setCategorized] = useState<Categorized | null>(null);
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
-  const [audioUrls, setAudioUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedItem, setSelectedItem] = useState<{ item: Item; category?: keyof Categorized } | null>(null);
@@ -193,8 +190,7 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
     try {
       const supabase = createClient();
 
-      const [audios, images, notes, files] = await Promise.all([
-        fetchItems(supabase, "audio", { limit: 20 }),
+      const [images, notes, files] = await Promise.all([
         fetchItems(supabase, ["image", "video"], { limit: 20 }),
         fetchItems(supabase, "note", { limit: 40 }),
         fetchItems(supabase, "file", { limit: 20 }),
@@ -203,18 +199,13 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
       const noteItems = notes.filter((i) => !getNoteUrl(i));
       const linkItems = notes.filter((i) => getNoteUrl(i));
 
-      setCategorized({ audios, images, notes: noteItems, links: linkItems, files });
+      setCategorized({ images, notes: noteItems, links: linkItems, files });
 
       const imgPaths = [...new Set(images.filter((i) => i.file_url).map((i) => i.file_url!))];
-      const audioPaths = [...new Set(audios.filter((i) => i.file_url).map((i) => i.file_url!))];
-
-      const [imgEntries, audioEntries] = await Promise.all([
-        Promise.all(imgPaths.map(async (p) => [p, await getSignedUrl(supabase, p).catch(() => "")] as const)),
-        Promise.all(audioPaths.map(async (p) => [p, await getSignedUrl(supabase, p).catch(() => "")] as const)),
-      ]);
-
+      const imgEntries = await Promise.all(
+        imgPaths.map(async (p) => [p, await getSignedUrl(supabase, p).catch(() => "")] as const)
+      );
       setImageUrls(Object.fromEntries(imgEntries.filter(([, url]) => url)));
-      setAudioUrls(Object.fromEntries(audioEntries.filter(([, url]) => url)));
     } catch {
       // silent
     } finally {
@@ -230,11 +221,11 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
   useRealtimeSubscription(
     "items",
     (payload) => {
-      if (payload.eventType === "INSERT") {
-        void load(true);
-      } else if (payload.eventType === "UPDATE") {
-        void load(true);
-      } else if (payload.eventType === "DELETE") {
+      if (
+        payload.eventType === "INSERT" ||
+        payload.eventType === "UPDATE" ||
+        payload.eventType === "DELETE"
+      ) {
         void load(true);
       }
     }
@@ -256,88 +247,75 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
         <SectionWrapper>
           <div className="flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-zinc-500" />
-            <div className="h-4 w-1/3 animate-pulse rounded bg-zinc-800"></div>
+            <div className="h-4 w-1/3 animate-pulse rounded bg-zinc-800" />
           </div>
         </SectionWrapper>
       )}
-      {categorized.audios.length > 0 && (
-      <SectionWrapper className="h-[140px]" scroll="y" onClick={() => setSelectedCategory("audios")}>
-        <div className="grid grid-cols-2 gap-4">
-          {categorized.audios.map((item) => (
-            <div key={item.id}>
-              <CompactAudioItem item={item} onClick={() => setSelectedItem({ item, category: "audios" })} />
-            </div>
-          ))}
-        </div>
-      </SectionWrapper>
-    )}
 
-    {categorized.images.length > 0 && (
-      <SectionWrapper className="h-[96px] p-3" scroll="x" onClick={() => setSelectedCategory("images")}>
-        <div className="flex h-full items-center gap-2">
-          {categorized.images.map((item) => (
-            <div key={item.id} className="aspect-square h-full shrink-0">
-              <ImageThumb
-                url={item.file_url ? imageUrls[item.file_url] ?? null : null}
-                isVideo={item.type === "video"}
-                compact
-                onClick={() => setSelectedItem({ item, category: "images" })}
+      <SectionWrapper className="h-[112px] p-3" scroll="x" onClick={() => setSelectedCategory("files")}>
+        <div className="flex h-full items-stretch gap-3">
+          {categorized.files.length > 0 ? (
+            categorized.files.map((item) => (
+              <CompactFileThumb
+                key={item.id}
+                item={item}
+                onClick={() => setSelectedItem({ item, category: "files" })}
               />
+            ))
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-sm text-zinc-500">
+              No hay documentos
             </div>
-          ))}
+          )}
         </div>
       </SectionWrapper>
-    )}
 
-    <div className="grid grid-cols-2 gap-5">
-      {categorized.notes.length > 0 ? (
-        <SectionWrapper className="h-[180px]" scroll="y" onClick={() => setSelectedCategory("notes")}>
-          <div className="flex flex-col gap-3">
+      {categorized.images.length > 0 && (
+        <SectionWrapper className="h-[96px] p-3" scroll="x" onClick={() => setSelectedCategory("images")}>
+          <div className="flex h-full items-center gap-2">
+            {categorized.images.map((item) => (
+              <div key={item.id} className="aspect-square h-full shrink-0">
+                <ImageThumb
+                  url={item.file_url ? imageUrls[item.file_url] ?? null : null}
+                  isVideo={item.type === "video"}
+                  compact
+                  onClick={() => setSelectedItem({ item, category: "images" })}
+                />
+              </div>
+            ))}
+          </div>
+        </SectionWrapper>
+      )}
+
+      {categorized.notes.length > 0 && (
+        <SectionWrapper className="max-h-[180px]" scroll="y" onClick={() => setSelectedCategory("notes")}>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             {categorized.notes.map((item) => (
-              <div key={item.id} className="shrink-0">
+              <div key={item.id}>
                 <CompactNoteItem item={item} onClick={() => setSelectedItem({ item, category: "notes" })} />
               </div>
             ))}
           </div>
         </SectionWrapper>
-      ) : <div />}
+      )}
 
-      <SectionWrapper className="h-[180px]" scroll="y" onClick={() => setSelectedCategory("files")}>
-        <div className="flex flex-col gap-3">
-          {categorized.files && categorized.files.length > 0 ? (
-            categorized.files.map((item) => (
-              <div key={item.id} className="shrink-0">
-                <CompactFileItem item={item} onClick={() => setSelectedItem({ item, category: "files" })} />
+      {categorized.links.length > 0 && (
+        <SectionWrapper className="max-h-[180px]" scroll="y" onClick={() => setSelectedCategory("links")}>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+            {categorized.links.map((item) => (
+              <div key={item.id}>
+                <CompactLinkItem item={item} onClick={() => setSelectedItem({ item, category: "links" })} />
               </div>
-            ))
-          ) : (
-            <div className="flex h-full items-center justify-center text-sm text-zinc-500">
-              No hay archivos
-            </div>
-          )}
-        </div>
-      </SectionWrapper>
-    </div>
-
-    {categorized.links.length > 0 && (
-      <SectionWrapper className="max-h-[180px]" scroll="y" onClick={() => setSelectedCategory("links")}>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-          {categorized.links.map((item) => (
-            <div key={item.id}>
-              <CompactLinkItem item={item} onClick={() => setSelectedItem({ item, category: "links" })} />
-            </div>
-          ))}
-        </div>
-      </SectionWrapper>
-    )}
+            ))}
+          </div>
+        </SectionWrapper>
+      )}
     </div>
   );
 
   return (
     <div className="mx-auto w-[98%] pt-4 pb-20">
-      <div className="cursor-default">
-        {dashboardContent}
-      </div>
+      <div className="cursor-default">{dashboardContent}</div>
 
       {selectedItem && (
         <ItemDetail
@@ -363,23 +341,19 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
           onOpenChange={(open) => !open && setSelectedCategory(null)}
           size="fixed"
           title={
-            selectedCategory === "audios" ? "Audios" :
-            selectedCategory === "images" ? "Imágenes" :
-            selectedCategory === "notes" ? "Notas" :
-            selectedCategory === "files" ? "Archivos" : "Enlaces"
+            selectedCategory === "images"
+              ? "Imágenes"
+              : selectedCategory === "notes"
+                ? "Notas"
+                : selectedCategory === "files"
+                  ? "Documentos"
+                  : "Enlaces"
           }
         >
-          <div className="flex-1 overflow-y-auto min-h-0 pb-4">
-            {selectedCategory === "audios" && (
-              <div className="grid grid-cols-1 gap-3">
-                {categorized.audios.map(item => (
-                  <CompactAudioItem key={item.id} item={item} onClick={() => setSelectedItem({ item, category: "audios" })} />
-                ))}
-              </div>
-            )}
+          <div className="min-h-0 flex-1 overflow-y-auto pb-4">
             {selectedCategory === "images" && (
               <div className="grid grid-cols-3 gap-2">
-                {categorized.images.map(item => (
+                {categorized.images.map((item) => (
                   <ImageThumb
                     key={item.id}
                     url={item.file_url ? imageUrls[item.file_url] ?? null : null}
@@ -391,22 +365,34 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
             )}
             {selectedCategory === "notes" && (
               <div className="grid grid-cols-1 gap-3">
-                {categorized.notes.map(item => (
-                  <CompactNoteItem key={item.id} item={item} onClick={() => setSelectedItem({ item, category: "notes" })} />
+                {categorized.notes.map((item) => (
+                  <CompactNoteItem
+                    key={item.id}
+                    item={item}
+                    onClick={() => setSelectedItem({ item, category: "notes" })}
+                  />
                 ))}
               </div>
             )}
             {selectedCategory === "links" && (
               <div className="grid grid-cols-1 gap-3">
-                {categorized.links.map(item => (
-                  <CompactLinkItem key={item.id} item={item} onClick={() => setSelectedItem({ item, category: "links" })} />
+                {categorized.links.map((item) => (
+                  <CompactLinkItem
+                    key={item.id}
+                    item={item}
+                    onClick={() => setSelectedItem({ item, category: "links" })}
+                  />
                 ))}
               </div>
             )}
-            {selectedCategory === "files" && categorized.files && (
+            {selectedCategory === "files" && (
               <div className="grid grid-cols-1 gap-3">
-                {categorized.files.map(item => (
-                  <CompactFileItem key={item.id} item={item} onClick={() => setSelectedItem({ item, category: "files" })} />
+                {categorized.files.map((item) => (
+                  <CompactFileItem
+                    key={item.id}
+                    item={item}
+                    onClick={() => setSelectedItem({ item, category: "files" })}
+                  />
                 ))}
               </div>
             )}
@@ -416,4 +402,3 @@ export function DashboardPage({ refreshKey = 0 }: DashboardPageProps) {
     </div>
   );
 }
-
