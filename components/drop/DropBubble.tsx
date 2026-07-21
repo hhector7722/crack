@@ -1,7 +1,12 @@
 "use client";
 
 import type { Drop, DropAttachment } from "@/lib/drop/types";
-import { formatRemaining, isPreviewablePath } from "@/lib/drop/helpers";
+import {
+  firstUrlInText,
+  formatRemaining,
+  isPreviewablePath,
+  isStandaloneUrl,
+} from "@/lib/drop/helpers";
 import { useLongPress } from "@/hooks/use-long-press";
 import { downloadSignedFile } from "@/lib/drop/signed-url-cache";
 import { DropTextContent } from "./DropTextContent";
@@ -9,6 +14,7 @@ import { BubbleImage } from "./bubbles/BubbleImage";
 import { BubbleAudio } from "./bubbles/BubbleAudio";
 import { BubbleVideo } from "./bubbles/BubbleVideo";
 import { BubbleFile } from "./bubbles/BubbleFile";
+import { BubbleLinkPreview } from "./bubbles/BubbleLinkPreview";
 
 function FloatingAttachment({
   attachment,
@@ -101,7 +107,11 @@ export function DropBubble({
 
   const imagePaths = imageAttachments.map((a) => a.file_url);
   const videoPaths = videoAttachments.map((a) => a.file_url);
-  const hasText = Boolean(content?.trim());
+  const trimmedContent = content?.trim() ?? "";
+  const hasText = Boolean(trimmedContent);
+  const standaloneUrl = hasText && isStandaloneUrl(trimmedContent);
+  const previewUrl =
+    hasText && !standaloneUrl ? firstUrlInText(trimmedContent) : null;
 
   const remainingLabel =
     now === 0 ? "--" : formatRemaining(drop.expires_at, now);
@@ -113,10 +123,17 @@ export function DropBubble({
   return (
     <div className="flex min-w-0 justify-end" {...longPress}>
       <div className="relative flex min-w-0 max-w-[80%] flex-col items-end gap-1.5">
-        {hasText ? (
-          <div className="min-w-0 max-w-full break-words rounded-2xl rounded-br-sm bg-[#1c1c1e] px-3.5 py-2.5">
-            <DropTextContent content={content!} />
-          </div>
+        {standaloneUrl ? (
+          <BubbleLinkPreview url={trimmedContent} onLoad={onContentResize} />
+        ) : hasText ? (
+          <>
+            <div className="min-w-0 max-w-full break-words rounded-2xl rounded-br-sm bg-[#1c1c1e] px-3.5 py-2.5">
+              <DropTextContent content={content!} />
+            </div>
+            {previewUrl ? (
+              <BubbleLinkPreview url={previewUrl} onLoad={onContentResize} />
+            ) : null}
+          </>
         ) : null}
 
         {gridAttachments.length > 0 ? (

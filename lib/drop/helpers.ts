@@ -85,6 +85,22 @@ export function splitTextWithUrls(text: string): TextPart[] {
   return parts;
 }
 
+/** Primera URL del texto, si existe. */
+export function firstUrlInText(text: string): string | null {
+  const re = new RegExp(URL_IN_TEXT.source);
+  const match = text.match(re);
+  return match?.[1] ?? match?.[0] ?? null;
+}
+
+/** True si el mensaje es esencialmente solo una URL (con o sin espacios). */
+export function isStandaloneUrl(text: string): boolean {
+  const trimmed = text.trim();
+  if (!trimmed) return false;
+  const url = firstUrlInText(trimmed);
+  if (!url) return false;
+  return trimmed === url;
+}
+
 export function isImageFile(file: File) {
   return contentTypeFromFile(file) === "image";
 }
