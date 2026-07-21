@@ -39,9 +39,38 @@ const jsonPayloadSchema = z.object({
 
 function getBearerToken(request: Request): string | null {
   const header = request.headers.get("authorization");
-  if (!header?.startsWith("Bearer ")) return null;
-  const token = header.slice(7).trim();
+  if (!header) return null;
+  const match = /^Bearer\s+(.+)$/i.exec(header.trim());
+  if (!match) return null;
+  const token = match[1].trim();
   return token.length > 0 ? token : null;
+}
+
+function extensionFromUpload(file: Blob & { name?: string }): string {
+  const name = file.name ?? "";
+  if (name.includes(".")) {
+    const fromName = name.split(".").pop()?.toLowerCase();
+    if (fromName) return fromName;
+  }
+
+  const mime = (file.type || "").toLowerCase();
+  if (mime === "image/jpeg" || mime === "image/jpg") return "jpg";
+  if (mime === "image/png") return "png";
+  if (mime === "image/heic") return "heic";
+  if (mime === "image/heif") return "heif";
+  if (mime === "image/webp") return "webp";
+  if (mime === "image/gif") return "gif";
+  if (mime.startsWith("video/")) return "mp4";
+  if (mime.startsWith("audio/")) return "m4a";
+  return "bin";
+}
+
+function asUploadBlob(
+  value: FormDataEntryValue | null,
+): (Blob & { name?: string; type: string }) | null {
+  if (value == null || typeof value === "string") return null;
+  if (!(value instanceof Blob) || value.size <= 0) return null;
+  return value;
 }
 
 async function getUserIdFromToken(token: string) {
@@ -126,13 +155,17 @@ export async function POST(request: Request) {
     if (contentTypeHeader.includes("multipart/form-data")) {
       const formData = await request.formData();
       const rawContent = formData.get("content") ?? formData.get("text");
-      const file = formData.get("file");
+      const file =
+        asUploadBlob(formData.get("file")) ??
+        asUploadBlob(formData.get("image")) ??
+        asUploadBlob(formData.get("photo"));
 
       if (typeof rawContent === "string") content = rawContent.trim() || null;
 
-      if (file instanceof File && file.size > 0) {
-        const ct = mimeToContentType(file.type);
-        const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
+      if (file) {
+        const mime = file.type || "application/octet-stream";
+        const ct = mimeToContentType(mime);
+        const ext = extensionFromUpload(file);
         const filePath = await uploadFile(
           createAdminClient(),
           auth.userId,
