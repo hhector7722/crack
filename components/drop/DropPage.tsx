@@ -36,6 +36,8 @@ export function DropPage({
     textareaRef,
     canSend,
     realtimeStatus,
+    refreshing,
+    refreshDrops,
     handleContentResize,
     handleFileChange,
     removePendingFile,
@@ -87,7 +89,7 @@ export function DropPage({
     >
       {showHeader ? (
         <>
-          <DropHeader />
+          <DropHeader refreshing={refreshing} onRefresh={refreshDrops} />
           <DropInstallHint />
         </>
       ) : null}

@@ -2,11 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ChevronsDown, ChevronsUp } from "lucide-react";
+import { ArrowLeft, ChevronsDown, ChevronsUp, Zap } from "lucide-react";
 
 const COLLAPSED_KEY = "drop-header-collapsed";
 
-export function DropHeader() {
+export function DropHeader({
+  refreshing,
+  onRefresh,
+}: {
+  refreshing: boolean;
+  onRefresh: () => Promise<void>;
+}) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -34,15 +40,29 @@ export function DropHeader() {
           <ArrowLeft className="h-4 w-4" strokeWidth={2} />
         </button>
         <span className="truncate text-xs font-semibold text-zinc-500">Drop</span>
-        <button
-          type="button"
-          onClick={toggleCollapsed}
-          aria-label="Mostrar cabecera"
-          aria-expanded={false}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-100 active:bg-zinc-800"
-        >
-          <ChevronsDown className="h-4 w-4" strokeWidth={2} />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => void onRefresh()}
+            aria-label="Refrescar Drop"
+            aria-busy={refreshing}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-100 active:bg-zinc-800"
+          >
+            <Zap
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+              strokeWidth={2}
+            />
+          </button>
+          <button
+            type="button"
+            onClick={toggleCollapsed}
+            aria-label="Mostrar cabecera"
+            aria-expanded={false}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-100 active:bg-zinc-800"
+          >
+            <ChevronsDown className="h-4 w-4" strokeWidth={2} />
+          </button>
+        </div>
       </header>
     );
   }
@@ -62,7 +82,21 @@ export function DropHeader() {
           <p className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
             Crack
           </p>
-          <h1 className="mt-0.5 text-lg font-bold">Drop</h1>
+          <div className="mt-0.5 flex items-center gap-2">
+            <h1 className="text-lg font-bold">Drop</h1>
+            <button
+              type="button"
+              onClick={() => void onRefresh()}
+              aria-label="Refrescar Drop"
+              aria-busy={refreshing}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 active:bg-zinc-800"
+            >
+              <Zap
+                className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+                strokeWidth={2}
+              />
+            </button>
+          </div>
         </div>
         <button
           type="button"

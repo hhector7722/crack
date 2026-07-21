@@ -59,6 +59,7 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     null
   );
   const [realtimeStatus, setRealtimeStatus] = useState<"connecting" | "connected" | "error">("connecting");
+  const [refreshing, setRefreshing] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -148,6 +149,32 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
   const removeDrop = useCallback((dropId: string) => {
     setDrops((current) => current.filter((d) => d.id !== dropId));
   }, []);
+
+  const refreshDrops = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    setError(null);
+    try {
+      const supabase = createClient();
+      const { data, error: fetchError } = await supabase
+        .from("drops")
+        .select(
+          "id, content, user_id, created_at, expires_at, attachments:drop_attachments(*)"
+        )
+        .eq("user_id", userId)
+        .gt("expires_at", new Date().toISOString())
+        .order("created_at", { ascending: false });
+
+      if (fetchError) throw fetchError;
+      setDrops(sortDropsAsc((data ?? []) as Drop[]));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "No se pudo refrescar Drop"
+      );
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshing, userId]);
 
   // realtime
   useEffect(() => {
@@ -497,6 +524,8 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     textareaRef,
     canSend,
     realtimeStatus,
+    refreshing,
+    refreshDrops,
     handleContentResize,
     handleTextareaChange,
     handleFileChange,
