@@ -117,7 +117,7 @@ function getBearerToken(request: Request): string | null {
   return token.length > 0 ? token : null;
 }
 
-function extensionFromUpload(file: Blob & { name?: string }): string {
+function extensionFromUpload(file: { name?: string; type?: string }): string {
   const name = file.name ?? "";
   if (name.includes(".")) {
     const fromName = name.split(".").pop()?.toLowerCase();
