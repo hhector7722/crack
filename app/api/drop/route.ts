@@ -31,17 +31,21 @@ type DropRow = {
   attachments: DropAttachmentRow[];
 };
 
-const jsonPayloadSchema = z.object({
-  content: z.string().trim().max(10000).optional(),
-  fileUrl: z.string().trim().max(2048).optional(),
-  file_url: z.string().trim().max(2048).optional(),
-  /** Base64 del archivo (atajos iOS); admite data URL. */
-  fileBase64: z.string().min(1).optional(),
-  file_base64: z.string().min(1).optional(),
-  filename: z.string().trim().max(255).optional(),
-  mimeType: z.string().trim().max(128).optional(),
-  mime_type: z.string().trim().max(128).optional(),
-});
+const jsonPayloadSchema = z
+  .object({
+    content: z.string().trim().max(10000).optional(),
+    fileUrl: z.string().trim().max(2048).optional(),
+    file_url: z.string().trim().max(2048).optional(),
+    /** Base64 del archivo (atajos iOS); admite data URL. */
+    fileBase64: z.string().min(1).optional(),
+    file_base64: z.string().min(1).optional(),
+    base64: z.string().min(1).optional(),
+    imageBase64: z.string().min(1).optional(),
+    filename: z.string().trim().max(255).optional(),
+    mimeType: z.string().trim().max(128).optional(),
+    mime_type: z.string().trim().max(128).optional(),
+  })
+  .passthrough();
 
 function blobFromBase64(
   raw: string,
@@ -49,8 +53,59 @@ function blobFromBase64(
   filename: string,
 ): File {
   const cleaned = raw.includes(",") ? raw.split(",").pop()! : raw;
-  const bytes = Buffer.from(cleaned, "base64");
+  const bytes = Buffer.from(cleaned.replace(/\s/g, ""), "base64");
   return new File([bytes], filename, { type: mimeType });
+}
+
+function pickBase64(data: Record<string, unknown>): string | null {
+  const keys = [
+    "fileBase64",
+    "file_base64",
+    "base64",
+    "imageBase64",
+    "image_base64",
+  ];
+  for (const key of keys) {
+    const value = data[key];
+    if (typeof value === "string" && value.trim().length > 0) return value.trim();
+  }
+  return null;
+}
+
+async function uploadDropAttachment(
+  userId: string,
+  file: Blob & { name?: string; type: string },
+): Promise<{ file_url: string; content_type: ContentType }> {
+  const mime = file.type || "application/octet-stream";
+  const ct = mimeToContentType(mime);
+  const ext = extensionFromUpload(file);
+  const filePath = await uploadFile(
+    createAdminClient(),
+    userId,
+    "drops",
+    file,
+    ext,
+  );
+  return { file_url: filePath, content_type: ct };
+}
+
+async function attachmentFromBase64(
+  userId: string,
+  b64: string,
+  mimeHint?: string | null,
+  filenameHint?: string | null,
+): Promise<{ file_url: string; content_type: ContentType } | null> {
+  const mime =
+    mimeHint?.trim() ||
+    (b64.startsWith("data:")
+      ? b64.slice(5, b64.indexOf(";")) || "image/jpeg"
+      : "image/jpeg");
+  const filename =
+    filenameHint?.trim() ||
+    `upload.${extensionFromUpload({ type: mime, name: "" })}`;
+  const file = blobFromBase64(b64, mime, filename);
+  if (file.size <= 0) return null;
+  return uploadDropAttachment(userId, file);
 }
 
 function getBearerToken(request: Request): string | null {
@@ -166,10 +221,12 @@ export async function POST(request: Request) {
   const contentTypeHeader = request.headers.get("content-type") ?? "";
   let content: string | null = null;
   let attachments: { file_url: string; content_type: ContentType }[] = [];
+  let debugKeys: string[] = [];
 
   try {
     if (contentTypeHeader.includes("multipart/form-data")) {
       const formData = await request.formData();
+      debugKeys = [...new Set(formData.keys())];
       const rawContent = formData.get("content") ?? formData.get("text");
       const file =
         asUploadBlob(formData.get("file")) ??
@@ -179,20 +236,31 @@ export async function POST(request: Request) {
       if (typeof rawContent === "string") content = rawContent.trim() || null;
 
       if (file) {
-        const mime = file.type || "application/octet-stream";
-        const ct = mimeToContentType(mime);
-        const ext = extensionFromUpload(file);
-        const filePath = await uploadFile(
-          createAdminClient(),
-          auth.userId,
-          "drops",
-          file,
-          ext,
-        );
-        attachments = [{ file_url: filePath, content_type: ct }];
+        attachments = [await uploadDropAttachment(auth.userId, file)];
+      } else {
+        const formRecord: Record<string, unknown> = {};
+        for (const key of debugKeys) {
+          const value = formData.get(key);
+          if (typeof value === "string") formRecord[key] = value;
+        }
+        const b64 = pickBase64(formRecord);
+        if (b64) {
+          const attached = await attachmentFromBase64(
+            auth.userId,
+            b64,
+            typeof formRecord.mimeType === "string"
+              ? formRecord.mimeType
+              : typeof formRecord.mime_type === "string"
+                ? formRecord.mime_type
+                : null,
+            typeof formRecord.filename === "string" ? formRecord.filename : null,
+          );
+          if (attached) attachments = [attached];
+        }
       }
     } else {
-      const json = await request.json();
+      const json = (await request.json()) as Record<string, unknown>;
+      debugKeys = Object.keys(json);
       const parsed = jsonPayloadSchema.parse(json);
       content = parsed.content?.trim() || null;
 
@@ -201,42 +269,32 @@ export async function POST(request: Request) {
         attachments = [{ file_url: fileUrl, content_type: "file" }];
       }
 
-      const b64 = parsed.fileBase64 ?? parsed.file_base64;
+      const b64 = pickBase64(parsed as Record<string, unknown>);
       if (b64 && attachments.length === 0) {
-        const mime =
-          parsed.mimeType?.trim() ||
-          parsed.mime_type?.trim() ||
-          (b64.startsWith("data:")
-            ? b64.slice(5, b64.indexOf(";")) || "application/octet-stream"
-            : "application/octet-stream");
-        const filename =
-          parsed.filename?.trim() ||
-          `upload.${extensionFromUpload({ type: mime, name: "" })}`;
-        const file = blobFromBase64(b64, mime, filename);
-        if (file.size > 0) {
-          const ct = mimeToContentType(mime);
-          const ext = extensionFromUpload(file);
-          const filePath = await uploadFile(
-            createAdminClient(),
-            auth.userId,
-            "drops",
-            file,
-            ext,
-          );
-          attachments = [{ file_url: filePath, content_type: ct }];
-        }
+        const attached = await attachmentFromBase64(
+          auth.userId,
+          b64,
+          parsed.mimeType ?? parsed.mime_type,
+          parsed.filename,
+        );
+        if (attached) attachments = [attached];
       }
     }
   } catch {
     return NextResponse.json(
-      { error: "Cuerpo de la petición inválido" },
+      { error: "Cuerpo de la petición inválido", contentType: contentTypeHeader },
       { status: 400 },
     );
   }
 
   if (!content && attachments.length === 0) {
     return NextResponse.json(
-      { error: "content o un archivo requerido" },
+      {
+        error: "content o un archivo requerido",
+        hint: "Usa JSON con fileBase64 (Texto) o Formulario con file (archivo). Claves recibidas abajo.",
+        receivedKeys: debugKeys,
+        contentType: contentTypeHeader,
+      },
       { status: 400 },
     );
   }
