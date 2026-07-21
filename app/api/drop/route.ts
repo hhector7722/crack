@@ -35,7 +35,23 @@ const jsonPayloadSchema = z.object({
   content: z.string().trim().max(10000).optional(),
   fileUrl: z.string().trim().max(2048).optional(),
   file_url: z.string().trim().max(2048).optional(),
+  /** Base64 del archivo (atajos iOS); admite data URL. */
+  fileBase64: z.string().min(1).optional(),
+  file_base64: z.string().min(1).optional(),
+  filename: z.string().trim().max(255).optional(),
+  mimeType: z.string().trim().max(128).optional(),
+  mime_type: z.string().trim().max(128).optional(),
 });
+
+function blobFromBase64(
+  raw: string,
+  mimeType: string,
+  filename: string,
+): File {
+  const cleaned = raw.includes(",") ? raw.split(",").pop()! : raw;
+  const bytes = Buffer.from(cleaned, "base64");
+  return new File([bytes], filename, { type: mimeType });
+}
 
 function getBearerToken(request: Request): string | null {
   const header = request.headers.get("authorization");
@@ -183,6 +199,32 @@ export async function POST(request: Request) {
       const fileUrl = parsed.file_url?.trim() ?? parsed.fileUrl?.trim() ?? null;
       if (fileUrl) {
         attachments = [{ file_url: fileUrl, content_type: "file" }];
+      }
+
+      const b64 = parsed.fileBase64 ?? parsed.file_base64;
+      if (b64 && attachments.length === 0) {
+        const mime =
+          parsed.mimeType?.trim() ||
+          parsed.mime_type?.trim() ||
+          (b64.startsWith("data:")
+            ? b64.slice(5, b64.indexOf(";")) || "application/octet-stream"
+            : "application/octet-stream");
+        const filename =
+          parsed.filename?.trim() ||
+          `upload.${extensionFromUpload({ type: mime, name: "" })}`;
+        const file = blobFromBase64(b64, mime, filename);
+        if (file.size > 0) {
+          const ct = mimeToContentType(mime);
+          const ext = extensionFromUpload(file);
+          const filePath = await uploadFile(
+            createAdminClient(),
+            auth.userId,
+            "drops",
+            file,
+            ext,
+          );
+          attachments = [{ file_url: filePath, content_type: ct }];
+        }
       }
     }
   } catch {
