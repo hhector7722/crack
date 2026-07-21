@@ -34,6 +34,8 @@ type DropRow = {
 const jsonPayloadSchema = z
   .object({
     content: z.string().trim().max(10000).optional(),
+    /** Alias habitual de atajos pensados para Crack/share-link. */
+    url: z.string().trim().max(10000).optional(),
     fileUrl: z.string().trim().max(2048).optional(),
     file_url: z.string().trim().max(2048).optional(),
     /** Base64 del archivo (atajos iOS); admite data URL. */
@@ -263,6 +265,10 @@ export async function POST(request: Request) {
       debugKeys = Object.keys(json);
       const parsed = jsonPayloadSchema.parse(json);
       content = parsed.content?.trim() || null;
+      // Atajos de Crack a veces mandan `url` aquí por error: trátarlo como content.
+      if (!content && parsed.url?.trim()) {
+        content = parsed.url.trim();
+      }
 
       const fileUrl = parsed.file_url?.trim() ?? parsed.fileUrl?.trim() ?? null;
       if (fileUrl) {
