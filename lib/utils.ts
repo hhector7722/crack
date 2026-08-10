@@ -74,6 +74,14 @@ export function extractFirstUrl(text: string | null | undefined): string | null 
   return match?.[0] ?? null;
 }
 
+function extractStandaloneUrl(text: string | null | undefined): string | null {
+  const trimmed = text?.trim();
+  if (!trimmed) return null;
+
+  const match = trimmed.match(URL_RE);
+  return match?.[0] === trimmed ? trimmed : null;
+}
+
 export function getNoteUrl(item: { title: string | null; content: string | null }): string | null {
-  return extractFirstUrl(item.content) ?? extractFirstUrl(item.title);
+  return extractStandaloneUrl(item.content) ?? extractStandaloneUrl(item.title);
 }
