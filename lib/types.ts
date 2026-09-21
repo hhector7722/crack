@@ -28,6 +28,7 @@ export interface Item {
   metadata: ItemMetadata;
   pinned: boolean;
   created_at: string;
+  last_opened_at: string | null;
   user_id: string;
 }
 

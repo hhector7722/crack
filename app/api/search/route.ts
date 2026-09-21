@@ -85,6 +85,7 @@ export async function GET(request: NextRequest) {
       metadata: r.metadata as SearchResultItem["metadata"],
       pinned: r.pinned,
       created_at: r.created_at,
+      last_opened_at: null,
       user_id: r.user_id,
       score: r.score,
       search_source: (r.search_source as SearchResultItem["search_source"]) || searchSource,

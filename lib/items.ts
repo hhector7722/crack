@@ -104,6 +104,23 @@ export async function togglePin(
   }
 }
 
+export async function recordItemOpened(
+  supabase: SupabaseClient,
+  id: string
+): Promise<string> {
+  const openedAt = new Date().toISOString();
+  const { error } = await supabase
+    .from("items")
+    .update({ last_opened_at: openedAt })
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(`Error registrando apertura: ${error.message}`);
+  }
+
+  return openedAt;
+}
+
 export function triggerEmbed(itemId: string): void {
   fetch("/api/embed", {
     method: "POST",

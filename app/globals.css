@@ -15,7 +15,7 @@
   --tm-tabbar-shell: calc(
     var(--tm-tabbar-core) + var(--tm-chrome-dots)
   );
-  --tm-bottom-chrome-block: 0px;
+  --tm-bottom-chrome-block: calc(9.5rem + env(safe-area-inset-bottom, 0px));
   --tm-chrome-bottom: 0px;
   --tab-bar-height: var(--tm-bottom-chrome-block);
   --tm-content-bottom: var(--tm-bottom-chrome-block);
@@ -195,19 +195,6 @@ html[data-modal-open] .tm-app-main {
   max-height: calc(var(--tm-app-height) - var(--tm-bottom-chrome-block));
 }
 
-.tm-app-main--internal-scroll .tm-tab-swipe-root {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
-}
-
-.tm-app-main--internal-scroll > .tm-app-pager {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
 .tm-tab-scroll-layout {
   box-sizing: border-box;
   display: flex;
@@ -244,24 +231,6 @@ html[data-modal-open] .tm-app-main {
   box-sizing: border-box;
 }
 
-.tm-tab-swipe-root--dragging {
-  touch-action: none;
-}
-
-.tm-tab-swipe-root {
-  overscroll-behavior-x: none;
-}
-
-html[data-tab-swipe-dragging],
-html[data-tab-swipe-dragging] body {
-  overscroll-behavior-x: none;
-  touch-action: pan-y pinch-zoom;
-}
-
-html:has(.tm-tab-swipe-root) {
-  overscroll-behavior-x: none;
-}
-
 html:has(.tm-app-shell) {
   background-color: var(--tm-tabbar-bg-hex);
   background-image: var(--tm-shell-bg-image);
@@ -272,23 +241,6 @@ html:has(.tm-app-shell) body {
   background-color: var(--tm-tabbar-bg-hex);
   background-image: var(--tm-shell-bg-image);
   background-attachment: fixed;
-}
-
-.swipe-pager-root--dragging {
-  cursor: grabbing;
-}
-
-.swipe-pager-panel {
-  transform-origin: center center;
-  backface-visibility: hidden;
-}
-
-.swipe-pager-panel--outgoing {
-  z-index: 0;
-}
-
-.swipe-pager-panel--incoming {
-  z-index: 1;
 }
 
 .crack-modal-root {

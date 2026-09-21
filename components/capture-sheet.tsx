@@ -2,10 +2,11 @@
 
 import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Mic, FileEdit, Camera } from "lucide-react";
+import { FileText, Image, Link2, Mic, Paperclip } from "lucide-react";
 import { AppModal } from "@/components/app-modal";
 import { VoiceRecorder } from "@/components/voice-recorder";
 import { NoteCapture, type NoteCaptureHandle } from "@/components/note-capture";
+import { LinkCapture } from "@/components/link-capture";
 import { useAppShell } from "@/components/app-shell-context";
 import type { CaptureMode } from "@/components/app-shell-context";
 
@@ -24,7 +25,7 @@ export function CaptureSheet({
   onOpenChange,
   onSaved,
 }: CaptureSheetProps) {
-  const { openCamera, openGallery } = useAppShell();
+  const { openCamera, openGallery, openFilePicker } = useAppShell();
   const [viewMode, setViewMode] = useState<ViewMode>(mode);
   const [error, setError] = useState<string | null>(null);
   const noteRef = useRef<NoteCaptureHandle>(null);
@@ -51,11 +52,7 @@ export function CaptureSheet({
     onSaved();
   }
 
-  function handleMenuSelect(selected: "voice" | "note" | "image") {
-    if (selected === "image") {
-      setViewMode("image");
-      return;
-    }
+  function handleMenuSelect(selected: Exclude<CaptureMode, "menu">) {
     setViewMode(selected);
   }
 
@@ -73,6 +70,7 @@ export function CaptureSheet({
     voice: "Grabar voz",
     note: "Nota de texto",
     image: "Foto o vídeo",
+    link: "Nuevo enlace",
   };
 
   const showBack = mode === "menu" && viewMode !== "menu";
@@ -84,30 +82,36 @@ export function CaptureSheet({
     return createPortal(
       <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black/40 backdrop-blur-md">
         <div className="absolute inset-0" onClick={() => handleClose(false)} />
-        <div className="relative z-10 flex items-center justify-center gap-8">
-          <button
-            type="button"
-            onClick={() => handleMenuSelect("voice")}
-            className="flex h-20 w-20 items-center justify-center rounded-full bg-black shadow-lg shadow-black/50 active:scale-95"
-          >
-            <Mic className="h-8 w-8 text-red-500" />
-          </button>
-          <button
-            type="button"
-            onClick={() => handleMenuSelect("note")}
-            className="flex h-20 w-20 items-center justify-center rounded-full bg-black shadow-lg shadow-black/50 active:scale-95"
-          >
-            <FileEdit className="h-8 w-8 text-white" />
-          </button>
+        <div className="relative z-10 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-2 shadow-2xl shadow-black/70">
+          <p className="px-3 pb-2 pt-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+            Crear
+          </p>
+          {[
+            { mode: "note" as const, label: "Nota", icon: FileText },
+            { mode: "voice" as const, label: "Audio", icon: Mic },
+            { mode: "image" as const, label: "Foto / vídeo", icon: Image },
+            { mode: "link" as const, label: "Enlace", icon: Link2 },
+          ].map(({ mode: optionMode, label, icon: Icon }) => (
+            <button
+              key={optionMode}
+              type="button"
+              onClick={() => handleMenuSelect(optionMode)}
+              className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-zinc-100 active:bg-zinc-800"
+            >
+              <Icon className="h-5 w-5 text-zinc-400" />
+              <span className="font-medium">{label}</span>
+            </button>
+          ))}
           <button
             type="button"
             onClick={() => {
               onOpenChange(false);
-              openGallery();
+              openFilePicker();
             }}
-            className="flex h-20 w-20 items-center justify-center rounded-full bg-black shadow-lg shadow-black/50 active:scale-95"
+            className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-zinc-100 active:bg-zinc-800"
           >
-            <Camera className="h-8 w-8 text-white" />
+            <Paperclip className="h-5 w-5 text-zinc-400" />
+            <span className="font-medium">Archivo</span>
           </button>
         </div>
       </div>,
@@ -144,6 +148,10 @@ export function CaptureSheet({
 
       {viewMode === "note" ? (
         <NoteCapture ref={noteRef} onSaved={handleSaved} onError={setError} />
+      ) : null}
+
+      {viewMode === "link" ? (
+        <LinkCapture onSaved={handleSaved} onError={setError} />
       ) : null}
 
       {showBack ? (

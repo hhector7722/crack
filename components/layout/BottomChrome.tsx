@@ -1,41 +1,17 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { FileUp, Mic, Image, Home, Link2, type LucideIcon } from "lucide-react";
-import { PagerDots } from "@/components/layout/PagerDots";
+import { usePathname, useRouter } from "next/navigation";
+import { Home, Library, Plus, Search } from "lucide-react";
 import { useAppShell } from "@/components/app-shell-context";
+import { useSearch } from "@/components/search-context";
 import { cn } from "@/lib/utils";
-
-const NAV_ITEMS: { pageIndex: number; label: string; icon: LucideIcon }[] = [
-  { pageIndex: 0, label: "Archivos", icon: FileUp },
-  { pageIndex: 1, label: "Audios", icon: Mic },
-  { pageIndex: 3, label: "Inicio", icon: Home },
-  { pageIndex: 2, label: "Imágenes", icon: Image },
-  { pageIndex: 4, label: "Enlaces", icon: Link2 },
-];
 
 export function BottomChrome() {
   const pathname = usePathname();
-  const { pagerIndex, navigateToPage, openFilePicker, openCapture } = useAppShell();
-
-  function handleNavAction(pageIndex: number) {
-    switch (pageIndex) {
-      case 0:
-        openFilePicker();
-        return;
-      case 1:
-        openCapture("voice");
-        return;
-      case 2:
-        openCapture("image");
-        return;
-      case 4:
-        navigateToPage(pageIndex);
-        return;
-      default:
-        navigateToPage(pageIndex);
-    }
-  }
+  const router = useRouter();
+  const { openCaptureMenu } = useAppShell();
+  const { toggleSearch } = useSearch();
+  const libraryActive = pathname === "/biblioteca" || ["/notes", "/enlaces", "/media", "/audio", "/files"].some((path) => pathname.startsWith(path));
 
   if (pathname === "/login" || pathname.startsWith("/auth")) {
     return null;
@@ -44,35 +20,43 @@ export function BottomChrome() {
   return (
     <div
       data-tm-bottom-chrome
-      className="tm-bottom-chrome pointer-events-none fixed bottom-0 left-0 right-0 z-[95] flex flex-col"
+      className="tm-bottom-chrome pointer-events-none fixed bottom-0 left-0 right-0 z-[95] flex flex-col bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent px-3 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-5"
     >
-      <div className="pointer-events-auto mx-3 flex items-center justify-around rounded-full bg-[#1c1c1e] px-2 py-3 shadow-xl shadow-black/50 ring-2 ring-white/20">
-        {NAV_ITEMS.map(({ pageIndex, label, icon: Icon }) => {
-          const active = pagerIndex === pageIndex;
+      <button
+        type="button"
+        onClick={toggleSearch}
+        className="pointer-events-auto mb-2 flex min-h-12 w-full items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900 px-4 text-left text-sm text-zinc-500 shadow-lg shadow-black/30 active:bg-zinc-800"
+      >
+        <Search className="h-5 w-5" />
+        <span>Buscar cualquier cosa…</span>
+      </button>
 
-          return (
-            <button
-              key={label}
-              type="button"
-              onClick={() => handleNavAction(pageIndex)}
-              aria-label={label}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "flex h-11 w-11 items-center justify-center rounded-full transition-colors active:bg-zinc-800",
-                active
-                  ? "text-zinc-100"
-                  : "text-zinc-300 active:text-zinc-100"
-              )}
-            >
-              <Icon className="h-5 w-5" strokeWidth={2} />
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="relative top-3 z-10">
-        <PagerDots />
-      </div>
+      <nav className="pointer-events-auto grid min-h-16 grid-cols-3 items-center rounded-2xl border border-zinc-800 bg-[#141416] px-2 shadow-xl shadow-black/50" aria-label="Navegación principal">
+        <button
+          type="button"
+          onClick={() => router.replace("/", { scroll: false })}
+          aria-current={!libraryActive ? "page" : undefined}
+          className={cn("flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium", !libraryActive ? "text-zinc-100" : "text-zinc-500")}
+        >
+          <Home className="h-5 w-5" /> Inicio
+        </button>
+        <button
+          type="button"
+          onClick={openCaptureMenu}
+          aria-label="Crear"
+          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 active:scale-95"
+        >
+          <Plus className="h-7 w-7" />
+        </button>
+        <button
+          type="button"
+          onClick={() => router.replace("/biblioteca", { scroll: false })}
+          aria-current={libraryActive ? "page" : undefined}
+          className={cn("flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium", libraryActive ? "text-zinc-100" : "text-zinc-500")}
+        >
+          <Library className="h-5 w-5" /> Biblioteca
+        </button>
+      </nav>
     </div>
   );
 }

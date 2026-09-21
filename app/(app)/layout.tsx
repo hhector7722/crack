@@ -12,8 +12,7 @@ import {
 import { Settings, X } from "lucide-react";
 import { CaptureSheet } from "@/components/capture-sheet";
 import { TabBarWrapper } from "@/components/layout/TabBarWrapper";
-
-import { AppPager } from "@/components/app-pager";
+import { MainContent } from "@/components/main-content";
 import { ProfileView } from "@/components/profile-view";
 import { AppShellProvider, type CaptureMode } from "@/components/app-shell-context";
 import { SearchProvider, useSearch } from "@/components/search-context";
@@ -159,7 +158,7 @@ export default function AppLayout({
                     type="button"
                     onClick={() => setShowProfile((v) => !v)}
                     aria-label="Ajustes"
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 transition-colors active:text-zinc-100"
+                    className="flex h-12 w-12 items-center justify-center rounded-full text-zinc-400 transition-colors active:text-zinc-100"
                   >
                     {showProfile ? <X className="h-5 w-5" /> : <Settings className="h-5 w-5" />}
                   </button>
@@ -185,7 +184,7 @@ export default function AppLayout({
                   <Suspense fallback={null}>
                     <UrlSyncObserver />
                   </Suspense>
-                  <AppPager refreshKey={refreshKey} />
+                  <MainContent refreshKey={refreshKey} />
                 </>
               )}
             </main>

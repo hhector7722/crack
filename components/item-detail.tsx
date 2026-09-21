@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Link2, Pencil, Trash2, Share2, Sparkles } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link2, Pencil, Trash2, Share2, Sparkles, Pin, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { AppModal } from "@/components/app-modal";
 import { createClient } from "@/lib/supabase/client";
-import { updateItem, deleteItem } from "@/lib/items";
+import { updateItem, deleteItem, recordItemOpened } from "@/lib/items";
 import { getSignedUrl, deleteFile } from "@/lib/storage";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -26,6 +26,7 @@ interface ItemDetailProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdated: (item: Item) => void;
+  onOpened?: (id: string, openedAt: string) => void;
   onDeleted: () => void;
 }
 
@@ -35,8 +36,10 @@ export function ItemDetail({
   open,
   onOpenChange,
   onUpdated,
+  onOpened,
   onDeleted,
 }: ItemDetailProps) {
+  const openedThisCycleRef = useRef(new Set<string>());
   const {
     activeIndex,
     activeItem,
@@ -53,6 +56,21 @@ export function ItemDetail({
   });
 
   const currentItem = activeItem ?? initialItem;
+
+  useEffect(() => {
+    if (!open) {
+      openedThisCycleRef.current.clear();
+      return;
+    }
+    if (openedThisCycleRef.current.has(currentItem.id)) return;
+    openedThisCycleRef.current.add(currentItem.id);
+
+    void recordItemOpened(createClient(), currentItem.id)
+      .then((openedAt) => onOpened?.(currentItem.id, openedAt))
+      .catch(() => {
+        openedThisCycleRef.current.delete(currentItem.id);
+      });
+  }, [currentItem.id, onOpened, open]);
 
   const panelSlide = buildCarouselPanelSlide((slideItem) => (
     <ItemDetailPanel
@@ -97,7 +115,7 @@ function ItemDetailPanel({
   onOpenChange,
   onUpdated,
   onDeleted,
-}: Omit<ItemDetailProps, "carouselItems">) {
+}: Omit<ItemDetailProps, "carouselItems" | "onOpened">) {
   const [title, setTitle] = useState(item.title ?? "");
   const [content, setContent] = useState(item.content ?? "");
   const [tags, setTags] = useState(item.metadata.tags?.join(", ") ?? "");
@@ -107,6 +125,7 @@ function ItemDetailPanel({
   const [priority, setPriority] = useState<Priority | undefined>(item.metadata.priority);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [pinning, setPinning] = useState(false);
   const [loadingMedia, setLoadingMedia] = useState(false);
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [linkImage, setLinkImage] = useState<string | null>(item.metadata.link_image ?? null);
@@ -194,6 +213,7 @@ function ItemDetailPanel({
         },
       });
       onUpdated(updated);
+      setMode("view");
     } catch {
       alert("Error guardando cambios");
     } finally {
@@ -202,7 +222,7 @@ function ItemDetailPanel({
   }
 
   async function handleDelete() {
-    if (!window.confirm("¿Eliminar permanentemente?")) return;
+    if (!window.confirm("¿Eliminar este elemento?\nEsta acción no se puede deshacer.")) return;
     try {
       const supabase = createClient();
       if (item.file_url) {
@@ -213,6 +233,21 @@ function ItemDetailPanel({
       onOpenChange(false);
     } catch {
       alert("Error eliminando item");
+    }
+  }
+
+  async function handleTogglePin() {
+    if (pinning) return;
+    setPinning(true);
+    try {
+      const updated = await updateItem(createClient(), item.id, {
+        pinned: !item.pinned,
+      });
+      onUpdated(updated);
+    } catch {
+      alert("No se pudo cambiar el fijado");
+    } finally {
+      setPinning(false);
     }
   }
 
@@ -254,73 +289,85 @@ function ItemDetailPanel({
 
   return (
     <>
-      <div className="mb-4 flex flex-col items-end gap-2">
+      <div className="mb-4 flex flex-col gap-3">
         <span className="text-xs text-zinc-400 whitespace-nowrap">
           {format(new Date(item.created_at), "d 'de' MMMM yyyy 'a las' H:mm", { locale: es })}
         </span>
-        <div className="flex items-center gap-2">
-          {mode === "edit" && (
-            <>
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  const text = [title, content].filter(Boolean).join("\n");
-                  if (!text.trim()) return;
-                  try {
-                    const res = await fetch("/api/classify", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ transcript: text }),
-                    });
-                    if (!res.ok) return;
-                    const data = await res.json();
-                    if (data.title) setTitle(data.title);
-                    if (data.type) setClassificationType(data.type);
-                    if (data.tags) setTags(data.tags);
-                    if (data.priority) setPriority(data.priority);
-                  } catch {}
-                }}
-                className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
-                title="Reclasificar con IA"
-              >
-                <Sparkles className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving}
-                className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors disabled:opacity-40"
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                  <polyline points="17 21 17 13 7 13 7 21" />
-                  <polyline points="7 3 7 8 15 8" />
-                </svg>
-              </button>
-            </>
-          )}
-          <button
-            type="button"
-            onClick={handleShare}
-            className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode(m => m === "view" ? "edit" : "view")}
-            className="p-1 text-zinc-500 hover:text-zinc-300 transition-colors"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-        </div>
+        {mode === "view" ? (
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <button
+              type="button"
+              onClick={() => void handleTogglePin()}
+              disabled={pinning}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-zinc-200 active:bg-zinc-800 disabled:opacity-50"
+            >
+              <Pin className={cn("h-4 w-4", item.pinned && "fill-current")} />
+              {item.pinned ? "Desfijar" : "Fijar"}
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleShare()}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-zinc-200 active:bg-zinc-800"
+            >
+              <Share2 className="h-4 w-4" /> Compartir
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("edit")}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-zinc-200 active:bg-zinc-800"
+            >
+              <Pencil className="h-4 w-4" /> Editar
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleDelete()}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-red-950/35 px-3 text-sm font-medium text-red-300 active:bg-red-950/60"
+            >
+              <Trash2 className="h-4 w-4" /> Eliminar
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              type="button"
+              onClick={() => setMode("view")}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-zinc-300 active:bg-zinc-800"
+            >
+              <X className="h-4 w-4" /> Cancelar
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                const text = [title, content].filter(Boolean).join("\n");
+                if (!text.trim()) return;
+                try {
+                  const res = await fetch("/api/classify", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ transcript: text }),
+                  });
+                  if (!res.ok) return;
+                  const data = await res.json();
+                  if (data.title) setTitle(data.title);
+                  if (data.type) setClassificationType(data.type);
+                  if (data.tags) setTags(data.tags);
+                  if (data.priority) setPriority(data.priority);
+                } catch {}
+              }}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-zinc-300 active:bg-zinc-800"
+            >
+              <Sparkles className="h-4 w-4" /> Clasificar
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={saving}
+              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-100 px-3 text-sm font-semibold text-zinc-950 active:bg-white disabled:opacity-50"
+            >
+              <Save className="h-4 w-4" /> {saving ? "Guardando…" : "Guardar"}
+            </button>
+          </div>
+        )}
       </div>
 
       {!url && (classificationType || isUnclassified) ? (
