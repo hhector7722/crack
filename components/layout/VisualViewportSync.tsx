@@ -4,6 +4,7 @@ import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   applyVisualViewportChrome,
+  resetVisualViewportChrome,
   VIEWPORT_CHROME_SYNC_EVENT,
 } from "@/lib/layout/viewport-chrome";
 
@@ -78,6 +79,7 @@ export function VisualViewportSync() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("focusout", handleFocusOut);
+      resetVisualViewportChrome();
     };
   }, [pathname]);
 

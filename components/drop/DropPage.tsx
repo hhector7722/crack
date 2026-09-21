@@ -10,6 +10,8 @@ import { DropMessages } from "@/components/drop/DropMessages";
 import { DropComposer } from "@/components/drop/DropComposer";
 import { DropImageOverlay } from "@/components/drop/DropImageOverlay";
 import { DropVideoOverlay } from "@/components/drop/DropVideoOverlay";
+import { DropMediaComposer } from "@/components/drop/DropMediaComposer";
+import { VisualViewportSync } from "@/components/layout/VisualViewportSync";
 
 export type { Drop };
 
@@ -32,16 +34,16 @@ export function DropPage({
     now,
     imageViewer, setImageViewer,
     scrollRef,
-    fileInputRef,
     textareaRef,
     canSend,
     realtimeStatus,
     refreshing,
     refreshDrops,
     handleContentResize,
-    handleFileChange,
     removePendingFile,
     handleSend,
+    sendDrop,
+    reportError,
     removeDrop,
   } = useDrops({ initialDrops, userId });
 
@@ -54,6 +56,7 @@ export function DropPage({
     null
   );
   const [isDragOver, setIsDragOver] = useState(false);
+  const [mediaFiles, setMediaFiles] = useState<File[] | null>(null);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -79,9 +82,11 @@ export function DropPage({
   );
 
   return (
-    <div
+    <>
+      <VisualViewportSync />
+      <div
       data-drop-shell
-      className="fixed inset-0 flex min-w-0 flex-col overflow-x-hidden bg-zinc-950 text-zinc-100"
+      className="fixed inset-x-0 top-[var(--tm-vv-offset-top,0px)] flex h-[var(--tm-vv-height,100dvh)] min-w-0 flex-col overflow-x-hidden bg-zinc-950 text-zinc-100"
       style={{ paddingTop: "env(safe-area-inset-top)" }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -112,10 +117,12 @@ export function DropPage({
         sending={sending}
         error={error}
         onSend={handleSend}
-        onFileChange={handleFileChange}
+        onAddPendingFiles={(files) => setPendingFiles((current) => [...current, ...files])}
+        onGallerySelected={(files) => setMediaFiles(files)}
+        onSendAudio={(file) => sendDrop({ files: [file] })}
+        onRecordingError={reportError}
         onRemovePendingFile={removePendingFile}
         onPasteFile={(file) => setPendingFiles((prev) => [...prev, file])}
-        fileInputRef={fileInputRef}
         textareaRef={textareaRef}
       />
 
@@ -129,7 +136,7 @@ export function DropPage({
         </div>
       ) : null}
 
-      <div className="pointer-events-none fixed bottom-2 right-2 flex items-center gap-1.5">
+      <div className="pointer-events-none fixed bottom-[calc(env(safe-area-inset-bottom)+4.5rem)] right-2 flex items-center gap-1.5">
         <span
           className={`h-2 w-2 rounded-full ${
             realtimeStatus === "connected"
@@ -173,6 +180,23 @@ export function DropPage({
       ) : null}
 
       {actionSheet}
-    </div>
+      </div>
+
+      {mediaFiles ? (
+        <DropMediaComposer
+          files={mediaFiles}
+          sending={sending}
+          onFilesChange={setMediaFiles}
+          onClose={() => {
+            if (!sending) setMediaFiles(null);
+          }}
+          onSend={async (comment, files) => {
+            const sent = await sendDrop({ content: comment, files });
+            if (sent) setMediaFiles(null);
+            return sent;
+          }}
+        />
+      ) : null}
+    </>
   );
 }

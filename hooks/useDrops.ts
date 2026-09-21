@@ -62,8 +62,8 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
   const [refreshing, setRefreshing] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const sendingRef = useRef(false);
   const pinnedToBottomRef = useRef(true);
   const forceScrollRef = useRef(false);
   const suppressScrollTrackingRef = useRef(false);
@@ -406,41 +406,21 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     };
   }, [scrollToBottom, visibleDrops.length]);
 
-  const handleTextareaChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setContent(e.target.value);
-      const el = e.target;
-      el.style.height = "auto";
-      el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
-    },
-    []
-  );
-
-  const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const fileList = e.target.files;
-      if (fileList && fileList.length > 0) {
-        const files: File[] = [];
-        for (let i = 0; i < fileList.length; i++) {
-          const file = fileList.item(i);
-          if (file) files.push(file);
-        }
-        setPendingFiles((prev) => [...prev, ...files]);
-      }
-      e.target.value = "";
-    },
-    []
-  );
-
   const removePendingFile = useCallback((index: number) => {
     setPendingFiles((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault();
-    const trimmed = content.trim();
-    if ((!trimmed && pendingFiles.length === 0) || sending) return;
+  const sendDrop = useCallback(async ({
+    content: rawContent,
+    files = [],
+  }: {
+    content?: string;
+    files?: File[];
+  }): Promise<boolean> => {
+    const trimmed = rawContent?.trim() ?? "";
+    if ((!trimmed && files.length === 0) || sendingRef.current) return false;
 
+    sendingRef.current = true;
     forceScrollRef.current = true;
     pinnedToBottomRef.current = true;
     scrollToBottom();
@@ -453,11 +433,11 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
         void Notification.requestPermission();
       }
 
-      if (pendingFiles.length > 0) {
+      if (files.length > 0) {
         const supabase = createClient();
 
         const attachments = await Promise.all(
-          pendingFiles.map(async (file) => {
+          files.map(async (file) => {
             const ct = contentTypeFromFile(file);
             const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
             const filePath = await uploadFile(supabase, userId, "drops", file, ext);
@@ -477,7 +457,6 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
         if (rpcError) throw rpcError;
 
         upsertDrop(data as unknown as Drop);
-        setPendingFiles([]);
       } else {
         const supabase = createClient();
         const { data, error: insertError } = await supabase
@@ -494,15 +473,26 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
         if (insertError) throw insertError;
         upsertDrop(data as Drop);
       }
-
-      setContent("");
-      if (textareaRef.current) textareaRef.current.style.height = "auto";
+      forceScrollRef.current = true;
+      scrollToBottom();
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error enviando Drop");
+      return false;
     } finally {
+      sendingRef.current = false;
       setSending(false);
     }
-  }
+  }, [scrollToBottom, upsertDrop, userId]);
+
+  const handleSend = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    const sent = await sendDrop({ content, files: pendingFiles });
+    if (!sent) return;
+    setContent("");
+    setPendingFiles([]);
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+  }, [content, pendingFiles, sendDrop]);
 
   const canSend =
     (content.trim().length > 0 || pendingFiles.length > 0) && !sending;
@@ -520,17 +510,16 @@ export function useDrops({ initialDrops, userId }: UseDropsOptions) {
     imageViewer,
     setImageViewer,
     scrollRef,
-    fileInputRef,
     textareaRef,
     canSend,
     realtimeStatus,
     refreshing,
     refreshDrops,
     handleContentResize,
-    handleTextareaChange,
-    handleFileChange,
     removePendingFile,
     handleSend,
+    sendDrop,
+    reportError: setError,
     upsertDrop,
     removeDrop,
   };
