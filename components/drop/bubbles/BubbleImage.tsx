@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { ImageIcon } from "lucide-react";
 import { useSignedUrl } from "@/lib/drop/signed-url-cache";
 

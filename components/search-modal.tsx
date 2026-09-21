@@ -8,7 +8,7 @@ import { useModalOpen } from "@/lib/ui/use-modal-open";
 import { cn, getNoteUrl } from "@/lib/utils";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import type { SearchResultItem, SearchSource } from "@/lib/types";
+import type { SearchResultItem } from "@/lib/types";
 
 interface SearchModalProps {
   open: boolean;
@@ -30,7 +30,6 @@ export function SearchModal({ open, onOpenChange, onSelect, onRefresh }: SearchM
   const [results, setResults] = useState<SearchResultItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [searchSource, setSearchSource] = useState<SearchSource>("fts");
   const [hasSemantic, setHasSemantic] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -48,7 +47,6 @@ export function SearchModal({ open, onOpenChange, onSelect, onRefresh }: SearchM
       setResults([]);
       setSelectedIndex(0);
       setHasSemantic(false);
-      setSearchSource("fts");
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [open]);
@@ -82,7 +80,6 @@ export function SearchModal({ open, onOpenChange, onSelect, onRefresh }: SearchM
         setHasSemantic(true);
       }
       setResults(data.results ?? []);
-      setSearchSource(data.search_source ?? "fts");
       setSelectedIndex(0);
       if (!semantic) {
         logSearchEvent({ query: q.trim() });

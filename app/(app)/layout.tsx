@@ -49,11 +49,7 @@ function KeyboardShortcuts() {
   return null;
 }
 
-export default function AppLayout({
-  children: _children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AppLayout() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -94,10 +90,7 @@ export default function AppLayout({
     setSheetOpen(true);
   }, []);
 
-  async function handleMediaSelected(
-    e: React.ChangeEvent<HTMLInputElement>,
-    _source: "camera" | "gallery"
-  ) {
+  async function handleMediaSelected(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file) return;
@@ -195,7 +188,7 @@ export default function AppLayout({
               accept="image/*,video/*"
               capture="environment"
               className="hidden"
-              onChange={(e) => handleMediaSelected(e, "camera")}
+              onChange={handleMediaSelected}
             />
 
             <input
@@ -203,7 +196,7 @@ export default function AppLayout({
               type="file"
               accept="image/*,video/*"
               className="hidden"
-              onChange={(e) => handleMediaSelected(e, "gallery")}
+              onChange={handleMediaSelected}
             />
 
             <input
