@@ -264,7 +264,7 @@ export function MainContent({ refreshKey = 0 }: { refreshKey?: number }) {
       <PullToRefresh
         action="refresh"
         onPullRelease={loadItems}
-        className="h-full"
+        className="min-h-0 flex-1"
       >
         {error ? (
           <div className="flex flex-col items-center px-4 py-16 text-center">
