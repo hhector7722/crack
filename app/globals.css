@@ -15,7 +15,7 @@
   --tm-tabbar-shell: calc(
     var(--tm-tabbar-core) + var(--tm-chrome-dots)
   );
-  --tm-bottom-chrome-block: calc(9.5rem + env(safe-area-inset-bottom, 0px));
+  --tm-bottom-chrome-block: calc(7.25rem + env(safe-area-inset-bottom, 0px));
   --tm-chrome-bottom: 0px;
   --tab-bar-height: var(--tm-bottom-chrome-block);
   --tm-content-bottom: var(--tm-bottom-chrome-block);

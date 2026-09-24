@@ -9,17 +9,81 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatRelative(dateStr: string): string {
-  return formatDistanceToNow(new Date(dateStr), { addSuffix: true, locale: es });
+  return formatDistanceToNow(new Date(dateStr), {
+    addSuffix: true,
+    locale: es,
+  });
 }
 
-export function displayValue(value: string | number | null | undefined): string {
+export function displayValue(
+  value: string | number | null | undefined
+): string {
   if (value === null || value === undefined || value === "" || value === 0) {
     return " ";
   }
   return String(value);
 }
 
-export function classificationLabel(type: ClassificationType | undefined): string {
+const NAMED_HTML_ENTITIES: Record<string, string> = {
+  amp: "&",
+  quot: '"',
+  apos: "'",
+  lt: "<",
+  gt: ">",
+  nbsp: " ",
+  ndash: "–",
+  mdash: "—",
+  hellip: "…",
+  laquo: "«",
+  raquo: "»",
+};
+
+export function decodeHtmlEntities(
+  value: string | null | undefined
+): string {
+  if (!value) return "";
+
+  let decoded = value;
+
+  for (let pass = 0; pass < 2; pass += 1) {
+    decoded = decoded.replace(
+      /&(#x?[0-9a-f]+|[a-z][a-z0-9]+);/gi,
+      (match, entity: string) => {
+        const normalized = entity.toLowerCase();
+
+        if (normalized.startsWith("#x")) {
+          const codePoint = Number.parseInt(normalized.slice(2), 16);
+          if (Number.isFinite(codePoint)) {
+            try {
+              return String.fromCodePoint(codePoint);
+            } catch {
+              return match;
+            }
+          }
+        }
+
+        if (normalized.startsWith("#")) {
+          const codePoint = Number.parseInt(normalized.slice(1), 10);
+          if (Number.isFinite(codePoint)) {
+            try {
+              return String.fromCodePoint(codePoint);
+            } catch {
+              return match;
+            }
+          }
+        }
+
+        return NAMED_HTML_ENTITIES[normalized] ?? match;
+      }
+    );
+  }
+
+  return decoded;
+}
+
+export function classificationLabel(
+  type: ClassificationType | undefined
+): string {
   switch (type) {
     case "reminder":
       return "Recordatorio";
@@ -33,7 +97,9 @@ export function classificationLabel(type: ClassificationType | undefined): strin
   }
 }
 
-export function classificationColor(type: ClassificationType | undefined): string {
+export function classificationColor(
+  type: ClassificationType | undefined
+): string {
   switch (type) {
     case "reminder":
       return "bg-amber-500/20 text-amber-300 border-amber-500/30";
@@ -63,18 +129,22 @@ export function priorityLabel(priority: Priority | undefined): string {
 export function formatDuration(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, "0")}`;
+  return mins + ":" + secs.toString().padStart(2, "0");
 }
 
-const URL_RE = /https?:\/\/[^\s<>"{}|\\^`[\]]+/i;
+const URL_RE = /https?:\/\/[^\s<>"{}|\\^\`[\]]+/i;
 
-export function extractFirstUrl(text: string | null | undefined): string | null {
+export function extractFirstUrl(
+  text: string | null | undefined
+): string | null {
   if (!text) return null;
   const match = text.match(URL_RE);
   return match?.[0] ?? null;
 }
 
-function extractStandaloneUrl(text: string | null | undefined): string | null {
+function extractStandaloneUrl(
+  text: string | null | undefined
+): string | null {
   const trimmed = text?.trim();
   if (!trimmed) return null;
 
@@ -82,6 +152,9 @@ function extractStandaloneUrl(text: string | null | undefined): string | null {
   return match?.[0] === trimmed ? trimmed : null;
 }
 
-export function getNoteUrl(item: { title: string | null; content: string | null }): string | null {
+export function getNoteUrl(item: {
+  title: string | null;
+  content: string | null;
+}): string | null {
   return extractStandaloneUrl(item.content) ?? extractStandaloneUrl(item.title);
 }

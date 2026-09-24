@@ -41,19 +41,30 @@ function legacyFilter(pathname: string): LibraryFilter {
   return "all";
 }
 
-function HomeView({ items, onOpen }: { items: Item[]; onOpen: (item: Item) => void }) {
+function HomeView({
+  items,
+  onOpen,
+}: {
+  items: Item[];
+  onOpen: (item: Item) => void;
+}) {
   const pinned = items.filter((item) => item.pinned);
   const recentlyViewed = items
     .filter((item) => !item.pinned && item.last_opened_at)
     .sort(
       (a, b) =>
-        new Date(b.last_opened_at!).getTime() - new Date(a.last_opened_at!).getTime()
+        new Date(b.last_opened_at!).getTime() -
+        new Date(a.last_opened_at!).getTime()
     )
     .slice(0, 8);
+
   const shownIds = new Set([...pinned, ...recentlyViewed].map((item) => item.id));
   const recent = items
     .filter((item) => !shownIds.has(item.id))
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
 
   const sections = [
     { title: "Fijados", items: pinned },
@@ -61,20 +72,24 @@ function HomeView({ items, onOpen }: { items: Item[]; onOpen: (item: Item) => vo
   ];
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pb-6 pt-3">
+    <div className="mx-auto w-full max-w-3xl px-3 pb-2 pt-2">
       {sections.map((section) => (
-        <section key={section.title} className="mb-7">
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
+        <section key={section.title} className="mb-4">
+          <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
             {section.title}
           </h2>
           {section.items.length ? (
-            <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
+            <div className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-0.5">
               {section.items.map((item) => (
-                <CompactItemTile key={item.id} item={item} onOpen={() => onOpen(item)} />
+                <CompactItemTile
+                  key={item.id}
+                  item={item}
+                  onOpen={() => onOpen(item)}
+                />
               ))}
             </div>
           ) : (
-            <p className="min-h-12 py-3 text-sm text-zinc-600">
+            <p className="min-h-8 py-1 text-xs text-zinc-600">
               {section.title === "Fijados"
                 ? "Fija elementos para tenerlos siempre a mano."
                 : "Los elementos que abras aparecerán aquí."}
@@ -84,17 +99,24 @@ function HomeView({ items, onOpen }: { items: Item[]; onOpen: (item: Item) => vo
       ))}
 
       <section>
-        <h2 className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-zinc-500">
+        <h2 className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
           Recientes
         </h2>
         {recent.length ? (
           <div>
             {recent.map((item) => (
-              <ItemListRow key={item.id} item={item} onOpen={() => onOpen(item)} />
+              <ItemListRow
+                key={item.id}
+                item={item}
+                compact
+                onOpen={() => onOpen(item)}
+              />
             ))}
           </div>
         ) : (
-          <p className="py-8 text-sm text-zinc-600">No hay más elementos recientes.</p>
+          <p className="py-5 text-xs text-zinc-600">
+            No hay más elementos recientes.
+          </p>
         )}
       </section>
     </div>
@@ -120,7 +142,9 @@ function LibraryView({
         const isLink = Boolean(getNoteUrl(item));
         if (filter === "notes") return item.type === "note" && !isLink;
         if (filter === "links") return isLink;
-        if (filter === "media") return item.type === "image" || item.type === "video";
+        if (filter === "media") {
+          return item.type === "image" || item.type === "video";
+        }
         if (filter === "audio") return item.type === "audio";
         if (filter === "files") return item.type === "file";
         return true;
@@ -129,8 +153,11 @@ function LibraryView({
   );
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 pb-6 pt-3">
-      <div className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1" aria-label="Filtros de Biblioteca">
+    <div className="mx-auto w-full max-w-3xl px-3 pb-3 pt-2">
+      <div
+        className="no-scrollbar -mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-1"
+        aria-label="Filtros de Biblioteca"
+      >
         {FILTERS.map((option) => (
           <button
             key={option.id}
@@ -138,7 +165,7 @@ function LibraryView({
             aria-pressed={filter === option.id}
             onClick={() => setFilter(option.id)}
             className={cn(
-              "min-h-12 shrink-0 rounded-full px-4 text-sm font-medium transition-colors",
+              "min-h-10 shrink-0 rounded-full px-4 text-sm font-medium transition-colors",
               filter === option.id
                 ? "bg-zinc-100 text-zinc-950"
                 : "bg-zinc-900 text-zinc-400 active:bg-zinc-800"
@@ -152,11 +179,17 @@ function LibraryView({
       {filtered.length ? (
         <div>
           {filtered.map((item) => (
-            <ItemListRow key={item.id} item={item} onOpen={() => onOpen(item)} />
+            <ItemListRow
+              key={item.id}
+              item={item}
+              onOpen={() => onOpen(item)}
+            />
           ))}
         </div>
       ) : (
-        <p className="py-12 text-center text-sm text-zinc-600">No hay elementos en este filtro.</p>
+        <p className="py-12 text-center text-sm text-zinc-600">
+          No hay elementos en este filtro.
+        </p>
       )}
     </div>
   );
@@ -176,7 +209,11 @@ export function MainContent({ refreshKey = 0 }: { refreshKey?: number }) {
       const data = await fetchItems(createClient());
       setItems(sortItems(data));
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "No se pudieron cargar los elementos");
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "No se pudieron cargar los elementos"
+      );
     } finally {
       setLoading(false);
     }
@@ -189,9 +226,12 @@ export function MainContent({ refreshKey = 0 }: { refreshKey?: number }) {
   useRealtimeSubscription("items", (payload) => {
     if (payload.eventType === "DELETE") {
       const deleted = payload.old as unknown as Item;
-      setItems((current) => current.filter((item) => item.id !== deleted.id));
+      setItems((current) =>
+        current.filter((item) => item.id !== deleted.id)
+      );
       return;
     }
+
     const changed = payload.new as unknown as Item;
     setItems((current) =>
       sortItems([changed, ...current.filter((item) => item.id !== changed.id)])
@@ -205,7 +245,11 @@ export function MainContent({ refreshKey = 0 }: { refreshKey?: number }) {
     setSelectedItem(updated);
   }
 
-  const isLibrary = pathname === "/biblioteca" || ["/notes", "/enlaces", "/media", "/audio", "/files"].some((path) => pathname.startsWith(path));
+  const isLibrary =
+    pathname === "/biblioteca" ||
+    ["/notes", "/enlaces", "/media", "/audio", "/files"].some((path) =>
+      pathname.startsWith(path)
+    );
 
   if (loading) {
     return (
@@ -217,16 +261,28 @@ export function MainContent({ refreshKey = 0 }: { refreshKey?: number }) {
 
   return (
     <>
-      <PullToRefresh action="refresh" onPullRelease={loadItems} className="h-full scroll-pb-end pb-[var(--tm-bottom-chrome-block)]">
+      <PullToRefresh
+        action="refresh"
+        onPullRelease={loadItems}
+        className="h-full"
+      >
         {error ? (
           <div className="flex flex-col items-center px-4 py-16 text-center">
             <p className="text-sm text-red-300">{error}</p>
-            <button type="button" onClick={() => void loadItems()} className="mt-4 flex min-h-12 items-center gap-2 px-4 text-sm text-zinc-300">
+            <button
+              type="button"
+              onClick={() => void loadItems()}
+              className="mt-4 flex min-h-12 items-center gap-2 px-4 text-sm text-zinc-300"
+            >
               <RefreshCw className="h-4 w-4" /> Reintentar
             </button>
           </div>
         ) : isLibrary ? (
-          <LibraryView items={items} initialFilter={legacyFilter(pathname)} onOpen={setSelectedItem} />
+          <LibraryView
+            items={items}
+            initialFilter={legacyFilter(pathname)}
+            onOpen={setSelectedItem}
+          />
         ) : (
           <HomeView items={items} onOpen={setSelectedItem} />
         )}
@@ -244,12 +300,16 @@ export function MainContent({ refreshKey = 0 }: { refreshKey?: number }) {
           onOpened={(id, openedAt) => {
             setItems((current) =>
               current.map((item) =>
-                item.id === id ? { ...item, last_opened_at: openedAt } : item
+                item.id === id
+                  ? { ...item, last_opened_at: openedAt }
+                  : item
               )
             );
           }}
           onDeleted={() => {
-            setItems((current) => current.filter((item) => item.id !== selectedItem.id));
+            setItems((current) =>
+              current.filter((item) => item.id !== selectedItem.id)
+            );
             setSelectedItem(null);
           }}
         />
