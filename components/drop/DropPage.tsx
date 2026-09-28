@@ -10,7 +10,6 @@ import { DropMessages } from "@/components/drop/DropMessages";
 import { DropComposer } from "@/components/drop/DropComposer";
 import { DropImageOverlay } from "@/components/drop/DropImageOverlay";
 import { DropVideoOverlay } from "@/components/drop/DropVideoOverlay";
-import { DropMediaComposer } from "@/components/drop/DropMediaComposer";
 import { VisualViewportSync } from "@/components/layout/VisualViewportSync";
 
 export type { Drop };
@@ -56,7 +55,6 @@ export function DropPage({
     null
   );
   const [isDragOver, setIsDragOver] = useState(false);
-  const [mediaFiles, setMediaFiles] = useState<File[] | null>(null);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -118,7 +116,9 @@ export function DropPage({
         error={error}
         onSend={handleSend}
         onAddPendingFiles={(files) => setPendingFiles((current) => [...current, ...files])}
-        onGallerySelected={(files) => setMediaFiles(files)}
+        onGallerySelected={(files) => {
+          void sendDrop({ files });
+        }}
         onSendAudio={(file) => sendDrop({ files: [file] })}
         onRecordingError={reportError}
         onRemovePendingFile={removePendingFile}
@@ -181,22 +181,6 @@ export function DropPage({
 
       {actionSheet}
       </div>
-
-      {mediaFiles ? (
-        <DropMediaComposer
-          files={mediaFiles}
-          sending={sending}
-          onFilesChange={setMediaFiles}
-          onClose={() => {
-            if (!sending) setMediaFiles(null);
-          }}
-          onSend={async (comment, files) => {
-            const sent = await sendDrop({ content: comment, files });
-            if (sent) setMediaFiles(null);
-            return sent;
-          }}
-        />
-      ) : null}
     </>
   );
 }
