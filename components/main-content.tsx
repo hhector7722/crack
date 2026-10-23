@@ -12,6 +12,7 @@ import { PullToRefresh } from "@/components/pull-to-refresh";
 import { SearchModal } from "@/components/search-modal";
 import { ItemDetail } from "@/components/item-detail";
 import { CompactItemTile, ItemListRow } from "@/components/item-list-row";
+import { PinnedCarousel } from "@/components/pinned-carousel";
 import type { Item, SearchResultItem } from "@/lib/types";
 
 type LibraryFilter = "all" | "notes" | "links" | "media" | "audio" | "files";
@@ -32,6 +33,17 @@ function sortItems(items: Item[]) {
   });
 }
 
+function sortPinned(items: Item[]) {
+  return items.filter((item) => item.pinned).sort((a, b) => {
+    if (a.pinned_order !== null && b.pinned_order !== null) {
+      return a.pinned_order - b.pinned_order;
+    }
+    if (a.pinned_order !== null) return -1;
+    if (b.pinned_order !== null) return 1;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+}
+
 function legacyFilter(pathname: string): LibraryFilter {
   if (pathname.startsWith("/notes")) return "notes";
   if (pathname.startsWith("/enlaces")) return "links";
@@ -44,13 +56,15 @@ function legacyFilter(pathname: string): LibraryFilter {
 function HomeView({
   items,
   onOpen,
+  onReorderPinned,
 }: {
   items: Item[];
   onOpen: (item: Item) => void;
+  onReorderPinned: (ids: string[]) => Promise<void>;
 }) {
-  const pinned = items.filter((item) => item.pinned);
+  const pinned = sortPinned(items);
   const recentlyViewed = items
-    .filter((item) => !item.pinned && item.last_opened_at)
+    .filter((item) => Boolean(item.last_opened_at))
     .sort(
       (a, b) =>
         new Date(b.last_opened_at!).getTime() -
@@ -58,13 +72,12 @@ function HomeView({
     )
     .slice(0, 8);
 
-  const shownIds = new Set([...pinned, ...recentlyViewed].map((item) => item.id));
-  const recent = items
-    .filter((item) => !shownIds.has(item.id))
-    .sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+  // "Recientes" es el historial completo por fecha de creación, independiente
+  // de visitas y fijados. Orden cronológico: antiguos primero.
+  const recent = [...items].sort(
+    (a, b) =>
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
 
   const sections = [
     { title: "Fijados", items: pinned },
@@ -79,15 +92,23 @@ function HomeView({
             {section.title}
           </h2>
           {section.items.length ? (
-            <div className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-0.5">
-              {section.items.map((item) => (
-                <CompactItemTile
-                  key={item.id}
-                  item={item}
-                  onOpen={() => onOpen(item)}
-                />
-              ))}
-            </div>
+            section.title === "Fijados" ? (
+              <PinnedCarousel
+                items={section.items}
+                onOpen={onOpen}
+                onReorder={onReorderPinned}
+              />
+            ) : (
+              <div className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-0.5">
+                {section.items.map((item) => (
+                  <CompactItemTile
+                    key={item.id}
+                    item={item}
+                    onOpen={() => onOpen(item)}
+                  />
+                ))}
+              </div>
+            )
           ) : (
             <p className="min-h-8 py-1 text-xs text-zinc-600">
               {section.title === "Fijados"
@@ -245,6 +266,23 @@ export function MainContent({ refreshKey = 0 }: { refreshKey?: number }) {
     setSelectedItem(updated);
   }
 
+  async function reorderPinned(ids: string[]) {
+    // Actualización optimista; ante un fallo se recupera el orden real.
+    setItems((current) =>
+      current.map((item) => {
+        const index = ids.indexOf(item.id);
+        return index === -1 ? item : { ...item, pinned_order: index };
+      })
+    );
+    const { error: reorderError } = await createClient().rpc("set_pinned_order", {
+      p_item_ids: ids,
+    });
+    if (reorderError) {
+      await loadItems();
+      throw new Error("No se pudo guardar el orden de fijados");
+    }
+  }
+
   const isLibrary =
     pathname === "/biblioteca" ||
     ["/notes", "/enlaces", "/media", "/audio", "/files"].some((path) =>
@@ -284,7 +322,7 @@ export function MainContent({ refreshKey = 0 }: { refreshKey?: number }) {
             onOpen={setSelectedItem}
           />
         ) : (
-          <HomeView items={items} onOpen={setSelectedItem} />
+          <HomeView items={items} onOpen={setSelectedItem} onReorderPinned={reorderPinned} />
         )}
       </PullToRefresh>
 
