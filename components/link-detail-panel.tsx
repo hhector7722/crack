@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { deleteItem, updateItem } from "@/lib/items";
 import { deleteFile, uploadFile } from "@/lib/storage";
 import { decodeHtmlEntities, getNoteUrl } from "@/lib/utils";
+import { parseXPostUrl } from "@/lib/link-preview";
 import type { Item } from "@/lib/types";
 
 interface LinkDetailPanelProps {
@@ -23,7 +24,14 @@ export function LinkDetailPanel({
   onDeleted,
 }: LinkDetailPanelProps) {
   const url = getNoteUrl(item);
-  const displayTitle = decodeHtmlEntities(item.title || item.metadata.link_title || url || "Enlace");
+  const xPost = url ? parseXPostUrl(url) : null;
+  const originalTitle = item.title || item.metadata.link_title || url || "Enlace";
+  const displayTitle = decodeHtmlEntities(
+    xPost && /^\d{10,25}$/.test(originalTitle.trim())
+      ? (item.metadata.link_title && !/^\d{10,25}$/.test(item.metadata.link_title)
+        ? item.metadata.link_title : "Publicación de @" + xPost.handle)
+      : originalTitle
+  );
   const [title, setTitle] = useState(displayTitle);
   const [editing, setEditing] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -56,7 +64,7 @@ export function LinkDetailPanel({
   // Intenta conservar una copia de la portada en el almacenamiento privado.
   // Si la web bloquea la descarga, se conserva la URL original y se ofrece una portada manual.
   useEffect(() => {
-    if (!url || item.metadata.link_image_path || cacheAttempted.current) return;
+    if (!url || cacheAttempted.current || (item.metadata.link_image_path && !/^\d{10,25}$/.test(item.title?.trim() || ""))) return;
     cacheAttempted.current = true;
     let cancelled = false;
     void fetch("/api/link-cover", {
