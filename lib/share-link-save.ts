@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createItem, triggerEmbed } from "@/lib/items";
-import { titleFromUrl, fetchLinkPreview } from "@/lib/link-preview";
+import { titleFromUrl, fetchLinkPreview, normalizeSavedLinkUrl } from "@/lib/link-preview";
 import { extractFirstUrl } from "@/lib/utils";
 
 export function resolveSharedUrl(input: {
@@ -10,14 +10,14 @@ export function resolveSharedUrl(input: {
 }): string | null {
   const direct = input.url?.trim();
   if (direct && extractFirstUrl(direct)) {
-    return extractFirstUrl(direct);
+    return normalizeSavedLinkUrl(extractFirstUrl(direct)!);
   }
 
   const fromText = extractFirstUrl(input.text);
-  if (fromText) return fromText;
+  if (fromText) return normalizeSavedLinkUrl(fromText);
 
   const fromTitle = extractFirstUrl(input.title);
-  if (fromTitle) return fromTitle;
+  if (fromTitle) return normalizeSavedLinkUrl(fromTitle);
 
   return null;
 }
@@ -68,6 +68,8 @@ export async function saveSharedLink(
   if (preview.description) {
     metadata.link_description = preview.description;
   }
+  if (preview.author) metadata.link_author = preview.author;
+  if (preview.handle) metadata.link_handle = preview.handle;
 
   const item = await createItem(supabase, {
     type: "note",
