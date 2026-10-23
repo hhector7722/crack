@@ -14,6 +14,7 @@ export interface ItemMetadata {
   duration_seconds?: number;
   link_image?: string;
   link_image_path?: string;
+  extra?: boolean;
   link_title?: string;
   link_description?: string;
   classification_status?: "pending" | "transcribed" | "classified" | "failed";
