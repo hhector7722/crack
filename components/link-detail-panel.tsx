@@ -132,10 +132,16 @@ export function LinkDetailPanel({
     setMenuOpen(false);
     setError("");
     try {
-      const updated = await updateItem(createClient(), item.id, {
-        metadata: { ...item.metadata, extra: item.metadata.extra !== true },
+      const nextExtra = item.metadata.extra !== true;
+      const { error } = await createClient().rpc("set_item_extra", {
+        p_item_id: item.id,
+        p_extra: nextExtra,
       });
-      onUpdated(updated);
+      if (error) throw error;
+      onUpdated({
+        ...item,
+        metadata: { ...item.metadata, extra: nextExtra },
+      });
     } catch {
       setError("No se pudo cambiar la categoría");
     }
