@@ -174,9 +174,11 @@ function ItemVisual({
 export function CompactItemTile({
   item,
   onOpen,
+  showPin = true,
 }: {
   item: Item;
   onOpen: () => void;
+  showPin?: boolean;
 }) {
   const mediaUrl = useMediaUrl(item);
   const title = getDisplayTitle(item);
@@ -185,18 +187,18 @@ export function CompactItemTile({
     <button
       type="button"
       onClick={onOpen}
-      className="w-36 shrink-0 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/65 text-left active:bg-zinc-800"
+      className="block w-[6.75rem] shrink-0 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/65 text-left active:bg-zinc-800"
     >
-      <div className="relative h-16 w-full overflow-hidden bg-zinc-900">
+      <div className="relative h-[4.25rem] w-full overflow-hidden bg-zinc-900">
         <ItemVisual item={item} mediaUrl={mediaUrl} />
-        {item.pinned ? (
+        {showPin && item.pinned ? (
           <span className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-zinc-100 backdrop-blur-sm">
             <Pin className="h-3.5 w-3.5 fill-current" />
           </span>
         ) : null}
       </div>
       <div className="px-2.5 py-1.5">
-        <p className="line-clamp-1 text-xs font-semibold text-zinc-100">
+        <p className="line-clamp-2 min-h-[2.25rem] text-[11px] font-semibold leading-[1.12rem] text-zinc-100">
           {title}
         </p>
         {!getNoteUrl(item) ? (
