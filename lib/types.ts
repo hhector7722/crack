@@ -13,6 +13,7 @@ export interface ItemMetadata {
   raw_transcript?: string;
   duration_seconds?: number;
   link_image?: string;
+  link_image_path?: string;
   link_title?: string;
   link_description?: string;
   classification_status?: "pending" | "transcribed" | "classified" | "failed";
