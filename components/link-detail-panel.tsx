@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Ellipsis, Pencil, Pin, Share2, Trash2, X } from "lucide-react";
+import { Check, Ellipsis, LockKeyhole, Pencil, Pin, Share2, Trash2, X } from "lucide-react";
 import { LinkCover } from "@/components/link-cover";
 import { createClient } from "@/lib/supabase/client";
 import { deleteItem, updateItem } from "@/lib/items";
@@ -128,6 +128,19 @@ export function LinkDetailPanel({
     }
   }
 
+  async function toggleExtra() {
+    setMenuOpen(false);
+    setError("");
+    try {
+      const updated = await updateItem(createClient(), item.id, {
+        metadata: { ...item.metadata, extra: item.metadata.extra !== true },
+      });
+      onUpdated(updated);
+    } catch {
+      setError("No se pudo cambiar la categoría");
+    }
+  }
+
   async function removeLink() {
     setMenuOpen(false);
     if (!window.confirm("¿Eliminar este enlace? Esta acción no se puede deshacer.")) return;
@@ -195,6 +208,9 @@ export function LinkDetailPanel({
             </button>
             <button type="button" onClick={() => { setMenuOpen(false); fileInputRef.current?.click(); }} disabled={uploading} className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-zinc-200 hover:bg-zinc-800">
               <Pencil className="h-4 w-4" /> Cambiar portada
+            </button>
+            <button type="button" onClick={() => void toggleExtra()} className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-zinc-200 hover:bg-zinc-800">
+              <LockKeyhole className="h-4 w-4" /> {item.metadata.extra ? "Sacar de Extra" : "Mover a Extra"}
             </button>
             <div className="my-1 border-t border-zinc-800" />
             <button type="button" onClick={() => void removeLink()} className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-red-300 hover:bg-red-950/40">
