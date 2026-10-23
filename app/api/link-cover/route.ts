@@ -3,7 +3,7 @@ import { lookup } from "node:dns/promises";
 import { BlockList, isIP } from "node:net";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { fetchLinkPreview } from "@/lib/link-preview";
+import { fetchLinkPreview, normalizeSavedLinkUrl, parseXPostUrl, titleFromUrl } from "@/lib/link-preview";
 import { getNoteUrl } from "@/lib/utils";
 import type { Item } from "@/lib/types";
 
@@ -124,46 +124,78 @@ export async function POST(request: Request) {
     .eq("user_id", user.id)
     .single();
   if (error || !data) return NextResponse.json({ error: "Enlace no encontrado" }, { status: 404 });
+
   const item = data as Item;
-  const url = getNoteUrl(item);
-  if (!url) return NextResponse.json({ error: "No es un enlace" }, { status: 400 });
-  if (item.metadata.link_image_path) return NextResponse.json({ item });
+  const originalUrl = getNoteUrl(item);
+  if (!originalUrl) return NextResponse.json({ error: "No es un enlace" }, { status: 400 });
 
-  const preview = item.metadata.link_image
-    ? null
-    : await fetchLinkPreview(url);
-  const imageUrl = item.metadata.link_image || preview?.image || youtubeImage(url);
-  if (!imageUrl) return NextResponse.json({ saved: false });
+  const url = normalizeSavedLinkUrl(originalUrl);
+  const xPost = parseXPostUrl(url);
+  const metadata = item.metadata ?? {};
+  const badTitle = /^\d{10,25}$/.test((item.title ?? "").trim())
+    || (xPost !== null && ["x.com", "twitter.com", "vxtwitter.com", titleFromUrl(url)].includes((item.title ?? "").trim().toLowerCase()));
+  const needsPreview = Boolean(xPost) && (
+    badTitle || !metadata.link_description || !metadata.link_image
+  );
 
-  const downloaded = await downloadImage(imageUrl);
-  if (!downloaded) return NextResponse.json({ saved: false });
+  if (metadata.link_image_path && !needsPreview && url === originalUrl) {
+    return NextResponse.json({ item });
+  }
 
-  const path = `${user.id}/images/${crypto.randomUUID()}.${downloaded.extension}`;
-  const { error: uploadError } = await supabase.storage
-    .from("crack-files")
-    .upload(path, downloaded.bytes, { contentType: downloaded.mime, upsert: false });
-  if (uploadError) return NextResponse.json({ saved: false });
+  const preview = needsPreview || !metadata.link_image
+    ? await fetchLinkPreview(url)
+    : null;
 
-  const { data: current } = await supabase
+  const candidateImage = metadata.link_image || preview?.image || youtubeImage(url);
+  let uploadedPath: string | null = null;
+
+  if (!metadata.link_image_path && candidateImage) {
+    const downloaded = await downloadImage(candidateImage);
+    if (downloaded) {
+      const path = user.id + "/images/" + crypto.randomUUID() + "." + downloaded.extension;
+      const { error: uploadError } = await supabase.storage.from("crack-files")
+        .upload(path, downloaded.bytes, {
+          contentType: downloaded.mime,
+          upsert: false,
+        });
+      if (!uploadError) uploadedPath = path;
+    }
+  }
+
+  // Read latest values to avoid overwriting manually edited titles/metadata.
+  const { data: fresh, error: readError } = await supabase
     .from("items")
-    .select("metadata")
+    .select("*")
     .eq("id", item.id)
     .eq("user_id", user.id)
     .single();
-
-  if (!current || current.metadata?.link_image_path) {
-    await supabase.storage.from("crack-files").remove([path]);
+  if (readError || !fresh) {
+    if (uploadedPath) await supabase.storage.from("crack-files").remove([uploadedPath]);
     return NextResponse.json({ saved: false });
   }
 
-  const { data: updated, error: updateError } = await supabase
-    .from("items")
+  const latest = fresh as Item;
+  const existing = latest.metadata ?? {};
+  const newMetadata = {
+    ...existing,
+    link_title: preview?.title || existing.link_title,
+    link_description: preview?.description || existing.link_description,
+    link_author: preview?.author || existing.link_author,
+    link_handle: preview?.handle || existing.link_handle,
+    link_image: existing.link_image || preview?.image || candidateImage || undefined,
+    link_image_path: existing.link_image_path || uploadedPath || undefined,
+  };
+  const latestBadTitle = /^\d{10,25}$/.test((latest.title ?? "").trim())
+    || (xPost !== null && ["x.com", "twitter.com", "vxtwitter.com", titleFromUrl(url).toLowerCase()].includes((latest.title ?? "").trim().toLowerCase()));
+  const updatedTitle = latestBadTitle
+    ? (preview?.title || titleFromUrl(url))
+    : latest.title;
+
+  const { data: updated, error: updateError } = await supabase.from("items")
     .update({
-      metadata: {
-        ...current.metadata,
-        link_image: imageUrl,
-        link_image_path: path,
-      },
+      title: updatedTitle,
+      content: url,
+      metadata: newMetadata,
     })
     .eq("id", item.id)
     .eq("user_id", user.id)
@@ -171,8 +203,11 @@ export async function POST(request: Request) {
     .single();
 
   if (updateError || !updated) {
-    await supabase.storage.from("crack-files").remove([path]);
+    if (uploadedPath) await supabase.storage.from("crack-files").remove([uploadedPath]);
     return NextResponse.json({ saved: false });
   }
-  return NextResponse.json({ saved: true, item: updated });
+  if (uploadedPath && existing.link_image_path && existing.link_image_path !== uploadedPath) {
+    await supabase.storage.from("crack-files").remove([uploadedPath]);
+  }
+  return NextResponse.json({ saved: Boolean(uploadedPath), item: updated });
 }
