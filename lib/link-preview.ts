@@ -1,23 +1,56 @@
 import { decodeHtmlEntities } from "@/lib/utils";
 
+export interface XPostUrl {
+  handle: string;
+  id: string;
+  canonicalUrl: string;
+}
+
+export function parseXPostUrl(value: string): XPostUrl | null {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    if (!["x.com", "www.x.com", "mobile.x.com", "twitter.com", "www.twitter.com", "mobile.twitter.com"].includes(host)) {
+      return null;
+    }
+    const match = url.pathname.match(/^\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]{10,25})(?:\/|$)/);
+    if (!match) return null;
+    return {
+      handle: match[1],
+      id: match[2],
+      // Tracking parameters can also contain accidentally concatenated URLs
+      // (including share tokens). They must never be forwarded to preview providers.
+      canonicalUrl: "https://x.com/" + match[1] + "/status/" + match[2],
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function normalizeSavedLinkUrl(value: string): string {
+  const post = parseXPostUrl(value);
+  if (post) return post.canonicalUrl;
+  return value;
+}
+
 export function titleFromUrl(url: string): string {
+  const xPost = parseXPostUrl(url);
+  if (xPost) return "Publicación de @" + xPost.handle;
+
   try {
     const parsed = new URL(url);
     const host = parsed.hostname.replace(/^www\./, "");
 
     if (parsed.pathname && parsed.pathname !== "/") {
       const segment = parsed.pathname.split("/").filter(Boolean).pop();
-      if (segment) {
+      if (segment && !/^\d{10,}$/.test(segment)) {
         const decoded = decodeURIComponent(segment)
           .replace(/\.(html?|php|aspx?)$/i, "")
           .replace(/[-_+]/g, " ")
           .trim();
-        if (decoded.length > 0 && decoded.length < 80) {
-          return decoded;
-        }
+        if (decoded.length > 0 && decoded.length < 80) return decoded;
       }
     }
-
     return host;
   } catch {
     return "Enlace";
@@ -31,15 +64,14 @@ function decodeMeta(value: string): string {
 function readMeta(html: string, key: string): string | null {
   const patterns = [
     new RegExp(
-      `<meta[^>]+(?:property|name)=["']${key}["'][^>]+content=["']([^"']+)["']`,
+      "<meta[^>]+(?:property|name)=[\"']" + key + "[\"'][^>]+content=[\"']([^\"']+)[\"']",
       "i"
     ),
     new RegExp(
-      `<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${key}["']`,
+      "<meta[^>]+content=[\"']([^\"']+)[\"'][^>]+(?:property|name)=[\"']" + key + "[\"']",
       "i"
     ),
   ];
-
   for (const pattern of patterns) {
     const match = html.match(pattern);
     if (match?.[1]) return decodeMeta(match[1]);
@@ -51,6 +83,8 @@ export interface LinkPreviewData {
   title: string | null;
   image: string | null;
   description: string | null;
+  author?: string | null;
+  handle?: string | null;
 }
 
 export function parseLinkPreviewHtml(html: string, baseUrl: string): LinkPreviewData {
@@ -59,10 +93,7 @@ export function parseLinkPreviewHtml(html: string, baseUrl: string): LinkPreview
     readMeta(html, "twitter:title") ??
     html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() ??
     null;
-
-  let image =
-    readMeta(html, "og:image") ?? readMeta(html, "twitter:image") ?? null;
-
+  let image = readMeta(html, "og:image") ?? readMeta(html, "twitter:image") ?? null;
   if (image) {
     try {
       image = new URL(image, baseUrl).href;
@@ -70,7 +101,6 @@ export function parseLinkPreviewHtml(html: string, baseUrl: string): LinkPreview
       image = null;
     }
   }
-
   const description =
     readMeta(html, "og:description") ??
     readMeta(html, "twitter:description") ??
@@ -84,7 +114,65 @@ export function parseLinkPreviewHtml(html: string, baseUrl: string): LinkPreview
   };
 }
 
-export async function fetchLinkPreview(url: string): Promise<LinkPreviewData> {
+type XPostData = {
+  text?: string;
+  author?: { name?: string; screen_name?: string };
+  media?: {
+    photos?: Array<{ url?: string }>;
+    videos?: Array<{ thumbnail_url?: string }>;
+    all?: Array<{ type?: string; url?: string; thumbnail_url?: string }>;
+  };
+};
+
+function tweetTitle(text: string, fallback: string): string {
+  const firstLine = text.split(/\r?\n/).map((line) => line.trim()).find(Boolean) || "";
+  if (!firstLine) return fallback;
+  return firstLine.length > 120 ? firstLine.slice(0, 117).trimEnd() + "…" : firstLine;
+}
+
+async function fetchXPostPreview(post: XPostUrl): Promise<LinkPreviewData | null> {
+  try {
+    // Fixed API origin + strictly validated handle/ID (no arbitrary fetch URLs).
+    const endpoint = "https://api.fxtwitter.com/" + post.handle + "/status/" + post.id;
+    const res = await fetch(endpoint, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(6500),
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+
+    const payload = await res.json() as {
+      code?: number;
+      tweet?: XPostData;
+      status?: XPostData;
+    };
+    if (payload.code && payload.code !== 200) return null;
+    const tweet = payload.tweet ?? payload.status;
+    if (!tweet) return null;
+    const body = typeof tweet.text === "string" ? tweet.text.trim() : "";
+    const handle = tweet.author?.screen_name || post.handle;
+    const author = tweet.author?.name || "@" + handle;
+    const media = tweet.media;
+    const photo = media?.photos?.find((photo) => photo.url)?.url
+      || media?.all?.find((item) => item.type === "photo" && item.url)?.url;
+    const videoThumbnail = media?.videos?.find((video) => video.thumbnail_url)?.thumbnail_url
+      || media?.all?.find((item) => item.type === "video" && item.thumbnail_url)?.thumbnail_url;
+    const image = photo || videoThumbnail || null;
+
+    return {
+      title: tweetTitle(body, "Publicación de @" + handle),
+      image: image && /^https:\/\//.test(image) ? image : null,
+      description: body ? body.slice(0, 4000) : null,
+      author,
+      handle,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchLinkPreview(rawUrl: string): Promise<LinkPreviewData> {
+  const url = normalizeSavedLinkUrl(rawUrl);
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -95,18 +183,17 @@ export async function fetchLinkPreview(url: string): Promise<LinkPreviewData> {
     return { title: titleFromUrl(url), image: null, description: null };
   }
 
-  let fetchUrl = parsed.href;
-  let userAgent = "Mozilla/5.0 (compatible; CrackLinkPreview/1.0; +https://crack.app)";
+  const xPost = parseXPostUrl(url);
+  if (xPost) {
+    const preview = await fetchXPostPreview(xPost);
+    if (preview) return preview;
+  }
 
-  if (
-    parsed.hostname === "x.com" ||
-    parsed.hostname === "twitter.com" ||
-    parsed.hostname === "www.x.com" ||
-    parsed.hostname === "www.twitter.com"
-  ) {
-    parsed.hostname = "vxtwitter.com";
-    fetchUrl = parsed.href;
-    userAgent = "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)";
+  let fetchUrl = parsed.href;
+  let userAgent = "Mozilla/5.0 (compatible; CrackLinkPreview/1.0)";
+  if (xPost) {
+    fetchUrl = "https://vxtwitter.com/" + xPost.handle + "/status/" + xPost.id;
+    userAgent = "Mozilla/5.0 (compatible; Discordbot/2.0)";
   }
 
   try {
@@ -119,25 +206,21 @@ export async function fetchLinkPreview(url: string): Promise<LinkPreviewData> {
       redirect: "follow",
     });
 
-    if (!res.ok) {
-      return { title: titleFromUrl(parsed.href), image: null, description: null };
+    if (!res.ok || !(res.headers.get("content-type") ?? "").includes("text/html")) {
+      return { title: titleFromUrl(url), image: null, description: null };
     }
-
-    const contentType = res.headers.get("content-type") ?? "";
-    if (!contentType.includes("text/html")) {
-      return { title: titleFromUrl(parsed.href), image: null, description: null };
-    }
-
     const html = await res.text();
-    const preview = parseLinkPreviewHtml(html.slice(0, 200_000), parsed.href);
-
+    const preview = parseLinkPreviewHtml(html.slice(0, 200_000), fetchUrl);
+    // Some embedding services return a bare numeric status ID as the title.
+    const validTitle = preview.title && !/^\d{10,}$/.test(preview.title.trim());
     return {
-      title: preview.title ?? titleFromUrl(parsed.href),
+      title: validTitle ? preview.title : titleFromUrl(url),
       image: preview.image,
       description: preview.description,
+      handle: xPost?.handle ?? null,
     };
   } catch {
-    return { title: titleFromUrl(parsed.href), image: null, description: null };
+    return { title: titleFromUrl(url), image: null, description: null };
   }
 }
 
@@ -150,10 +233,11 @@ export function resolveLinkTitle(
   if (
     normalizedItemTitle &&
     normalizedItemTitle !== url &&
-    !normalizedItemTitle.includes("http")
+    !normalizedItemTitle.includes("http") &&
+    !/^\d{10,}$/.test(normalizedItemTitle)
   ) {
     return normalizedItemTitle;
   }
-  if (previewTitle?.trim()) return previewTitle.trim();
+  if (previewTitle?.trim() && !/^\d{10,}$/.test(previewTitle.trim())) return previewTitle.trim();
   return titleFromUrl(url);
 }
