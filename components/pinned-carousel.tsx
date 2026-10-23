@@ -2,7 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GripVertical } from "lucide-react";
-import { CompactItemTile } from "@/components/item-list-row";
+import { PinnedItemTile } from "@/components/item-list-row";
 import type { Item } from "@/lib/types";
 
 type DragSession = {
@@ -178,7 +178,7 @@ export function PinnedCarousel({
             data-pinned-id={id}
             style={{ opacity: draggedId === id ? 0.28 : 1 }}
           >
-            <CompactItemTile item={item} onOpen={() => onOpen(item)} showPin={false} />
+            <PinnedItemTile item={item} onOpen={() => onOpen(item)} />
             <button
               type="button"
               aria-label={`Reordenar fijado: ${item.title ?? "Sin título"}. Arrastra o usa las flechas izquierda y derecha.`}
