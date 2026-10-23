@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, LockKeyhole, RefreshCw } from "lucide-react";
+import { AppModal } from "@/components/app-modal";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { fetchItems } from "@/lib/items";
@@ -15,7 +16,11 @@ import { CompactItemTile, ItemListRow } from "@/components/item-list-row";
 import { PinnedCarousel } from "@/components/pinned-carousel";
 import type { Item, SearchResultItem } from "@/lib/types";
 
-type LibraryFilter = "all" | "notes" | "links" | "media" | "audio" | "files";
+type LibraryFilter = "all" | "notes" | "links" | "media" | "audio" | "files" | "extra";
+
+function isExtraItem(item: Item): boolean {
+  return item.metadata?.extra === true;
+}
 
 const FILTERS: { id: LibraryFilter; label: string }[] = [
   { id: "all", label: "Todo" },
@@ -24,6 +29,7 @@ const FILTERS: { id: LibraryFilter; label: string }[] = [
   { id: "media", label: "Fotos y vídeos" },
   { id: "audio", label: "Audios" },
   { id: "files", label: "Archivos" },
+  { id: "extra", label: "Extra" },
 ];
 
 function sortItems(items: Item[]) {
@@ -62,8 +68,9 @@ function HomeView({
   onOpen: (item: Item) => void;
   onReorderPinned: (ids: string[]) => Promise<void>;
 }) {
-  const pinned = sortPinned(items);
-  const recentlyViewed = items
+  const visibleItems = items.filter((item) => !isExtraItem(item));
+  const pinned = sortPinned(visibleItems);
+  const recentlyViewed = visibleItems
     .filter((item) => Boolean(item.last_opened_at))
     .sort(
       (a, b) =>
@@ -74,7 +81,7 @@ function HomeView({
 
   // "Recientes" es el historial completo por fecha de creación, independiente
   // de visitas y fijados. Orden cronológico: antiguos primero.
-  const recent = [...items].sort(
+  const recent = [...visibleItems].sort(
     (a, b) =>
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   );
@@ -154,12 +161,49 @@ function LibraryView({
   onOpen: (item: Item) => void;
 }) {
   const [filter, setFilter] = useState<LibraryFilter>(initialFilter);
+  const [extraOpen, setExtraOpen] = useState(false);
+  const [extraUnlocked, setExtraUnlocked] = useState(false);
+  const [extraPin, setExtraPin] = useState("");
+  const [extraError, setExtraError] = useState(false);
 
-  useEffect(() => setFilter(initialFilter), [initialFilter]);
+  useEffect(() => {
+    setFilter(initialFilter);
+    setExtraUnlocked(false);
+    if (initialFilter === "extra") setExtraOpen(true);
+  }, [initialFilter]);
+
+  function chooseFilter(next: LibraryFilter) {
+    if (next === "extra") {
+      if (extraUnlocked) {
+        setFilter("extra");
+      } else {
+        setExtraPin("");
+        setExtraError(false);
+        setExtraOpen(true);
+      }
+      return;
+    }
+    setExtraUnlocked(false);
+    setFilter(next);
+  }
+
+  function unlockExtra() {
+    if (extraPin !== "1313") {
+      setExtraError(true);
+      return;
+    }
+    setExtraUnlocked(true);
+    setExtraOpen(false);
+    setExtraPin("");
+    setExtraError(false);
+    setFilter("extra");
+  }
 
   const filtered = useMemo(
     () =>
       items.filter((item) => {
+        if (filter === "extra") return extraUnlocked && isExtraItem(item);
+        if (isExtraItem(item)) return false;
         const isLink = Boolean(getNoteUrl(item));
         if (filter === "notes") return item.type === "note" && !isLink;
         if (filter === "links") return isLink;
@@ -170,7 +214,7 @@ function LibraryView({
         if (filter === "files") return item.type === "file";
         return true;
       }),
-    [filter, items]
+    [filter, items, extraUnlocked]
   );
 
   return (
@@ -184,7 +228,7 @@ function LibraryView({
             key={option.id}
             type="button"
             aria-pressed={filter === option.id}
-            onClick={() => setFilter(option.id)}
+            onClick={() => chooseFilter(option.id)}
             className={cn(
               "min-h-10 shrink-0 rounded-full px-4 text-sm font-medium transition-colors",
               filter === option.id
@@ -196,6 +240,52 @@ function LibraryView({
           </button>
         ))}
       </div>
+
+      <AppModal
+        open={extraOpen}
+        onOpenChange={(nextOpen) => {
+          setExtraOpen(nextOpen);
+          if (!nextOpen) {
+            setExtraPin("");
+            setExtraError(false);
+          }
+        }}
+        title="Extra"
+        size="content"
+      >
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            unlockExtra();
+          }}
+          className="flex w-[min(18rem,calc(100vw-4rem))] flex-col items-center gap-4 pt-2"
+        >
+          <LockKeyhole className="h-8 w-8 text-zinc-400" />
+          <input
+            autoFocus
+            type="password"
+            inputMode="numeric"
+            autoComplete="off"
+            maxLength={4}
+            aria-label="Código para acceder a Extra"
+            placeholder="PIN"
+            value={extraPin}
+            onChange={(event) => {
+              setExtraPin(event.target.value.replace(/\\D/g, ""));
+              setExtraError(false);
+            }}
+            className="h-12 w-full rounded-lg bg-zinc-900 px-3 text-center text-lg tracking-[0.4em] text-zinc-100 outline-none focus:ring-1 focus:ring-zinc-500"
+          />
+          {extraError ? <p role="alert" className="text-sm text-red-300">PIN incorrecto</p> : null}
+          <button
+            type="submit"
+            disabled={extraPin.length !== 4}
+            className="min-h-11 w-full rounded-lg bg-zinc-100 text-sm font-semibold text-zinc-950 disabled:opacity-40"
+          >
+            Entrar
+          </button>
+        </form>
+      </AppModal>
 
       {filtered.length ? (
         <div>
