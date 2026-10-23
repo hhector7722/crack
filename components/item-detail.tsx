@@ -5,6 +5,7 @@ import { Link2, Pencil, Trash2, Share2, Sparkles, Pin, Save, X } from "lucide-re
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { AppModal } from "@/components/app-modal";
+import { LinkDetailPanel } from "@/components/link-detail-panel";
 import { createClient } from "@/lib/supabase/client";
 import { updateItem, deleteItem, recordItemOpened } from "@/lib/items";
 import { getSignedUrl, deleteFile } from "@/lib/storage";
@@ -72,22 +73,33 @@ export function ItemDetail({
       });
   }, [currentItem.id, onOpened, open]);
 
-  const panelSlide = buildCarouselPanelSlide((slideItem) => (
-    <ItemDetailPanel
-      key={slideItem.id}
-      item={slideItem}
-      open={open}
-      onOpenChange={onOpenChange}
-      onUpdated={onUpdated}
-      onDeleted={onDeleted}
-    />
-  ));
+  const panelSlide = buildCarouselPanelSlide((slideItem) =>
+    getNoteUrl(slideItem) ? (
+      <LinkDetailPanel
+        key={slideItem.id}
+        item={slideItem}
+        onOpenChange={onOpenChange}
+        onUpdated={onUpdated}
+        onDeleted={onDeleted}
+      />
+    ) : (
+      <ItemDetailPanel
+        key={slideItem.id}
+        item={slideItem}
+        open={open}
+        onOpenChange={onOpenChange}
+        onUpdated={onUpdated}
+        onDeleted={onDeleted}
+      />
+    )
+  );
 
   return (
     <AppModal
       open={open}
       onOpenChange={onOpenChange}
-      size="fixed"
+      size={getNoteUrl(currentItem) ? "wide" : "fixed"}
+      className={getNoteUrl(currentItem) ? "h-[min(78dvh,680px)]" : undefined}
       onSwipeLeft={canSwipe && !panelSlide ? () => startSlide(1) : undefined}
       onSwipeRight={canSwipe && !panelSlide ? () => startSlide(-1) : undefined}
       panelSlide={panelSlide}
@@ -97,14 +109,24 @@ export function ItemDetail({
         ) : undefined
       }
     >
-      <ItemDetailPanel
-        key={currentItem.id}
-        item={currentItem}
-        open={open}
-        onOpenChange={onOpenChange}
-        onUpdated={onUpdated}
-        onDeleted={onDeleted}
-      />
+      {getNoteUrl(currentItem) ? (
+        <LinkDetailPanel
+          key={currentItem.id}
+          item={currentItem}
+          onOpenChange={onOpenChange}
+          onUpdated={onUpdated}
+          onDeleted={onDeleted}
+        />
+      ) : (
+        <ItemDetailPanel
+          key={currentItem.id}
+          item={currentItem}
+          open={open}
+          onOpenChange={onOpenChange}
+          onUpdated={onUpdated}
+          onDeleted={onDeleted}
+        />
+      )}
     </AppModal>
   );
 }
