@@ -76,7 +76,10 @@ export async function GET(request: NextRequest) {
       results = (data ?? []) as SearchRow[];
     }
 
-    const items: SearchResultItem[] = results.map((r) => ({
+    // Los títulos editados son siempre consultables por coincidencia parcial,
+    // aunque su embedding semántico todavía corresponda al texto anterior.
+    // Se priorizan antes de la mezcla FTS/semántica.
+    const literalTitle = q.replace(/[\\%_]/g, "\\    const items: SearchResultItem[] = results.map((r) => ({
       id: r.id,
       type: r.type as SearchResultItem["type"],
       title: r.title,
@@ -89,7 +92,47 @@ export async function GET(request: NextRequest) {
       user_id: r.user_id,
       score: r.score,
       search_source: (r.search_source as SearchResultItem["search_source"]) || searchSource,
-    }));
+    }));");
+    const { data: matchedTitles, error: titleError } = await supabase
+      .from("items")
+      .select("id,type,title,content,file_url,metadata,pinned,pinned_order,created_at,user_id")
+      .eq("user_id", user.id)
+      .ilike("title", `%${literalTitle}%`)
+      .order("created_at", { ascending: false })
+      .limit(25);
+    if (titleError) throw titleError;
+
+    const items: SearchResultItem[] = [];
+    const seen = new Set<string>();
+    for (const match of matchedTitles ?? []) {
+      if (seen.has(match.id)) continue;
+      seen.add(match.id);
+      items.push({
+        ...match,
+        last_opened_at: null,
+        score: 2,
+        search_source: "fts",
+      } as SearchResultItem);
+    }
+    for (const result of results) {
+      if (seen.has(result.id) || items.length >= 25) continue;
+      seen.add(result.id);
+      items.push({
+        id: result.id,
+        type: result.type as SearchResultItem["type"],
+        title: result.title,
+        content: result.content,
+        file_url: result.file_url,
+        metadata: result.metadata as SearchResultItem["metadata"],
+        pinned: result.pinned,
+        pinned_order: null,
+        created_at: result.created_at,
+        last_opened_at: null,
+        user_id: result.user_id,
+        score: result.score,
+        search_source: (result.search_source as SearchResultItem["search_source"]) || searchSource,
+      });
+    }
 
     return NextResponse.json({
       results: items,
