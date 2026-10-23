@@ -171,7 +171,7 @@ function LibraryView({
 
   useEffect(() => {
     return () => {
-      void createClient().rpc("lock_extra").catch(() => {});
+      void createClient().rpc("lock_extra").then(() => {}, () => {});
     };
   }, []);
 
