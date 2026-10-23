@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Link2, Pencil, Trash2, Share2, Sparkles, Pin, Save, X } from "lucide-react";
+import { Link2, LockKeyhole, Pencil, Trash2, Share2, Sparkles, Pin, Save, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { AppModal } from "@/components/app-modal";
@@ -273,6 +273,18 @@ function ItemDetailPanel({
     }
   }
 
+  async function handleToggleExtra() {
+    if (item.type !== "image" && item.type !== "video") return;
+    try {
+      const updated = await updateItem(createClient(), item.id, {
+        metadata: { ...item.metadata, extra: item.metadata.extra !== true },
+      });
+      onUpdated(updated);
+    } catch {
+      alert("No se pudo cambiar la categoría");
+    }
+  }
+
   async function handleShare() {
     if (item.type === "audio" || item.type === "image" || item.type === "video") {
       const fileUrl = mediaUrl;
@@ -347,6 +359,16 @@ function ItemDetailPanel({
             >
               <Trash2 className="h-4 w-4" /> Eliminar
             </button>
+            {(item.type === "image" || item.type === "video") ? (
+              <button
+                type="button"
+                onClick={() => void handleToggleExtra()}
+                className="col-span-2 flex min-h-10 items-center justify-center gap-2 rounded-lg bg-zinc-900/55 px-3 text-xs text-zinc-400 sm:col-span-4"
+              >
+                <LockKeyhole className="h-3.5 w-3.5" />
+                {item.metadata.extra ? "Sacar de Extra" : "Mover a Extra"}
+              </button>
+            ) : null}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-2">
