@@ -193,7 +193,7 @@ function LibraryView({
       return;
     }
     if (extraUnlocked) {
-      void createClient().rpc("lock_extra").then(() => onUnlocked()).catch(() => {});
+      void Promise.resolve(createClient().rpc("lock_extra")).then(() => onUnlocked()).catch(() => {});
     }
     setExtraUnlocked(false);
     setFilter(next);
