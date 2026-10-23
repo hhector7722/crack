@@ -208,12 +208,29 @@ export function CompactItemTile({
         <p className="line-clamp-2 min-h-[2.25rem] text-[11px] font-semibold leading-[1.12rem] text-zinc-100">
           {title}
         </p>
-        {!getNoteUrl(item) ? (
-          <span className="mt-0.5 block text-[10px] text-zinc-500">
-            {getKind(item)}
-          </span>
-        ) : null}
+
       </div>
+    </button>
+  );
+}
+
+export function PinnedItemTile({
+  item,
+  onOpen,
+}: {
+  item: Item;
+  onOpen: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={getDisplayTitle(item)}
+      className="flex min-h-[4.25rem] w-[6.75rem] shrink-0 items-center rounded-xl border border-zinc-800 bg-zinc-900/65 py-2 pl-2.5 pr-7 text-left transition-colors active:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+    >
+      <span className="line-clamp-3 break-words text-[11px] font-semibold leading-[1.12rem] text-zinc-100">
+        {getDisplayTitle(item)}
+      </span>
     </button>
   );
 }
