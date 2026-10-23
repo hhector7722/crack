@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Link2, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { createItem, triggerEmbed } from "@/lib/items";
+import { normalizeSavedLinkUrl } from "@/lib/link-preview";
 
 export function LinkCapture({
   onSaved,
@@ -23,7 +24,7 @@ export function LinkCapture({
       const normalized = /^https?:\/\//i.test(value.trim())
         ? value.trim()
         : `https://${value.trim()}`;
-      url = new URL(normalized);
+      url = new URL(normalizeSavedLinkUrl(normalized));
     } catch {
       onError("Introduce una URL válida");
       return;
@@ -51,6 +52,8 @@ export function LinkCapture({
             link_title: preview.title || undefined,
             link_image: preview.image || undefined,
             link_description: preview.description || undefined,
+            link_author: preview.author || undefined,
+            link_handle: preview.handle || undefined,
           };
         }
       } catch {
