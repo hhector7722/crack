@@ -65,6 +65,12 @@ export function LinkCapture({
         user_id: user.id,
       });
       triggerEmbed(item.id);
+      // Guarda una copia estable de la miniatura si el origen permite descargarla.
+      void fetch("/api/link-cover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: item.id }),
+      }).catch(() => {});
       onSaved();
     } catch (error) {
       onError(error instanceof Error ? error.message : "Error guardando enlace");
