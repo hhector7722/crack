@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LinkCover } from "@/components/link-cover";
+import { parseXPostUrl } from "@/lib/link-preview";
 import { getSignedUrl } from "@/lib/storage";
 import {
   cn,
@@ -44,6 +45,12 @@ function getDisplayTitle(item: Item) {
     displayValue(item.title) === " "
       ? ""
       : item.title?.trim() || item.metadata.link_title?.trim() || "";
+  const xPost = linkUrl ? parseXPostUrl(linkUrl) : null;
+  if (xPost && /^\d{10,25}$/.test(rawTitle)) {
+    return decodeHtmlEntities(item.metadata.link_title && !/^\d{10,25}$/.test(item.metadata.link_title)
+      ? item.metadata.link_title
+      : "Publicación de @" + xPost.handle);
+  }
   return decodeHtmlEntities(rawTitle || linkUrl || getKind(item));
 }
 
