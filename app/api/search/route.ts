@@ -3,147 +3,102 @@ import { createClient } from "@/lib/supabase/server";
 import { getQueryEmbedding } from "@/lib/embedding";
 import type { SearchResultItem, SearchSource } from "@/lib/types";
 
+type SearchRow = {
+  id: string;
+  type: string;
+  title: string | null;
+  content: string | null;
+  file_url: string | null;
+  metadata: SearchResultItem["metadata"];
+  pinned: boolean;
+  created_at: string;
+  user_id: string;
+  score?: number;
+  search_source?: string;
+};
+
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  }
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);
-  const q = searchParams.get("q")?.trim();
+  const q = searchParams.get("q")?.trim() ?? "";
   const semantic = searchParams.get("semantic") === "true";
-
-  if (!q || q.length === 0) {
-    return NextResponse.json({ error: "q requerido" }, { status: 400 });
-  }
-
-  if (q.length > 200) {
-    return NextResponse.json({ error: "Consulta demasiado larga" }, { status: 400 });
-  }
+  if (!q) return NextResponse.json({ error: "q requerido" }, { status: 400 });
+  if (q.length > 200) return NextResponse.json({ error: "Consulta demasiado larga" }, { status: 400 });
 
   try {
     let embedding: number[] | null = null;
     let searchSource: SearchSource = "fts";
-
     if (semantic) {
       try {
         embedding = await getQueryEmbedding(q);
         searchSource = "hybrid";
       } catch {
-        embedding = null;
         searchSource = "fts";
       }
     }
 
-    type SearchRow = {
-      id: string;
-      type: string;
-      title: string | null;
-      content: string | null;
-      file_url: string | null;
-      metadata: Record<string, unknown>;
-      pinned: boolean;
-      created_at: string;
-      user_id: string;
-      score: number;
-      search_source: string;
-    };
-
-    let results: SearchRow[] = [];
-
-    if (embedding) {
-      const { data, error } = await supabase.rpc("search_items_v1", {
+    // FTS encuentra palabras completas, pero no siempre prefijos ("crimi").
+    // La coincidencia por título es literal y parcial; incluye títulos editados.
+    const escaped = q.replace(/[\\%_]/g, "\\$&");
+    const [titleMatches, fullText] = await Promise.all([
+      supabase
+        .from("items")
+        .select("id,type,title,content,file_url,metadata,pinned,created_at,user_id")
+        .eq("user_id", user.id)
+        .ilike("title", "%" + escaped + "%")
+        .order("created_at", { ascending: false })
+        .limit(100),
+      supabase.rpc("search_items_v1", {
         p_user_id: user.id,
         p_query: q,
         p_embedding: embedding,
-        p_limit: 25,
+        p_limit: 100,
         p_rrf_k: 60,
-      });
-      if (error) throw error;
-      results = (data ?? []) as SearchRow[];
-    } else {
-      const { data, error } = await supabase.rpc("search_items_v1", {
-        p_user_id: user.id,
-        p_query: q,
-        p_limit: 25,
-        p_rrf_k: 60,
-      });
-      if (error) throw error;
-      results = (data ?? []) as SearchRow[];
-    }
+      }),
+    ]);
 
-    // Los títulos editados son siempre consultables por coincidencia parcial,
-    // aunque su embedding semántico todavía corresponda al texto anterior.
-    // Se priorizan antes de la mezcla FTS/semántica.
-    const literalTitle = q.replace(/[\\%_]/g, "\\    const items: SearchResultItem[] = results.map((r) => ({
-      id: r.id,
-      type: r.type as SearchResultItem["type"],
-      title: r.title,
-      content: r.content,
-      file_url: r.file_url,
-      metadata: r.metadata as SearchResultItem["metadata"],
-      pinned: r.pinned,
-      created_at: r.created_at,
-      last_opened_at: null,
-      user_id: r.user_id,
-      score: r.score,
-      search_source: (r.search_source as SearchResultItem["search_source"]) || searchSource,
-    }));");
-    const { data: matchedTitles, error: titleError } = await supabase
-      .from("items")
-      .select("id,type,title,content,file_url,metadata,pinned,pinned_order,created_at,user_id")
-      .eq("user_id", user.id)
-      .ilike("title", `%${literalTitle}%`)
-      .order("created_at", { ascending: false })
-      .limit(25);
-    if (titleError) throw titleError;
+    if (titleMatches.error) throw titleMatches.error;
+    if (fullText.error) throw fullText.error;
 
-    const items: SearchResultItem[] = [];
+    const results: SearchResultItem[] = [];
     const seen = new Set<string>();
-    for (const match of matchedTitles ?? []) {
-      if (seen.has(match.id)) continue;
-      seen.add(match.id);
-      items.push({
-        ...match,
-        last_opened_at: null,
-        score: 2,
-        search_source: "fts",
-      } as SearchResultItem);
-    }
-    for (const result of results) {
-      if (seen.has(result.id) || items.length >= 25) continue;
-      seen.add(result.id);
-      items.push({
-        id: result.id,
-        type: result.type as SearchResultItem["type"],
-        title: result.title,
-        content: result.content,
-        file_url: result.file_url,
-        metadata: result.metadata as SearchResultItem["metadata"],
-        pinned: result.pinned,
+    function add(row: SearchRow, score: number, source: SearchSource) {
+      if (row.metadata?.extra === true || seen.has(row.id) || results.length >= 25) return;
+      seen.add(row.id);
+      results.push({
+        id: row.id,
+        type: row.type as SearchResultItem["type"],
+        title: row.title,
+        content: row.content,
+        file_url: row.file_url,
+        metadata: row.metadata ?? {},
+        pinned: row.pinned,
         pinned_order: null,
-        created_at: result.created_at,
+        created_at: row.created_at,
         last_opened_at: null,
-        user_id: result.user_id,
-        score: result.score,
-        search_source: (result.search_source as SearchResultItem["search_source"]) || searchSource,
+        user_id: row.user_id,
+        score,
+        search_source: source,
       });
+    }
+
+    for (const row of (titleMatches.data ?? []) as SearchRow[]) {
+      add(row, 2, "fts");
+    }
+    for (const row of (fullText.data ?? []) as SearchRow[]) {
+      add(row, row.score ?? 0, (row.search_source as SearchSource) || searchSource);
     }
 
     return NextResponse.json({
-      results: items,
+      results,
       search_source: searchSource,
       query: q,
     });
   } catch (err) {
     console.error("[search]", err);
-    return NextResponse.json(
-      { error: "Error en la búsqueda" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Error en la búsqueda" }, { status: 500 });
   }
 }
