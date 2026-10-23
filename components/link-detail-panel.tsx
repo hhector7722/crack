@@ -34,6 +34,11 @@ export function LinkDetailPanel({
   const menuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cacheAttempted = useRef(false);
+  const onUpdatedRef = useRef(onUpdated);
+
+  useEffect(() => {
+    onUpdatedRef.current = onUpdated;
+  }, [onUpdated]);
 
   useEffect(() => {
     if (!editing) setTitle(displayTitle);
@@ -61,13 +66,13 @@ export function LinkDetailPanel({
     })
       .then(async (response) => (response.ok ? response.json() : null))
       .then((data: { item?: Item } | null) => {
-        if (!cancelled && data?.item) onUpdated(data.item);
+        if (!cancelled && data?.item) onUpdatedRef.current(data.item);
       })
       .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [item.id, item.metadata.link_image_path, onUpdated, url]);
+  }, [item.id, item.metadata.link_image_path, url]);
 
   async function saveTitle() {
     const value = title.trim();
