@@ -28,6 +28,7 @@ export interface Item {
   file_url: string | null;
   metadata: ItemMetadata;
   pinned: boolean;
+  pinned_order: number | null;
   created_at: string;
   last_opened_at: string | null;
   user_id: string;
