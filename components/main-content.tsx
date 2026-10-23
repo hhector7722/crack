@@ -155,16 +155,25 @@ function LibraryView({
   items,
   initialFilter,
   onOpen,
+  onUnlocked,
 }: {
   items: Item[];
   initialFilter: LibraryFilter;
   onOpen: (item: Item) => void;
+  onUnlocked: () => Promise<void>;
 }) {
   const [filter, setFilter] = useState<LibraryFilter>(initialFilter);
   const [extraOpen, setExtraOpen] = useState(false);
   const [extraUnlocked, setExtraUnlocked] = useState(false);
   const [extraPin, setExtraPin] = useState("");
   const [extraError, setExtraError] = useState(false);
+  const [extraBusy, setExtraBusy] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      void createClient().rpc("lock_extra").catch(() => {});
+    };
+  }, []);
 
   useEffect(() => {
     setFilter(initialFilter);
@@ -183,20 +192,35 @@ function LibraryView({
       }
       return;
     }
+    if (extraUnlocked) {
+      void createClient().rpc("lock_extra").then(() => onUnlocked()).catch(() => {});
+    }
     setExtraUnlocked(false);
     setFilter(next);
   }
 
-  function unlockExtra() {
-    if (extraPin !== "1313") {
-      setExtraError(true);
-      return;
-    }
-    setExtraUnlocked(true);
-    setExtraOpen(false);
-    setExtraPin("");
+  async function unlockExtra() {
+    if (extraBusy) return;
+    setExtraBusy(true);
     setExtraError(false);
-    setFilter("extra");
+    try {
+      const { data: accepted, error } = await createClient().rpc("unlock_extra", {
+        p_pin: extraPin,
+      });
+      if (error || accepted !== true) {
+        setExtraError(true);
+        return;
+      }
+      await onUnlocked();
+      setExtraUnlocked(true);
+      setExtraOpen(false);
+      setExtraPin("");
+      setFilter("extra");
+    } catch {
+      setExtraError(true);
+    } finally {
+      setExtraBusy(false);
+    }
   }
 
   const filtered = useMemo(
@@ -256,7 +280,7 @@ function LibraryView({
         <form
           onSubmit={(event) => {
             event.preventDefault();
-            unlockExtra();
+            void unlockExtra();
           }}
           className="flex w-[min(18rem,calc(100vw-4rem))] flex-col items-center gap-4 pt-2"
         >
@@ -279,10 +303,10 @@ function LibraryView({
           {extraError ? <p role="alert" className="text-sm text-red-300">PIN incorrecto</p> : null}
           <button
             type="submit"
-            disabled={extraPin.length !== 4}
+            disabled={extraPin.length !== 4 || extraBusy}
             className="min-h-11 w-full rounded-lg bg-zinc-100 text-sm font-semibold text-zinc-950 disabled:opacity-40"
           >
-            Entrar
+            {extraBusy ? "Comprobando…" : "Entrar"}
           </button>
         </form>
       </AppModal>
@@ -410,6 +434,7 @@ export function MainContent({ refreshKey = 0 }: { refreshKey?: number }) {
             items={items}
             initialFilter={legacyFilter(pathname)}
             onOpen={setSelectedItem}
+            onUnlocked={loadItems}
           />
         ) : (
           <HomeView items={items} onOpen={setSelectedItem} onReorderPinned={reorderPinned} />
