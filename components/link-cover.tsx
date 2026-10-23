@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getSignedUrl } from "@/lib/storage";
 import { cn, getNoteUrl } from "@/lib/utils";
+import { parseXPostUrl } from "@/lib/link-preview";
 import type { Item } from "@/lib/types";
 
 function youtubeThumbnail(url: string | null): string | null {
@@ -41,6 +42,7 @@ export function LinkCover({
   const path = item.metadata.link_image_path;
   const external = item.metadata.link_image ?? null;
   const linkUrl = getNoteUrl(item);
+  const xPost = linkUrl ? parseXPostUrl(linkUrl) : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -83,6 +85,21 @@ export function LinkCover({
           className={cn("h-full w-full object-cover", imageClassName)}
           onError={() => setFailed((current) => [...current, image])}
         />
+      ) : xPost ? (
+        <div className="flex h-full w-full flex-col justify-center overflow-hidden bg-gradient-to-br from-zinc-800 via-zinc-900 to-zinc-950 px-[8%] py-3">
+          <div className="mb-3 flex items-center gap-2 text-zinc-400">
+            <span aria-hidden className="text-base font-semibold">𝕏</span>
+            <span className="min-w-0 truncate text-[11px] font-semibold">
+              {item.metadata.link_author || "@" + (item.metadata.link_handle || xPost.handle)}
+            </span>
+          </div>
+          <p className="line-clamp-5 whitespace-pre-line break-words text-left text-[clamp(11px,1.6vw,16px)] font-medium leading-snug text-zinc-100">
+            {item.metadata.link_description ||
+              (!/^\d{10,25}$/.test(item.title?.trim() || "")
+                ? item.title
+                : "Publicación de @" + xPost.handle)}
+          </p>
+        </div>
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-800 via-zinc-900 to-zinc-950 px-3">
           <span className="max-w-full truncate text-center text-[11px] font-medium tracking-wide text-zinc-500">
