@@ -271,7 +271,7 @@ function LibraryView({
             placeholder="PIN"
             value={extraPin}
             onChange={(event) => {
-              setExtraPin(event.target.value.replace(/\\D/g, ""));
+              setExtraPin(event.target.value.replace(/\D/g, ""));
               setExtraError(false);
             }}
             className="h-12 w-full rounded-lg bg-zinc-900 px-3 text-center text-lg tracking-[0.4em] text-zinc-100 outline-none focus:ring-1 focus:ring-zinc-500"
