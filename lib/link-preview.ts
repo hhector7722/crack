@@ -1,3 +1,5 @@
+import { decodeHtmlEntities } from "@/lib/utils";
+
 export function titleFromUrl(url: string): string {
   try {
     const parsed = new URL(url);
@@ -23,13 +25,7 @@ export function titleFromUrl(url: string): string {
 }
 
 function decodeMeta(value: string): string {
-  return value
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .trim();
+  return decodeHtmlEntities(value).trim();
 }
 
 function readMeta(html: string, key: string): string | null {
