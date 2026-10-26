@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/client";
 import { createItem, triggerEmbed } from "@/lib/items";
 import { uploadFile } from "@/lib/storage";
 import { indexStoredPdf } from "@/lib/pdf-index-client";
+import { pdfUploadKind } from "@/lib/pdf-upload-validation";
 
 async function ensureAuthenticatedUser() {
   const supabase = createClient();
@@ -36,6 +37,11 @@ async function ensureAuthenticatedUser() {
 export async function uploadFileFromPicker(file: File): Promise<void> {
   const { supabase, user } = await ensureAuthenticatedUser();
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
+  if (ext === "pdf") {
+    // iOS puede entregar la miniatura de la página 1 en lugar del PDF completo.
+    // No guardarla bajo extensión .pdf como si fuese el documento.
+    pdfUploadKind(file.name, file.type, new Uint8Array(await file.slice(0,1024).arrayBuffer()));
+  }
   const path = await uploadFile(supabase, user.id, "files", file, ext);
 
   const item = await createItem(supabase, {

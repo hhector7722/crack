@@ -31,3 +31,10 @@ npx next build --webpack
 ## Limitaciones conocidas
 
 Los PDFs anteriores no se leen en segundo plano mientras no haya una sesión de usuario navegando: hay que pulsar **Leer PDFs** una vez. El texto de páginas escaneadas depende de la calidad de OCR local y del dispositivo; mantener Crack abierto durante la primera indexación. El sistema conserva número de página y documentos originales sin modificarlos. Los nombres, títulos o enlaces por sí solos no sustituyen a páginas extraídas.
+
+## Visor completo y archivos compartidos desde iPhone
+
+- Los archivos PDF nunca se transforman en imágenes de portada al subirlos desde Archivos o al enviarlos a Drops: se guarda el PDF binario original en Supabase Storage.
+- En el detalle del archivo, el visor de PDF usa PDF.js en vez del `iframe` nativo de iOS. Enseña **Página N de M**, flechas anterior/siguiente, botones **Abrir original** y **Descargar** y acceso a **Leer todas las páginas** para indexación.
+- Si un atajo iOS indica un nombre `.pdf` pero entrega bytes de un JPEG de portada, Crack lo rechaza con instrucciones de compartir el PDF original desde Archivos; si los bytes son PDF pero el MIME es incorrecto, se corrigen automáticamente y se guardan como PDF.
+- Para confirmar que el archivo es íntegro, abre el detalle y comprueba el total de páginas. El contador proviene del documento real en Storage, no del índice de texto; un documento puede mostrar todas sus páginas aunque siga pendiente la lectura OCR para el asistente.
