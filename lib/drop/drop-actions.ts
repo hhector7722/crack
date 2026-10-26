@@ -8,6 +8,7 @@ import {
 import type { SharePayload } from "@/lib/share";
 import { sharePayload } from "@/lib/share";
 import { deleteFile, duplicateStorageFile } from "@/lib/storage";
+import { indexStoredPdf } from "@/lib/pdf-index-client";
 import {
   fileLabel,
   itemTypeFromContentType,
@@ -143,6 +144,11 @@ export async function saveDropToCrack(
     });
 
     triggerEmbed(item.id);
+    if (itemType === "file" && newPath.toLowerCase().endsWith(".pdf")) {
+      void indexStoredPdf(item.id).catch(error =>
+        console.warn("[pdf:drop-index]",error instanceof Error?error.message:"unknown")
+      );
+    }
 
     if (itemType === "audio") {
       const url = await getOrFetchSignedUrl(newPath);
