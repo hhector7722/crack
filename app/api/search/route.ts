@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getQueryEmbedding } from "@/lib/embedding";
+import { embeddingsConfigured, getQueryEmbedding } from "@/lib/embedding";
 import type { SearchResultItem, SearchSource } from "@/lib/types";
 
 type SearchRow = {
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   try {
     let embedding: number[] | null = null;
     let searchSource: SearchSource = "fts";
-    if (semantic) {
+    if (semantic && embeddingsConfigured()) {
       try {
         embedding = await getQueryEmbedding(q);
         searchSource = "hybrid";
@@ -51,12 +51,10 @@ export async function GET(request: NextRequest) {
         .ilike("title", "%" + escaped + "%")
         .order("created_at", { ascending: false })
         .limit(100),
-      supabase.rpc("search_items_v1", {
-        p_user_id: user.id,
+      supabase.rpc("search_knowledge_v1", {
         p_query: q,
         p_embedding: embedding,
         p_limit: 100,
-        p_rrf_k: 60,
       }),
     ]);
 

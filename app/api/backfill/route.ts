@@ -1,59 +1,36 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateItemEmbedding, saveEmbedding } from "@/lib/embedding";
+import { embeddingsConfigured, generateItemEmbedding, saveEmbedding, buildEmbeddingText } from "@/lib/embedding";
 import type { Item } from "@/lib/types";
 
-const BATCH_SIZE = 10;
-
-export async function GET(request: NextRequest) {
+export async function POST() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  if (!embeddingsConfigured()) return NextResponse.json({ error: "Configura CLOUDFLARE_ACCOUNT_ID y CLOUDFLARE_API_TOKEN en Vercel." }, { status: 503 });
 
-  if (!user) {
-    return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  }
-
-  const { searchParams } = new URL(request.url);
-  const offset = parseInt(searchParams.get("offset") ?? "0", 10);
-
-  const { data: items, error: fetchError, count } = await supabase
-    .from("items")
-    .select("id, type, title, content, metadata", { count: "exact" })
+  // Batches repetibles sin offset: el conjunto disminuye tras guardar cada vector.
+  const { data, error } = await supabase.from("items")
+    .select("id,type,title,content,metadata")
     .eq("user_id", user.id)
-    .is("embedding", null)
+    .not("metadata", "cs", '{"extra":true}')
+    .is("knowledge_embedding", null)
     .order("created_at", { ascending: false })
-    .range(offset, offset + BATCH_SIZE - 1);
+    .limit(8);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  if (fetchError) {
-    return NextResponse.json({ error: fetchError.message }, { status: 500 });
-  }
-
-  const total = count ?? 0;
-  const results: { id: string; ok: boolean; error?: string }[] = [];
-
-  for (const item of items as Pick<Item, "id" | "type" | "title" | "content" | "metadata">[]) {
+  let indexed = 0;
+  const errors: string[] = [];
+  for (const item of (data ?? []) as Pick<Item, "id" | "type" | "title" | "content" | "metadata">[]) {
+    if (!buildEmbeddingText(item)) continue;
     try {
-      const embedding = await generateItemEmbedding(item);
-      await saveEmbedding(supabase, item.id, embedding);
-      results.push({ id: item.id, ok: true });
+      await saveEmbedding(supabase, item.id, await generateItemEmbedding(item));
+      indexed++;
     } catch (err) {
-      results.push({
-        id: item.id,
-        ok: false,
-        error: err instanceof Error ? err.message : "Error desconocido",
-      });
+      errors.push(err instanceof Error ? err.message : "Error indexando");
+      // Evitamos gastar la cuota gratuita reiterando una respuesta 429/5xx.
+      break;
     }
   }
-
-  const remaining = Math.max(0, total - (offset + BATCH_SIZE));
-
-  return NextResponse.json({
-    processed: results.length,
-    total,
-    remaining,
-    next_offset: remaining > 0 ? offset + BATCH_SIZE : null,
-    results,
-  });
+  return NextResponse.json({ indexed, processed: data?.length ?? 0, has_more: (data?.length ?? 0) === 8 && errors.length === 0 && indexed > 0, error: errors[0] ?? null });
 }

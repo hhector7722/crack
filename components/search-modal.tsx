@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Search, FileText, Mic, Image as ImageIcon, Link2, Loader2, Command } from "lucide-react";
 import { createPortal } from "react-dom";
 import { PullToRefresh } from "@/components/pull-to-refresh";
+import { KnowledgeAssistant } from "@/components/knowledge-assistant";
 import { useModalOpen } from "@/lib/ui/use-modal-open";
 import { cn, getNoteUrl } from "@/lib/utils";
 import { format } from "date-fns";
@@ -77,7 +78,7 @@ export function SearchModal({ open, onOpenChange, onSelect, onRefresh }: SearchM
       if (!res.ok) return;
       const data = await res.json();
       if (semantic) {
-        setHasSemantic(true);
+        setHasSemantic(data.search_source === "hybrid");
       }
       setResults(data.results ?? []);
       setSelectedIndex(0);
@@ -107,6 +108,8 @@ export function SearchModal({ open, onOpenChange, onSelect, onRefresh }: SearchM
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
+    // No interceptar Enter en los botones del asistente ni en las fuentes.
+    if (e.key === "Enter" && (e.target as HTMLElement).closest("button")) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
       setSelectedIndex((i) => Math.min(i + 1, results.length - 1));
@@ -168,6 +171,14 @@ export function SearchModal({ open, onOpenChange, onSelect, onRefresh }: SearchM
             />
             {loading && <Loader2 className="h-4 w-4 animate-spin text-zinc-500" />}
           </div>
+
+          <KnowledgeAssistant
+            query={query}
+            onSelect={(item) => {
+              onSelect(item);
+              onOpenChange(false);
+            }}
+          />
 
           {results.length > 0 && (
             <div className="flex items-center gap-2 border-b border-zinc-800/50 px-4 py-1.5">
