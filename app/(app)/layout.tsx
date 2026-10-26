@@ -9,7 +9,15 @@ import {
   useState,
   useCallback,
 } from "react";
-import { Settings, X } from "lucide-react";
+import { MessageCircle, Settings, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
+
+const CrackCopilot = dynamic(
+  () => import("@/components/crack-copilot").then((module) => module.CrackCopilot),
+  { ssr: false },
+);
 import { CaptureSheet } from "@/components/capture-sheet";
 import { TabBarWrapper } from "@/components/layout/TabBarWrapper";
 import { VisualViewportSync } from "@/components/layout/VisualViewportSync";
@@ -51,6 +59,8 @@ function KeyboardShortcuts() {
 }
 
 export default function AppLayout() {
+  const pathname = usePathname();
+  const isAssistant = pathname === "/asistente";
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
@@ -158,6 +168,15 @@ export default function AppLayout() {
                     {showProfile ? <X className="h-5 w-5" /> : <Settings className="h-5 w-5" />}
                   </button>
                 </div>
+                <div className="absolute right-2">
+                  <Link
+                    href={isAssistant ? "/" : "/asistente"}
+                    aria-label={isAssistant ? "Cerrar asistente" : "Abrir asistente de IA"}
+                    className="flex h-12 w-12 items-center justify-center rounded-full text-zinc-400 transition-colors active:text-zinc-100"
+                  >
+                    {isAssistant ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
+                  </Link>
+                </div>
               </div>
             </header>
 
@@ -170,7 +189,11 @@ export default function AppLayout() {
                   Subiendo...
                 </p>
               ) : null}
-              {showProfile ? (
+              {isAssistant ? (
+                <div className="min-h-0 flex-1 overflow-hidden">
+                  <CrackCopilot />
+                </div>
+              ) : showProfile ? (
                 <div className="flex-1 overflow-y-auto px-4 pb-6">
                   <ProfileView />
                 </div>
