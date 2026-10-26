@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Loader2, MessageCircle, SearchCheck, Send, Sparkles } from "lucide-react";
+import { BookOpen, FileSearch, Loader2, MessageCircle, SearchCheck, Send, Sparkles } from "lucide-react";
+import { indexExistingPdfs } from "@/lib/pdf-index-client";
+import { createClient } from "@/lib/supabase/client";
 import type { SearchResultItem } from "@/lib/types";
 
-type AnswerSource = { number:number; item:SearchResultItem; url:string|null };
+type AnswerSource = { number:number; item:SearchResultItem; url:string|null; page_number?:number };
 type AnswerResponse = { answer?:string; error?:string; sources?:AnswerSource[]; mode?:string };
 type Turn = { question:string; answer:string; sources:AnswerSource[] };
 
@@ -21,6 +23,8 @@ export function KnowledgeAssistant({
   const [asking,setAsking]=useState(false);
   const [indexing,setIndexing]=useState(false);
   const [indexed,setIndexed]=useState<number|null>(null);
+  const [pdfIndexing,setPdfIndexing]=useState(false);
+  const [pdfProgress,setPdfProgress]=useState<string|null>(null);
   const [canIndex,setCanIndex]=useState(false);
   const controller=useRef<AbortController|null>(null);
 
@@ -75,6 +79,30 @@ export function KnowledgeAssistant({
     }
   }
 
+  async function indexPdfs(){
+    if(pdfIndexing)return;
+    setPdfIndexing(true);setPdfProgress("Buscando archivos PDF…");setError(null);
+    try{await indexExistingPdfs(message=>setPdfProgress(message));}
+    catch(e){setError(e instanceof Error?e.message:"Error indexando PDF");}
+    finally{setPdfIndexing(false);}
+  }
+
+  async function openSource(source:AnswerSource){
+    if(!source.page_number||!source.item.file_url){onSelect(source.item);return;}
+    // Se abre en un nuevo visor PDF directamente por página.
+    const popup=window.open("about:blank","_blank");
+    if(popup)popup.opener=null;
+    try{
+      const supabase=createClient();
+      const {data,error}=await supabase.storage.from("crack-files")
+        .createSignedUrl(source.item.file_url,900);
+      if(error||!data?.signedUrl)throw new Error("No se pudo abrir el PDF");
+      const url=data.signedUrl+`#page=${source.page_number}`;
+      if(popup)popup.location.href=url;
+      else window.location.assign(url);
+    }catch(e){popup?.close();setError(e instanceof Error?e.message:"Error abriendo PDF");}
+  }
+
   async function indexLibrary() {
     if(indexing) return;
     setIndexing(true);
@@ -110,13 +138,21 @@ export function KnowledgeAssistant({
       ):query.trim().length<2 ? (
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs text-zinc-500">Busca enlaces o pregunta a tu biblioteca.</span>
+          <div className="flex items-center gap-3">
+            <button type="button" disabled={pdfIndexing} onClick={()=>void indexPdfs()}
+              className="flex shrink-0 items-center gap-1.5 text-xs text-zinc-300 underline-offset-2 hover:underline disabled:opacity-50">
+              {pdfIndexing?<Loader2 className="h-3.5 w-3.5 animate-spin"/>:<FileSearch className="h-3.5 w-3.5"/>}
+              {pdfIndexing?"Leyendo…":"Leer PDFs"}
+            </button>
           {canIndex && <button type="button" disabled={indexing} onClick={()=>void indexLibrary()}
             className="flex shrink-0 items-center gap-1.5 text-xs text-zinc-400 underline-offset-2 hover:underline disabled:opacity-50">
             {indexing?<Loader2 className="h-3.5 w-3.5 animate-spin"/>:<SearchCheck className="h-3.5 w-3.5"/>}
             {indexing?"Indexando…":"Indexar"}
           </button>}
+          </div>
         </div>
       ):null}
+      {pdfProgress && <p className="mt-2 text-xs text-zinc-400" role="status">{pdfProgress}</p>}
       {indexed!==null && !indexing && (
         <p className="mt-2 text-xs text-zinc-500">{indexed} elementos indexados en esta operación.</p>
       )}
@@ -138,10 +174,12 @@ export function KnowledgeAssistant({
                     <BookOpen className="h-3.5 w-3.5"/> Fuentes de tu biblioteca
                   </p>
                   {turn.sources.map(source=>(
-                    <button key={source.item.id} type="button" onClick={()=>onSelect(source.item)}
+                    <button key={source.item.id+"-"+(source.page_number??"note")} type="button"
+                      onClick={()=>void openSource(source)}
                       className="flex w-full min-h-9 items-center gap-2 rounded-lg px-2 text-left text-xs text-zinc-300 hover:bg-zinc-800">
                       <span className="shrink-0 text-zinc-500">[{source.number}]</span>
-                      <span className="min-w-0 truncate">{source.item.title||source.url||"Elemento guardado"}</span>
+                      <span className="min-w-0 truncate">{source.item.title||source.url||"Elemento guardado"}
+                        {source.page_number ? ` · PDF pág. ${source.page_number}` : ""}</span>
                     </button>
                   ))}
                 </div>

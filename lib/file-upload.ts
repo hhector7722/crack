@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { createItem, triggerEmbed } from "@/lib/items";
 import { uploadFile } from "@/lib/storage";
+import { indexStoredPdf } from "@/lib/pdf-index-client";
 
 async function ensureAuthenticatedUser() {
   const supabase = createClient();
@@ -45,4 +46,11 @@ export async function uploadFileFromPicker(file: File): Promise<void> {
     metadata: {},
   });
   triggerEmbed(item.id);
+  if(ext==="pdf"){
+    // El PDF ya está guardado; indexación automática sin bloquear la subida.
+    // Si se cierra la pestaña, «Leer PDFs» recupera cualquier pendiente.
+    void indexStoredPdf(item.id,file).catch(error=>{
+      console.warn("[pdf:auto-index]",error instanceof Error?error.message:"unknown");
+    });
+  }
 }
