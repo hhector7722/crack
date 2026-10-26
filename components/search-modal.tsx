@@ -108,6 +108,9 @@ export function SearchModal({ open, onOpenChange, onSelect, onRefresh }: SearchM
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
+    // Las preguntas de seguimiento tienen su formulario: Enter debe enviarlas
+    // al asistente, nunca abrir el primer resultado de la búsqueda.
+    if ((e.target as HTMLElement).closest("form")) return;
     // No interceptar Enter en los botones del asistente ni en las fuentes.
     if (e.key === "Enter" && (e.target as HTMLElement).closest("button")) return;
     if (e.key === "ArrowDown") {
