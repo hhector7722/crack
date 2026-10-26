@@ -1,4 +1,16 @@
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+// Next.js empaqueta la librería principal en .next/server/chunks, pero PDF.js
+// intenta importar "./pdf.worker.mjs" desde allí en Node/Vercel y falla.
+// Importar el worker como módulo hace que Webpack lo incluya realmente.
+import { WorkerMessageHandler } from "pdfjs-dist/legacy/build/pdf.worker.mjs";
+
+function configureNodePdfWorker() {
+  // PDF.js busca este objeto antes de intentar cargar un worker de un
+  // archivo relativo que no existe en el runtime de Vercel.
+  (globalThis as typeof globalThis & {
+    pdfjsWorker?: { WorkerMessageHandler: typeof WorkerMessageHandler };
+  }).pdfjsWorker = { WorkerMessageHandler };
+}
 
 export const MAX_PDF_BYTES = 60 * 1024 * 1024;
 export const MAX_PDF_PAGES = 150;
@@ -29,6 +41,7 @@ export async function extractPdfText(bytes:Uint8Array):Promise<{
   total_pages:number;pages:PdfExtractedPage[];needs_ocr_pages:number[];
 }> {
   if(!isPdfBytes(bytes))throw new Error("El archivo no es un PDF válido o supera 60 MB.");
+  configureNodePdfWorker();
   const task=getDocument({data:new Uint8Array(bytes),disableFontFace:true,useSystemFonts:true,isEvalSupported:false});
   let document:Awaited<typeof task.promise>|null=null;
   try{
