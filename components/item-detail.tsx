@@ -20,6 +20,7 @@ import {
 } from "@/lib/utils";
 import type { Item, ClassificationType, Priority } from "@/lib/types";
 import { CarouselSwipeDots, useCarouselSlide } from "@/lib/ui/use-carousel-slide";
+import { PdfDocumentViewer } from "@/components/pdf-document-viewer";
 
 interface ItemDetailProps {
   item: Item;
@@ -539,11 +540,20 @@ function ItemDetailPanel({
                   <p className="text-sm text-zinc-500">Cargando...</p>
                 </div>
               ) : mediaUrl ? (
-                <iframe
-                  src={mediaUrl}
-                  className="h-full w-full rounded-lg"
-                  title={item.title || "Archivo"}
-                />
+                item.file_url?.toLowerCase().endsWith(".pdf") ? (
+                  <PdfDocumentViewer
+                    key={item.id}
+                    url={mediaUrl}
+                    itemId={item.id}
+                    title={item.title || "Documento"}
+                  />
+                ) : (
+                  <iframe
+                    src={mediaUrl}
+                    className="h-full w-full rounded-lg"
+                    title={item.title || "Archivo"}
+                  />
+                )
               ) : (
                 <div className="flex flex-1 items-center justify-center">
                   <p className="text-sm text-red-400">No se pudo cargar el archivo</p>

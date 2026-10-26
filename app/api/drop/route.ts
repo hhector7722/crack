@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createAdminClient, getSupabaseAdminConfig } from "@/lib/supabase/admin";
 import { hashShareToken, tokensMatch } from "@/lib/share-token";
 import { uploadFile } from "@/lib/storage";
+import { pdfUploadKind } from "@/lib/pdf-upload-validation";
 
 type ContentType = "text" | "image" | "audio" | "video" | "file";
 
@@ -78,14 +79,18 @@ async function uploadDropAttachment(
   userId: string,
   file: Blob & { name?: string; type: string },
 ): Promise<{ file_url: string; content_type: ContentType }> {
-  const mime = file.type || "application/octet-stream";
-  const ct = mimeToContentType(mime);
-  const ext = extensionFromUpload(file);
+  const header = new Uint8Array(await file.slice(0,1024).arrayBuffer());
+  const detected = pdfUploadKind(file.name,file.type,header);
+  const ct = detected.isPdf ? "file" : mimeToContentType(file.type || "application/octet-stream");
+  const ext = detected.isPdf ? "pdf" : extensionFromUpload(file);
+  const upload = detected.isPdf && file.type !== "application/pdf"
+    ? new File([file], (file.name || "documento").replace(/\.[^.]+$/, "") + ".pdf", {type:"application/pdf"})
+    : file;
   const filePath = await uploadFile(
     createAdminClient(),
     userId,
     "drops",
-    file,
+    upload,
     ext,
   );
   return { file_url: filePath, content_type: ct };
@@ -286,9 +291,11 @@ export async function POST(request: Request) {
         if (attached) attachments = [attached];
       }
     }
-  } catch {
+  } catch (cause) {
+    const message=cause instanceof Error && cause.message.includes("no el PDF original")
+      ? cause.message : "Cuerpo de la petición inválido";
     return NextResponse.json(
-      { error: "Cuerpo de la petición inválido", contentType: contentTypeHeader },
+      { error: message, contentType: contentTypeHeader },
       { status: 400 },
     );
   }
