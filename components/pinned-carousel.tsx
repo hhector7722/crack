@@ -284,12 +284,13 @@ export function PinnedCarousel({
                 }
               }}
               onKeyDown={(event) => {
-                const direction = {
+                const directions: Record<string, number> = {
                   ArrowLeft: -2,
                   ArrowRight: 2,
                   ArrowUp: -1,
                   ArrowDown: 1,
-                }[event.key];
+                };
+                const direction = directions[event.key];
                 if (direction !== undefined) {
                   event.preventDefault();
                   keyboardReorder(id, direction);
