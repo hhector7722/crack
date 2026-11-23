@@ -204,7 +204,7 @@ export function CompactItemTile({
     >
       <div className={cn(
         "relative w-full overflow-hidden bg-zinc-900",
-        gridMode ? "aspect-[4/3]" : "h-[4.25rem]"
+        "aspect-square"
       )}>
         <ItemVisual item={item} mediaUrl={mediaUrl} />
       </div>
@@ -226,7 +226,7 @@ export function PinnedItemTile({
       onClick={onOpen}
       aria-label={getDisplayTitle(item)}
       title="Mantén pulsado para cambiar el orden"
-      className="crack-premium-card block aspect-[4/3] w-full min-w-0 overflow-hidden rounded-[15px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+      className="crack-premium-card block aspect-square w-full min-w-0 overflow-hidden rounded-[15px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
     >
       <ItemVisual item={item} mediaUrl={mediaUrl} />
     </button>
