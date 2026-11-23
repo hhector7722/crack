@@ -278,11 +278,12 @@ export function PinnedCarousel({
     <div
       ref={scrollRef}
       className="no-scrollbar -mx-3 overflow-x-auto px-3 pb-3 pt-1"
+      style={{ containerType: "inline-size" }}
       aria-label="Fijados. Mantén pulsado y arrastra para cambiar el orden."
     >
       <div
         className="grid w-max grid-flow-col grid-rows-2 gap-2.5"
-        style={{ gridAutoColumns: "clamp(9.5rem, 43vw, 12.5rem)" }}
+        style={{ gridAutoColumns: "calc((100cqw - 1.25rem) / 3)" }}
       >
         {order.map((id) => {
           const item = byId.get(id);
