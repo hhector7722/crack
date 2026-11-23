@@ -206,7 +206,13 @@ export function PinnedCarousel({
       beginDrag(pending.id, pending.pointerId, pending.startX, pending.startY, event.currentTarget);
       handlePointerMove(event);
     } else {
-      // Deslizar desplaza la cuadrícula; mantener pulsado y mover reordena.
+      const deltaX = event.clientX - pending.startX;
+      const deltaY = event.clientY - pending.startY;
+      // Vertical: scroll nativo de la página. Horizontal: scroll del carrusel.
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        clearPending();
+        return;
+      }
       if (pending.timer) clearTimeout(pending.timer);
       pending.timer = null;
       pending.scrolling = true;
@@ -292,7 +298,7 @@ export function PinnedCarousel({
               data-pinned-id={id}
               style={{
                 opacity: draggedId === id ? 0.25 : 1,
-                touchAction: "none",
+                touchAction: "pan-y",
               }}
               onPointerDown={(event) => handlePointerDown(event, id)}
               onPointerMove={handlePointerMove}
