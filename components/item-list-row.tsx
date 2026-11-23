@@ -171,10 +171,10 @@ function ItemVisual({
   return (
     <div className="flex h-full w-full items-center justify-center overflow-hidden bg-zinc-900 px-[10%] py-[7%]">
       <div className="flex h-full w-full flex-col overflow-hidden rounded-[3px] bg-zinc-100 px-[9%] py-[8%] text-left shadow-[0_3px_12px_rgba(0,0,0,.35)]">
-        <span className="mb-1 line-clamp-2 break-words text-[8px] font-bold leading-[9px] text-zinc-800">
+        <span className="mb-1 shrink-0 whitespace-normal break-words [overflow-wrap:anywhere] text-[8px] font-bold leading-[9px] text-zinc-800">
           {getDisplayTitle(item)}
         </span>
-        <p className="line-clamp-7 whitespace-pre-wrap break-words text-[7px] leading-[9px] text-zinc-600">
+        <p className="min-h-0 flex-1 overflow-hidden whitespace-pre-wrap break-words text-[7px] leading-[9px] text-zinc-600">
           {previewText || summary}
         </p>
       </div>
