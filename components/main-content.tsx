@@ -70,79 +70,49 @@ function HomeView({
 }) {
   const visibleItems = items.filter((item) => !isExtraItem(item));
   const pinned = sortPinned(visibleItems);
-  const recentlyViewed = visibleItems
-    .filter((item) => Boolean(item.last_opened_at))
-    .sort(
-      (a, b) =>
-        new Date(b.last_opened_at!).getTime() -
-        new Date(a.last_opened_at!).getTime()
-    )
-    .slice(0, 8);
 
-  // "Recientes" es el historial completo por fecha de creación, independiente
-  // de visitas y fijados. Orden cronológico: antiguos primero.
+  // Conserva el orden de la sección Recientes existente.
   const recent = [...visibleItems].sort(
     (a, b) =>
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   );
 
-  const sections = [
-    { title: "Fijados", items: pinned },
-    { title: "Vistos recientemente", items: recentlyViewed },
-  ];
-
   return (
-    <div className="mx-auto w-full max-w-3xl px-3 pb-2 pt-2">
-      {sections.map((section) => (
-        <section key={section.title} className="mb-4">
-          <h2 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
-            {section.title}
-          </h2>
-          {section.items.length ? (
-            section.title === "Fijados" ? (
-              <PinnedCarousel
-                items={section.items}
-                onOpen={onOpen}
-                onReorder={onReorderPinned}
-              />
-            ) : (
-              <div className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-0.5">
-                {section.items.map((item) => (
-                  <CompactItemTile
-                    key={item.id}
-                    item={item}
-                    onOpen={() => onOpen(item)}
-                  />
-                ))}
-              </div>
-            )
-          ) : (
-            <p className="min-h-8 py-1 text-xs text-zinc-600">
-              {section.title === "Fijados"
-                ? "Fija elementos para tenerlos siempre a mano."
-                : "Los elementos que abras aparecerán aquí."}
-            </p>
-          )}
-        </section>
-      ))}
+    <div className="mx-auto w-full max-w-3xl px-3 pb-3 pt-3">
+      <section className="mb-5">
+        <h2 className="crack-section-label mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em]">
+          Fijados
+        </h2>
+        {pinned.length ? (
+          <PinnedCarousel
+            items={pinned}
+            onOpen={onOpen}
+            onReorder={onReorderPinned}
+          />
+        ) : (
+          <p className="py-2 text-xs text-slate-400">
+            Fija elementos para tenerlos siempre a mano.
+          </p>
+        )}
+      </section>
 
       <section>
-        <h2 className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-500">
+        <h2 className="crack-section-label mb-2.5 text-[11px] font-semibold uppercase tracking-[0.14em]">
           Recientes
         </h2>
         {recent.length ? (
-          <div>
+          <div className="grid grid-cols-3 items-start gap-2.5">
             {recent.map((item) => (
-              <ItemListRow
+              <CompactItemTile
                 key={item.id}
                 item={item}
-                compact
+                gridMode
                 onOpen={() => onOpen(item)}
               />
             ))}
           </div>
         ) : (
-          <p className="py-5 text-xs text-zinc-600">
+          <p className="py-5 text-xs text-slate-400">
             No hay más elementos recientes.
           </p>
         )}

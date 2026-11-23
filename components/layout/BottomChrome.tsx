@@ -64,20 +64,20 @@ export function BottomChrome() {
   return (
     <div
       data-tm-bottom-chrome
-      className="tm-bottom-chrome pointer-events-none fixed left-0 right-0 z-[95] flex flex-col bg-gradient-to-t from-zinc-950 via-zinc-950/95 to-transparent px-3 pt-3"
+      className="tm-bottom-chrome crack-premium-bottom pointer-events-none fixed left-0 right-0 z-[95] flex flex-col px-3 pt-3"
       style={{ bottom: "var(--tm-chrome-bottom, 0px)" }}
     >
       <button
         ref={searchRef}
         type="button"
         onClick={toggleSearch}
-        className="pointer-events-auto mb-1.5 flex h-11 w-full items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900 px-3.5 text-left text-sm text-zinc-500 shadow-lg shadow-black/30 active:bg-zinc-800"
+        className="crack-premium-search pointer-events-auto mb-1.5 flex h-11 w-full items-center gap-3 rounded-xl px-3.5 text-left text-sm text-slate-300"
       >
         <Search className="h-5 w-5 shrink-0" />
         <span>Buscar cualquier cosa…</span>
       </button>
 
-      <div className="pointer-events-auto overflow-hidden rounded-t-xl border border-b-0 border-zinc-800 bg-[#141416] shadow-xl shadow-black/50">
+      <div className="crack-premium-nav pointer-events-auto overflow-hidden rounded-t-xl">
         <nav
           className="grid h-12 grid-cols-3 items-center px-1"
           aria-label="Navegación principal"
@@ -99,7 +99,7 @@ export function BottomChrome() {
             type="button"
             onClick={openCaptureMenu}
             aria-label="Crear"
-            className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-zinc-100 text-zinc-950 shadow-lg shadow-black/25 active:scale-95"
+            className="crack-premium-add mx-auto flex h-14 w-14 items-center justify-center rounded-full text-white active:scale-95"
           >
             <Plus className="h-7 w-7" />
           </button>
@@ -120,7 +120,7 @@ export function BottomChrome() {
 
         <div
           aria-hidden
-          className="h-[env(safe-area-inset-bottom,0px)] bg-[#141416]"
+          className="h-[env(safe-area-inset-bottom,0px)] bg-[#122640]"
         />
       </div>
     </div>

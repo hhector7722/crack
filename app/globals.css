@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #09090b;
+  --background: #091526;
   --foreground: #fafafa;
-  --tm-bg: #09090b;
+  --tm-bg: #091526;
   --tm-fg: #fafafa;
   --tm-muted: #71717a;
   --tm-accent: #fafafa;
@@ -28,9 +28,9 @@
   --tm-app-height: 100dvh;
   --tm-vv-offset-top: 0px;
   --tm-vv-height: 100dvh;
-  --tm-tabbar-bg-hex: #09090b;
-  --tm-shell-bg-hex: #09090b;
-  --tm-shell-bg-image: none;
+  --tm-tabbar-bg-hex: #091526;
+  --tm-shell-bg-hex: #091526;
+  --tm-shell-bg-image: radial-gradient(ellipse at 18% 5%, rgba(55, 96, 144, .23), transparent 50%), linear-gradient(165deg, #142b49 0%, #0c1d33 45%, #081424 100%);
   --app-gutter: clamp(0.75rem, 3.5vw, 1rem);
   --crack-ios-ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --crack-page-push-ms: 360ms;
@@ -329,5 +329,73 @@ html:has(.tm-app-shell) body {
 
   .action-accent {
     @apply flex min-h-12 w-full shrink-0 items-center justify-center gap-2 text-sm font-semibold text-red-400 transition-colors active:text-red-300;
+  }
+}
+
+
+/* Superficies satinadas y biseladas, inspiradas en los widgets de ventas de Marbella. */
+.crack-section-label {
+  color: #b5c9df;
+  text-shadow: 0 1px 1px rgba(0, 5, 17, .4);
+}
+
+.crack-premium-card {
+  border: 1px solid rgba(178, 210, 242, .32);
+  background: linear-gradient(153deg, #315575 0%, #203c5d 42%, #132b49 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(248, 253, 255, .23),
+    inset 0 -2px 3px rgba(0, 9, 27, .25),
+    0 7px 16px rgba(0, 8, 24, .3),
+    -2px -2px 9px rgba(99, 153, 199, .06);
+  transition: filter 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.crack-premium-card:active {
+  filter: brightness(1.12);
+  box-shadow:
+    inset 0 1px 0 rgba(248, 253, 255, .28),
+    inset 0 -2px 3px rgba(0, 9, 27, .25),
+    0 3px 8px rgba(0, 8, 24, .24);
+}
+
+.crack-premium-header {
+  background: linear-gradient(180deg, rgba(16, 37, 62, .99), rgba(13, 30, 52, .97));
+  border-bottom: 1px solid rgba(181, 214, 245, .13);
+  box-shadow: 0 5px 18px rgba(0, 8, 24, .2), inset 0 -1px 0 rgba(255, 255, 255, .03);
+}
+
+.crack-premium-bottom {
+  background: linear-gradient(0deg, #091526 65%, rgba(9, 21, 38, .94) 81%, transparent);
+}
+
+.crack-premium-search {
+  border: 1px solid rgba(178, 210, 242, .3);
+  background: linear-gradient(150deg, #294967, #172f4e);
+  box-shadow:
+    inset 0 1px 0 rgba(248, 253, 255, .17),
+    0 5px 14px rgba(0, 7, 22, .32);
+}
+
+.crack-premium-nav {
+  border: 1px solid rgba(174, 211, 243, .27);
+  border-bottom: 0;
+  background: linear-gradient(155deg, #203e5d, #122640 80%);
+  box-shadow:
+    inset 0 1px 0 rgba(246, 252, 255, .16),
+    0 -4px 20px rgba(0, 7, 24, .34);
+}
+
+.crack-premium-add {
+  border: 1px solid rgba(220, 243, 255, .29);
+  background: linear-gradient(150deg, #3d95c8, #22678f 76%, #1b567e);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .36),
+    inset 0 -2px 2px rgba(2, 36, 59, .22),
+    0 6px 14px rgba(0, 10, 31, .4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crack-premium-card {
+    transition: none;
   }
 }

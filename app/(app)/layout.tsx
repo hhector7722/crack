@@ -145,7 +145,7 @@ export default function AppLayout() {
               aria-hidden
             />
 
-            <header className="tm-app-header tm-app-header-fixed fixed top-0 right-0 left-0 z-[100] shrink-0 bg-[var(--tm-bg)] px-4 pb-2 pt-12">
+            <header className="tm-app-header tm-app-header-fixed crack-premium-header fixed top-0 right-0 left-0 z-[100] shrink-0 px-4 pb-2 pt-12">
               <div className="relative flex h-[var(--tm-app-header-inner)] min-h-[var(--tm-app-header-inner)] items-center justify-center px-2">
                 <h1 className="text-lg font-bold tracking-tight">Crack</h1>
                 <div className="absolute left-2">

@@ -182,10 +182,12 @@ export function CompactItemTile({
   item,
   onOpen,
   showPin = true,
+  gridMode = false,
 }: {
   item: Item;
   onOpen: () => void;
   showPin?: boolean;
+  gridMode?: boolean;
 }) {
   const mediaUrl = useMediaUrl(item);
   const title = getDisplayTitle(item);
@@ -194,9 +196,15 @@ export function CompactItemTile({
     <button
       type="button"
       onClick={onOpen}
-      className="block w-[6.75rem] shrink-0 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/65 text-left active:bg-zinc-800"
+      className={cn(
+        "crack-premium-card block shrink-0 overflow-hidden rounded-[15px] text-left",
+        gridMode ? "w-full min-w-0" : "w-[6.75rem]"
+      )}
     >
-      <div className="relative h-[4.25rem] w-full overflow-hidden bg-zinc-900">
+      <div className={cn(
+        "relative w-full overflow-hidden bg-[#101e32]",
+        gridMode ? "aspect-[4/3]" : "h-[4.25rem]"
+      )}>
         <ItemVisual item={item} mediaUrl={mediaUrl} />
         {showPin && item.pinned ? (
           <span className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-zinc-100 backdrop-blur-sm">
@@ -204,8 +212,11 @@ export function CompactItemTile({
           </span>
         ) : null}
       </div>
-      <div className="px-2.5 py-1.5">
-        <p className="line-clamp-2 min-h-[2.25rem] text-[11px] font-semibold leading-[1.12rem] text-zinc-100">
+      <div className={cn("px-2.5 py-2", gridMode && "px-2 py-2")}>
+        <p className={cn(
+          "line-clamp-2 min-h-[2.25rem] font-semibold text-slate-50",
+          gridMode ? "text-[10.5px] leading-[1.05rem]" : "text-[11px] leading-[1.12rem]"
+        )}>
           {title}
         </p>
 
@@ -221,14 +232,26 @@ export function PinnedItemTile({
   item: Item;
   onOpen: () => void;
 }) {
+  const mediaUrl = useMediaUrl(item);
+  const hasPreview =
+    item.type === "image" ||
+    item.type === "video" ||
+    Boolean(getNoteUrl(item));
+
   return (
     <button
       type="button"
       onClick={onOpen}
       aria-label={getDisplayTitle(item)}
-      className="flex min-h-[4.25rem] w-[6.75rem] shrink-0 items-center rounded-xl border border-zinc-800 bg-zinc-900/65 py-2 pl-2.5 pr-7 text-left transition-colors active:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+      title="Mantén pulsado para cambiar el orden"
+      className="crack-premium-card flex h-[4.5rem] w-full min-w-0 items-center gap-2 overflow-hidden rounded-[15px] px-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70"
     >
-      <span className="line-clamp-3 break-words text-[11px] font-semibold leading-[1.12rem] text-zinc-100">
+      {hasPreview ? (
+        <span className="h-11 w-11 shrink-0 overflow-hidden rounded-[10px] bg-[#0f2037] shadow-[inset_0_1px_1px_rgba(255,255,255,.1),0_2px_6px_rgba(0,8,20,.35)]">
+          <ItemVisual item={item} mediaUrl={mediaUrl} />
+        </span>
+      ) : null}
+      <span className="line-clamp-3 min-w-0 break-words text-[11px] font-semibold leading-[1.05rem] text-slate-50">
         {getDisplayTitle(item)}
       </span>
     </button>
@@ -261,8 +284,8 @@ export function ItemListRow({
         }
       }}
       className={cn(
-        "group flex w-full items-center border-b border-zinc-800/70 text-left outline-none active:opacity-70 focus-visible:ring-2 focus-visible:ring-zinc-500",
-        compact ? "min-h-[4.25rem] gap-2.5 py-2" : isLink ? "min-h-24 gap-3 py-2.5" : "min-h-20 gap-3 py-2.5"
+        "crack-premium-card group mb-2.5 flex w-full items-center rounded-2xl text-left outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70",
+        compact ? "min-h-[4.25rem] gap-2.5 px-3 py-2" : isLink ? "min-h-24 gap-3 px-3 py-2.5" : "min-h-20 gap-3 px-3 py-2.5"
       )}
     >
       <div
