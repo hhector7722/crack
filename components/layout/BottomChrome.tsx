@@ -71,7 +71,7 @@ export function BottomChrome() {
         ref={searchRef}
         type="button"
         onClick={toggleSearch}
-        className="crack-premium-search pointer-events-auto mb-1.5 flex h-11 w-full items-center gap-3 rounded-xl px-3.5 text-left text-sm text-slate-300"
+        className="crack-premium-search pointer-events-auto mb-1.5 flex h-11 w-full items-center gap-3 rounded-xl px-3.5 text-left text-sm text-zinc-500"
       >
         <Search className="h-5 w-5 shrink-0" />
         <span>Buscar cualquier cosa…</span>
@@ -99,7 +99,7 @@ export function BottomChrome() {
             type="button"
             onClick={openCaptureMenu}
             aria-label="Crear"
-            className="crack-premium-add mx-auto flex h-14 w-14 items-center justify-center rounded-full text-white active:scale-95"
+            className="crack-premium-add mx-auto flex h-14 w-14 items-center justify-center rounded-full text-zinc-950 active:scale-95"
           >
             <Plus className="h-7 w-7" />
           </button>
@@ -120,7 +120,7 @@ export function BottomChrome() {
 
         <div
           aria-hidden
-          className="h-[env(safe-area-inset-bottom,0px)] bg-[#122640]"
+          className="h-[env(safe-area-inset-bottom,0px)] bg-[#141416]"
         />
       </div>
     </div>
