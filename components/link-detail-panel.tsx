@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Ellipsis, LockKeyhole, Pencil, Pin, Share2, Trash2, X } from "lucide-react";
+import { Check, ImagePlus, LockKeyhole, Pencil, Pin, Share2, Trash2, X } from "lucide-react";
 import { LinkCover } from "@/components/link-cover";
 import { createClient } from "@/lib/supabase/client";
 import { deleteItem, updateItem } from "@/lib/items";
 import { deleteFile, uploadFile } from "@/lib/storage";
 import { decodeHtmlEntities, getNoteUrl } from "@/lib/utils";
 import { parseXPostUrl } from "@/lib/link-preview";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import type { Item } from "@/lib/types";
 
 interface LinkDetailPanelProps {
@@ -34,12 +36,10 @@ export function LinkDetailPanel({
   );
   const [title, setTitle] = useState(displayTitle);
   const [editing, setEditing] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pinning, setPinning] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
-  const menuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cacheAttempted = useRef(false);
   const onUpdatedRef = useRef(onUpdated);
@@ -51,15 +51,6 @@ export function LinkDetailPanel({
   useEffect(() => {
     if (!editing) setTitle(displayTitle);
   }, [displayTitle, editing]);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const dismiss = (event: PointerEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
-    };
-    document.addEventListener("pointerdown", dismiss);
-    return () => document.removeEventListener("pointerdown", dismiss);
-  }, [menuOpen]);
 
   // Intenta conservar una copia de la portada en el almacenamiento privado.
   // Si la web bloquea la descarga, se conserva la URL original y se ofrece una portada manual.
@@ -107,7 +98,6 @@ export function LinkDetailPanel({
 
   async function togglePin() {
     if (pinning) return;
-    setMenuOpen(false);
     setPinning(true);
     try {
       onUpdated(await updateItem(createClient(), item.id, { pinned: !item.pinned }));
@@ -119,7 +109,6 @@ export function LinkDetailPanel({
   }
 
   async function shareLink() {
-    setMenuOpen(false);
     if (!url) return;
     if (navigator.share) {
       try {
@@ -137,7 +126,6 @@ export function LinkDetailPanel({
   }
 
   async function toggleExtra() {
-    setMenuOpen(false);
     setError("");
     try {
       const nextExtra = item.metadata.extra !== true;
@@ -156,7 +144,6 @@ export function LinkDetailPanel({
   }
 
   async function removeLink() {
-    setMenuOpen(false);
     if (!window.confirm("¿Eliminar este enlace? Esta acción no se puede deshacer.")) return;
     try {
       await deleteItem(createClient(), item.id);
@@ -201,37 +188,46 @@ export function LinkDetailPanel({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
-      <div ref={menuRef} className="relative z-20 mb-2 flex shrink-0 justify-end">
-        <button
-          type="button"
-          onClick={() => setMenuOpen((current) => !current)}
-          aria-label="Opciones del enlace"
-          aria-expanded={menuOpen}
-          className="flex h-8 w-9 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-700/40 hover:text-zinc-100"
+    <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
+      <div className="mb-3 flex shrink-0 items-center justify-between gap-1.5">
+        <time
+          dateTime={item.created_at}
+          title={format(new Date(item.created_at), "d 'de' MMMM yyyy 'a las' H:mm", { locale: es })}
+          className="shrink-0 whitespace-nowrap text-[10px] text-zinc-400"
         >
-          <Ellipsis className="h-5 w-5" />
-        </button>
-        {menuOpen ? (
-          <div className="absolute right-0 top-9 z-30 w-48 overflow-hidden rounded-xl border border-zinc-700/70 bg-zinc-900 p-1 shadow-xl shadow-black/50">
-            <button type="button" onClick={() => void togglePin()} disabled={pinning} className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-zinc-200 hover:bg-zinc-800">
-              <Pin className="h-4 w-4" /> {item.pinned ? "Desfijar" : "Fijar"}
-            </button>
-            <button type="button" onClick={() => void shareLink()} className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-zinc-200 hover:bg-zinc-800">
-              <Share2 className="h-4 w-4" /> Compartir
-            </button>
-            <button type="button" onClick={() => { setMenuOpen(false); fileInputRef.current?.click(); }} disabled={uploading} className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-zinc-200 hover:bg-zinc-800">
-              <Pencil className="h-4 w-4" /> Cambiar portada
-            </button>
-            <button type="button" onClick={() => void toggleExtra()} className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-zinc-200 hover:bg-zinc-800">
-              <LockKeyhole className="h-4 w-4" /> {item.metadata.extra ? "Sacar de Extra" : "Mover a Extra"}
-            </button>
-            <div className="my-1 border-t border-zinc-800" />
-            <button type="button" onClick={() => void removeLink()} className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-red-300 hover:bg-red-950/40">
-              <Trash2 className="h-4 w-4" /> Eliminar
-            </button>
-          </div>
-        ) : null}
+          {format(new Date(item.created_at), "dd/MM/yy")}
+        </time>
+        <div className="flex shrink-0 items-center gap-0.5">
+          <button type="button" onClick={() => void togglePin()} disabled={pinning}
+            aria-label={item.pinned ? "Desfijar" : "Fijar"} title={item.pinned ? "Desfijar" : "Fijar"}
+            className="flex h-8 w-7 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700 disabled:opacity-50">
+            <Pin className={item.pinned ? "h-4 w-4 fill-current" : "h-4 w-4"} />
+          </button>
+          <button type="button" onClick={() => void shareLink()} aria-label="Compartir" title="Compartir"
+            className="flex h-8 w-7 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700">
+            <Share2 className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => { setTitle(displayTitle); setEditing(true); setError(""); }}
+            aria-label="Editar título" title="Editar título"
+            className="flex h-8 w-7 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700">
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading}
+            aria-label="Cambiar portada" title="Cambiar portada"
+            className="flex h-8 w-7 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700 disabled:opacity-50">
+            <ImagePlus className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => void toggleExtra()}
+            aria-label={item.metadata.extra ? "Sacar de Extra" : "Mover a Extra"}
+            title={item.metadata.extra ? "Sacar de Extra" : "Mover a Extra"}
+            className="flex h-8 w-7 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700">
+            <LockKeyhole className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => void removeLink()} aria-label="Eliminar" title="Eliminar"
+            className="flex h-8 w-7 items-center justify-center rounded-lg text-red-300 active:bg-red-950/50">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
         <input
           ref={fileInputRef}
           type="file"
@@ -287,7 +283,7 @@ export function LinkDetailPanel({
             onClick={() => { setTitle(displayTitle); setEditing(true); setError(""); }}
             className="group flex w-full items-start gap-2 text-left"
           >
-            <span className="min-w-0 flex-1 break-words text-lg font-semibold leading-snug text-zinc-100 line-clamp-3">{displayTitle}</span>
+            <span className="min-w-0 flex-1 break-words text-lg font-semibold leading-snug text-zinc-100">{displayTitle}</span>
             <Pencil className="mt-1 h-3.5 w-3.5 shrink-0 text-zinc-600 transition-colors group-hover:text-zinc-300" />
           </button>
         )}
