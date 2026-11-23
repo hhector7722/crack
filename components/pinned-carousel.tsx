@@ -9,6 +9,8 @@ type PendingDrag = {
   pointerId: number;
   startX: number;
   startY: number;
+  lastX: number;
+  scrolling: boolean;
   timer: ReturnType<typeof setTimeout> | null;
 };
 
@@ -126,6 +128,8 @@ export function PinnedCarousel({
       pointerId: event.pointerId,
       startX: event.clientX,
       startY: event.clientY,
+      lastX: event.clientX,
+      scrolling: false,
       timer: null,
     };
     pendingDrag.current = pending;
@@ -189,6 +193,12 @@ export function PinnedCarousel({
 
     const pending = pendingDrag.current;
     if (!pending || pending.pointerId !== event.pointerId) return;
+    if (pending.scrolling) {
+      event.preventDefault();
+      if (scrollRef.current) scrollRef.current.scrollLeft -= event.clientX - pending.lastX;
+      pending.lastX = event.clientX;
+      return;
+    }
     const distance = Math.hypot(event.clientX - pending.startX, event.clientY - pending.startY);
     if (distance < 7) return;
     if (event.pointerType === "mouse") {
@@ -196,15 +206,27 @@ export function PinnedCarousel({
       beginDrag(pending.id, pending.pointerId, pending.startX, pending.startY, event.currentTarget);
       handlePointerMove(event);
     } else {
-      // Un deslizamiento normal recorre los fijados; mantener pulsado permite ordenarlos.
-      clearPending();
+      // Deslizar desplaza la cuadrícula; mantener pulsado y mover reordena.
+      if (pending.timer) clearTimeout(pending.timer);
+      pending.timer = null;
+      pending.scrolling = true;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      event.preventDefault();
+      if (scrollRef.current) scrollRef.current.scrollLeft -= event.clientX - pending.lastX;
+      pending.lastX = event.clientX;
     }
   }
 
   function handlePointerUp(event: React.PointerEvent<HTMLDivElement>, cancelled = false) {
     const session = activeDrag.current;
     if (!session || session.pointerId !== event.pointerId) {
-      if (pendingDrag.current?.pointerId === event.pointerId) clearPending();
+      if (pendingDrag.current?.pointerId === event.pointerId) {
+        if (pendingDrag.current.scrolling) {
+          suppressClick.current = true;
+          setTimeout(() => { suppressClick.current = false; }, 0);
+        }
+        clearPending();
+      }
       return;
     }
     event.preventDefault();
@@ -270,7 +292,7 @@ export function PinnedCarousel({
               data-pinned-id={id}
               style={{
                 opacity: draggedId === id ? 0.25 : 1,
-                touchAction: "pan-x",
+                touchAction: "none",
               }}
               onPointerDown={(event) => handlePointerDown(event, id)}
               onPointerMove={handlePointerMove}
