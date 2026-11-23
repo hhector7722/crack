@@ -168,12 +168,17 @@ function ItemVisual({
     );
   }
 
+  const previewText = decodeHtmlEntities(item.content || item.metadata.summary || "");
   return (
-    <div className="flex h-full w-full flex-col justify-between bg-zinc-900 p-2">
-      <FileText className="h-4 w-4 text-zinc-500" />
-      <p className="line-clamp-3 text-[9px] font-medium leading-tight text-zinc-300">
-        {summary || "Nota"}
-      </p>
+    <div className="flex h-full w-full items-center justify-center overflow-hidden bg-zinc-900 px-[10%] py-[7%]">
+      <div className="flex h-full w-full flex-col overflow-hidden rounded-[3px] bg-zinc-100 px-[9%] py-[8%] text-left shadow-[0_3px_12px_rgba(0,0,0,.35)]">
+        <span className="mb-1 line-clamp-2 break-words text-[8px] font-bold leading-[9px] text-zinc-800">
+          {getDisplayTitle(item)}
+        </span>
+        <p className="line-clamp-7 whitespace-pre-wrap break-words text-[7px] leading-[9px] text-zinc-600">
+          {previewText || summary}
+        </p>
+      </div>
     </div>
   );
 }
@@ -181,45 +186,28 @@ function ItemVisual({
 export function CompactItemTile({
   item,
   onOpen,
-  showPin = true,
   gridMode = false,
 }: {
   item: Item;
   onOpen: () => void;
-  showPin?: boolean;
   gridMode?: boolean;
 }) {
   const mediaUrl = useMediaUrl(item);
-  const title = getDisplayTitle(item);
-
   return (
     <button
       type="button"
       onClick={onOpen}
+      aria-label={getDisplayTitle(item)}
       className={cn(
-        "crack-premium-card block shrink-0 overflow-hidden rounded-[15px] text-left",
+        "crack-premium-card block shrink-0 overflow-hidden rounded-[15px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400",
         gridMode ? "w-full min-w-0" : "w-[6.75rem]"
       )}
     >
       <div className={cn(
-        "relative w-full overflow-hidden bg-[#101e32]",
+        "relative w-full overflow-hidden bg-zinc-900",
         gridMode ? "aspect-[4/3]" : "h-[4.25rem]"
       )}>
         <ItemVisual item={item} mediaUrl={mediaUrl} />
-        {showPin && item.pinned ? (
-          <span className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-zinc-100 backdrop-blur-sm">
-            <Pin className="h-3.5 w-3.5 fill-current" />
-          </span>
-        ) : null}
-      </div>
-      <div className={cn("px-2.5 py-2", gridMode && "px-2 py-2")}>
-        <p className={cn(
-          "line-clamp-2 min-h-[2.25rem] font-semibold text-slate-50",
-          gridMode ? "text-[10.5px] leading-[1.05rem]" : "text-[11px] leading-[1.12rem]"
-        )}>
-          {title}
-        </p>
-
       </div>
     </button>
   );
@@ -233,27 +221,15 @@ export function PinnedItemTile({
   onOpen: () => void;
 }) {
   const mediaUrl = useMediaUrl(item);
-  const hasPreview =
-    item.type === "image" ||
-    item.type === "video" ||
-    Boolean(getNoteUrl(item));
-
   return (
     <button
       type="button"
       onClick={onOpen}
       aria-label={getDisplayTitle(item)}
       title="Mantén pulsado para cambiar el orden"
-      className="crack-premium-card flex h-[4.5rem] w-full min-w-0 items-center gap-2 overflow-hidden rounded-[15px] px-2.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300/70"
+      className="crack-premium-card block aspect-[4/3] w-full min-w-0 overflow-hidden rounded-[15px] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
     >
-      {hasPreview ? (
-        <span className="h-11 w-11 shrink-0 overflow-hidden rounded-[10px] bg-[#0f2037] shadow-[inset_0_1px_1px_rgba(255,255,255,.1),0_2px_6px_rgba(0,8,20,.35)]">
-          <ItemVisual item={item} mediaUrl={mediaUrl} />
-        </span>
-      ) : null}
-      <span className="line-clamp-3 min-w-0 break-words text-[11px] font-semibold leading-[1.05rem] text-slate-50">
-        {getDisplayTitle(item)}
-      </span>
+      <ItemVisual item={item} mediaUrl={mediaUrl} />
     </button>
   );
 }
