@@ -12,7 +12,7 @@ import { useSearch } from "@/components/search-context";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 import { SearchModal } from "@/components/search-modal";
 import { ItemDetail } from "@/components/item-detail";
-import { CompactItemTile, ItemListRow } from "@/components/item-list-row";
+import { CompactItemTile } from "@/components/item-list-row";
 import { PinnedCarousel } from "@/components/pinned-carousel";
 import type { Item, SearchResultItem } from "@/lib/types";
 
@@ -282,11 +282,12 @@ function LibraryView({
       </AppModal>
 
       {filtered.length ? (
-        <div>
+        <div className="grid grid-cols-3 items-start gap-2.5">
           {filtered.map((item) => (
-            <ItemListRow
+            <CompactItemTile
               key={item.id}
               item={item}
+              gridMode
               onOpen={() => onOpen(item)}
             />
           ))}
