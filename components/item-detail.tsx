@@ -330,92 +330,72 @@ function ItemDetailPanel({
 
   return (
     <>
-      <div className="mb-4 flex flex-col gap-3">
-        <span className="text-xs text-zinc-400 whitespace-nowrap">
-          {format(new Date(item.created_at), "d 'de' MMMM yyyy 'a las' H:mm", { locale: es })}
-        </span>
+      <div className="mb-3 flex shrink-0 items-center justify-between gap-1.5">
+        <time
+          dateTime={item.created_at}
+          title={format(new Date(item.created_at), "d 'de' MMMM yyyy 'a las' H:mm", { locale: es })}
+          className="min-w-0 shrink-0 whitespace-nowrap text-[10px] text-zinc-400"
+        >
+          {format(new Date(item.created_at), "dd/MM/yy")}
+        </time>
         {mode === "view" ? (
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <button
-              type="button"
-              onClick={() => void handleTogglePin()}
-              disabled={pinning}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-zinc-200 active:bg-zinc-800 disabled:opacity-50"
-            >
+          <div className="flex shrink-0 items-center gap-0.5">
+            <button type="button" onClick={() => void handleTogglePin()} disabled={pinning}
+              aria-label={item.pinned ? "Desfijar" : "Fijar"} title={item.pinned ? "Desfijar" : "Fijar"}
+              className="flex h-8 w-7 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700 disabled:opacity-50">
               <Pin className={cn("h-4 w-4", item.pinned && "fill-current")} />
-              {item.pinned ? "Desfijar" : "Fijar"}
             </button>
-            <button
-              type="button"
-              onClick={() => void handleShare()}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-zinc-200 active:bg-zinc-800"
-            >
-              <Share2 className="h-4 w-4" /> Compartir
+            <button type="button" onClick={() => void handleShare()} aria-label="Compartir" title="Compartir"
+              className="flex h-8 w-7 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700">
+              <Share2 className="h-4 w-4" />
             </button>
-            <button
-              type="button"
-              onClick={() => setMode("edit")}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-zinc-200 active:bg-zinc-800"
-            >
-              <Pencil className="h-4 w-4" /> Editar
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleDelete()}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-red-950/35 px-3 text-sm font-medium text-red-300 active:bg-red-950/60"
-            >
-              <Trash2 className="h-4 w-4" /> Eliminar
+            <button type="button" onClick={() => setMode("edit")} aria-label="Editar" title="Editar"
+              className="flex h-8 w-7 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700">
+              <Pencil className="h-4 w-4" />
             </button>
             {(item.type === "image" || item.type === "video") ? (
-              <button
-                type="button"
-                onClick={() => void handleToggleExtra()}
-                className="col-span-2 flex min-h-10 items-center justify-center gap-2 rounded-lg bg-zinc-900/55 px-3 text-xs text-zinc-400 sm:col-span-4"
-              >
-                <LockKeyhole className="h-3.5 w-3.5" />
-                {item.metadata.extra ? "Sacar de Extra" : "Mover a Extra"}
+              <button type="button" onClick={() => void handleToggleExtra()}
+                aria-label={item.metadata.extra ? "Sacar de Extra" : "Mover a Extra"}
+                title={item.metadata.extra ? "Sacar de Extra" : "Mover a Extra"}
+                className="flex h-8 w-7 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700">
+                <LockKeyhole className="h-4 w-4" />
               </button>
             ) : null}
+            <button type="button" onClick={() => void handleDelete()} aria-label="Eliminar" title="Eliminar"
+              className="flex h-8 w-7 items-center justify-center rounded-lg text-red-300 active:bg-red-950/50">
+              <Trash2 className="h-4 w-4" />
+            </button>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => setMode("view")}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-zinc-300 active:bg-zinc-800"
-            >
-              <X className="h-4 w-4" /> Cancelar
+          <div className="flex shrink-0 items-center gap-1">
+            <button type="button" onClick={() => setMode("view")} aria-label="Cancelar" title="Cancelar"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700">
+              <X className="h-4 w-4" />
             </button>
-            <button
-              type="button"
-              onClick={async () => {
-                const text = [title, content].filter(Boolean).join("\n");
-                if (!text.trim()) return;
-                try {
-                  const res = await fetch("/api/classify", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ transcript: text }),
-                  });
-                  if (!res.ok) return;
-                  const data = await res.json();
-                  if (data.title) setTitle(data.title);
-                  if (data.type) setClassificationType(data.type);
-                  if (data.tags) setTags(data.tags);
-                  if (data.priority) setPriority(data.priority);
-                } catch {}
-              }}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-900 px-3 text-sm font-medium text-zinc-300 active:bg-zinc-800"
-            >
-              <Sparkles className="h-4 w-4" /> Clasificar
+            <button type="button" onClick={async () => {
+              const text = [title, content].filter(Boolean).join("\n");
+              if (!text.trim()) return;
+              try {
+                const res = await fetch("/api/classify", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ transcript: text }),
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.title) setTitle(data.title);
+                if (data.type) setClassificationType(data.type);
+                if (data.tags) setTags(data.tags);
+                if (data.priority) setPriority(data.priority);
+              } catch {}
+            }} aria-label="Clasificar" title="Clasificar"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-300 active:bg-zinc-700">
+              <Sparkles className="h-4 w-4" />
             </button>
-            <button
-              type="button"
-              onClick={() => void handleSave()}
-              disabled={saving}
-              className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-zinc-100 px-3 text-sm font-semibold text-zinc-950 active:bg-white disabled:opacity-50"
-            >
-              <Save className="h-4 w-4" /> {saving ? "Guardando…" : "Guardar"}
+            <button type="button" onClick={() => void handleSave()} disabled={saving}
+              aria-label={saving ? "Guardando" : "Guardar"} title={saving ? "Guardando" : "Guardar"}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-100 active:bg-zinc-700 disabled:opacity-50">
+              <Save className="h-4 w-4" />
             </button>
           </div>
         )}
@@ -436,7 +416,7 @@ function ItemDetailPanel({
       ) : null}
 
       {mode === "view" ? (
-        <div className="flex min-h-0 flex-1 flex-col">
+        <div className={cn("flex min-h-0 flex-1 flex-col", (item.type === "note" || item.type === "audio") && !url && "overflow-y-auto overscroll-contain")}>
           {url ? (
             <div className="flex min-h-0 flex-1 flex-col justify-evenly text-left gap-3 pb-2">
               {(() => {
@@ -561,15 +541,8 @@ function ItemDetailPanel({
               )}
             </div>
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col">
-              <p
-                className="whitespace-pre-wrap text-zinc-300 cursor-text"
-                onClick={() => {
-                  setContent(item.content ?? "");
-                  setTitle(item.title ?? "");
-                  setMode("edit");
-                }}
-              >
+            <div className="flex min-h-full shrink-0 flex-col">
+              <p className="whitespace-pre-wrap break-words text-zinc-300 select-text">
                 {item.content || "Sin contenido"}
               </p>
             </div>
