@@ -90,7 +90,7 @@ function HomeView({
             onReorder={onReorderPinned}
           />
         ) : (
-          <p className="py-2 text-xs text-slate-400">
+          <p className="py-2 text-xs text-zinc-600">
             Fija elementos para tenerlos siempre a mano.
           </p>
         )}
@@ -112,7 +112,7 @@ function HomeView({
             ))}
           </div>
         ) : (
-          <p className="py-5 text-xs text-slate-400">
+          <p className="py-5 text-xs text-zinc-600">
             No hay más elementos recientes.
           </p>
         )}
