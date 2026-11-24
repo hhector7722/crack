@@ -82,7 +82,7 @@ export function CaptureSheet({
     return createPortal(
       <div className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-black/40 backdrop-blur-md">
         <div className="absolute inset-0" onClick={() => handleClose(false)} />
-        <div className="relative z-10 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 p-2 shadow-2xl shadow-black/70">
+        <div className="crack-premium-dialog relative z-10 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl p-2">
           <p className="px-3 pb-2 pt-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
             Crear
           </p>
