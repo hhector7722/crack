@@ -224,7 +224,7 @@ function LibraryView({
             aria-pressed={filter === option.id}
             onClick={() => chooseFilter(option.id)}
             className={cn(
-              "min-h-10 shrink-0 rounded-full px-4 text-sm font-medium transition-colors",
+              "crack-premium-filter min-h-10 shrink-0 rounded-full px-4 text-sm font-medium",
               filter === option.id
                 ? "bg-zinc-100 text-zinc-950"
                 : "bg-zinc-900 text-zinc-400 active:bg-zinc-800"
