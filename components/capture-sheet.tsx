@@ -96,7 +96,7 @@ export function CaptureSheet({
               key={optionMode}
               type="button"
               onClick={() => handleMenuSelect(optionMode)}
-              className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-zinc-100 active:bg-zinc-800"
+              className="crack-premium-menu-option mb-1 flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-zinc-100 active:bg-zinc-800"
             >
               <Icon className="h-5 w-5 text-zinc-400" />
               <span className="font-medium">{label}</span>
@@ -108,7 +108,7 @@ export function CaptureSheet({
               onOpenChange(false);
               openFilePicker();
             }}
-            className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-zinc-100 active:bg-zinc-800"
+            className="crack-premium-menu-option mb-1 flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-zinc-100 active:bg-zinc-800"
           >
             <Paperclip className="h-5 w-5 text-zinc-400" />
             <span className="font-medium">Archivo</span>
