@@ -169,8 +169,8 @@ function ItemVisual({
 
   const previewText = decodeHtmlEntities(item.content || item.metadata.summary || "");
   return (
-    <div className="flex h-full w-full items-center justify-center overflow-hidden bg-zinc-900 px-[10%] py-[7%]">
-      <div className="flex h-full w-full flex-col overflow-hidden rounded-[3px] bg-zinc-100 px-[9%] py-[8%] text-left shadow-[0_3px_12px_rgba(0,0,0,.35)]">
+    <div className="h-full w-full overflow-hidden bg-zinc-100">
+      <div className="flex h-full w-full flex-col overflow-hidden bg-zinc-100 px-[9%] py-[8%] text-left">
         <span className="mb-1 shrink-0 whitespace-normal break-words [overflow-wrap:anywhere] text-[8px] font-bold leading-[9px] text-zinc-800">
           {getDisplayTitle(item)}
         </span>
