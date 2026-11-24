@@ -150,7 +150,7 @@ export function SearchModal({ open, onOpenChange, onSelect, onRefresh }: SearchM
       onClick={() => onOpenChange(false)}
     >
       <div
-        className="relative z-10 w-full max-w-[min(580px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/50"
+        className="crack-premium-dialog relative z-10 w-full max-w-[min(580px,calc(100vw-2rem))] overflow-hidden rounded-2xl"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
